@@ -1,0 +1,40 @@
+﻿@{
+    ViewData["Title"] = "Cronômetro";
+}
+
+<div id="cronometroPage" class="d-flex flex-column justify-content-center align-items-center min-vh-100 text-light text-center px-3">
+
+    <!-- Botão de Voltar -->
+    <div class="mb-3 w-100" style="max-width: 400px;">
+        <a href="/Home" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-2"></i> Voltar para Home
+        </a>
+    </div>
+
+    <!-- Card central do cronômetro -->
+    <div class="cronometro-card p-4 rounded shadow-lg" style="max-width: 420px; width: 100%; background-color: #2c2c3a;">
+        <h1 class="mb-4 fw-bold"><i class="fas fa-stopwatch me-2"></i>Cronômetro</h1>
+
+        <div class="input-group mb-4">
+            <span class="input-group-text bg-dark text-white"><i class="fas fa-clock"></i></span>
+            <input type="number" id="minutos" class="form-control text-center bg-dark text-white" placeholder="Minutos" min="0">
+            <input type="number" id="segundos" class="form-control text-center bg-dark text-white" placeholder="Segundos" min="0" max="59">
+        </div>
+
+        <div id="displayTempo" class="digital-clock my-4 shadow">
+            <i class="fas fa-hourglass-half me-2"></i><span id="tempoTexto">00:00</span>
+        </div>
+
+        <div class="d-flex justify-content-center gap-2">
+            <button class="btn btn-success" id="btnIniciar">
+                <i class="fas fa-play me-1"></i> Iniciar
+            </button>
+            <button class="btn btn-danger" id="btnParar">
+                <i class="fas fa-stop me-1"></i> Parar
+            </button>
+            <button class="btn btn-secondary" id="btnResetar">
+                <i class="fas fa-redo me-1"></i> Resetar
+            </button>
+        </div>
+    </div>
+</div>

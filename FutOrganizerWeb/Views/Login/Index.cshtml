@@ -1,0 +1,42 @@
+﻿<div id="loginPage" class="d-flex justify-content-center align-items-center min-vh-100 bg-dark text-light px-3" data-aos="fade-in">
+    <div class="card p-4 shadow-lg border-0 w-100" style="max-width: 400px; background-color: #1e1e2f;">
+        <div class="text-center mb-4">
+            <i class="fas fa-futbol fa-3x text-primary mb-3"></i>
+            <h2 class="fw-bold">FutOrganizer</h2>
+            <p class="text-light">Bem-vindo de volta!</p>
+        </div>
+
+        <form id="formLogin">
+            <!-- E-mail com ícone -->
+            <div class="mb-3 position-relative">
+                <label for="email" class="form-label text-light">E-mail</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-light"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control bg-dark text-light border-secondary" id="email" placeholder="nome@exemplo.com" required />
+                </div>
+            </div>
+
+            <!-- Senha com ícone e botão de exibir -->
+            <div class="mb-3 position-relative">
+                <label for="senha" class="form-label text-light">Senha</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-light"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control bg-dark text-light border-secondary" id="senha" placeholder="Senha" required />
+                    <button type="button" id="toggleSenha" class="btn btn-outline-secondary text-light border-secondary" tabindex="-1">
+                        <i id="iconeOlho" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnEntrar" type="submit" class="btn btn-primary w-100 fw-bold d-flex justify-content-center align-items-center gap-2">
+                <span id="btnIcon"><i class="fas fa-sign-in-alt"></i></span>
+                <span id="btnText">Entrar</span>
+                <div id="btnSpinner" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></div>
+            </button>
+        </form>
+
+        <div class="text-center mt-3">
+            <a href="/Login/EsqueciSenha" class="text-secondary small">Esqueceu sua senha?</a>
+        </div>
+    </div>
+</div>

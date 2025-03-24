@@ -1,0 +1,78 @@
+﻿<div id="sorteioPage" class="container">
+    <div class="container">
+
+        <!-- Botão de Voltar -->
+        <div class="mb-3">
+            <a href="/Home" class="btn btn-outline-light">
+                <i class="fas fa-arrow-left me-2"></i> Voltar para Home
+            </a>
+        </div>
+
+
+        <h1 class="mb-4 text-center animate__animated animate__fadeInDown">Organizador de Pelada</h1>
+
+        <!-- Configuração dos Times -->
+        <div class="mb-4" data-aos="fade-up">
+            <h4>Configurar Times</h4>
+            <div class="row mb-2 align-items-end">
+                <div class="col-8 col-md-6 mb-2 mb-md-0">
+                    <input type="number" id="playersPerTeam" class="form-control" placeholder="Jogadores por Time" min="1">
+                </div>
+                <div class="col-4 col-md-3">
+                    <button class="btn btn-primary w-100" onclick="generateTeams()">
+                        <i class="fas fa-cogs"></i> Gerar Times
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Adicionar Jogadores -->
+        <div class="mb-4" data-aos="fade-up" data-aos-delay="100">
+            <h4>Adicionar Jogadores</h4>
+            <textarea id="playerNames" class="form-control mb-2"
+                      placeholder="Insira os nomes dos jogadores, um por linha"
+                      oninput="updatePlayerCount()"></textarea>
+
+            <h6 class="text-white">Jogadores Adicionados:</h6>
+            <small id="playerCount" class="text-white">0 jogadores adicionados</small>
+            <ul id="playerList" class="list-group mt-2"></ul>
+        </div>
+
+        <!-- Configuração do Goleiro -->
+        <h4 data-aos="fade-up" data-aos-delay="200">Configuração do Goleiro</h4>
+        <div class="mb-3 form-check">
+            <input type="checkbox" class="form-check-input" id="hasFixedGoalkeeper" onchange="toggleGoalkeeperInput()">
+            <label class="form-check-label" for="hasFixedGoalkeeper">Tem Goleiro Fixo?</label>
+        </div>
+
+        <textarea id="goalkeeperNames" class="form-control mb-3" placeholder="Insira os nomes dos goleiros, um por linha" disabled></textarea>
+
+        <button class="btn btn-primary w-100 mb-4" id="sortGoalkeepersBtn" onclick="sortGoalkeepers()" style="display:none;">
+            <i class="fas fa-futbol"></i> Sortear Goleiros
+        </button>
+
+        <!-- Container de Times -->
+        <div id="teamsContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" data-aos="fade-up" data-aos-delay="300"></div>
+
+        <!-- Modal para Transferência de Jogadores -->
+        <div class="modal fade animate__animated animate__zoomIn" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="transferModalLabel">Transferir Jogador</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="selectTeam" class="form-label">Selecione o Time</label>
+                            <select class="form-select" id="selectTeam" onchange="loadTeamPlayers()"></select>
+                        </div>
+                        <div id="teamPlayersList"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Toast Container -->
+    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+</div>
