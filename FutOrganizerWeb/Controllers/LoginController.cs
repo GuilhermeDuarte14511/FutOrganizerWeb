@@ -1,6 +1,7 @@
 ﻿using FutOrganizerWeb.Application.DTOs;
 using FutOrganizerWeb.Application.Interfaces;
 using FutOrganizerWeb.Domain.Entities;
+using FutOrganizerWeb.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FutOrganizerWeb.Controllers

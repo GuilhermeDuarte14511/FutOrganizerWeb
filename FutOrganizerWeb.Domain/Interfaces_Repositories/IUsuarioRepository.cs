@@ -1,6 +1,6 @@
 ﻿using FutOrganizerWeb.Domain.Entities;
 
-namespace FutOrganizerWeb.Application.Interfaces_Repositories
+namespace FutOrganizerWeb.Domain.Interfaces_Repositories
 {
     public interface IUsuarioRepository
     {

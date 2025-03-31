@@ -1,4 +1,4 @@
-﻿using FutOrganizerWeb.Application.Interfaces_Repositories;
+﻿using FutOrganizerWeb.Domain.Interfaces_Repositories;
 using FutOrganizerWeb.Domain.Entities;
 using FutOrganizerWeb.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;

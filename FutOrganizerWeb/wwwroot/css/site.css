@@ -153,10 +153,23 @@ html, body {
 }
 
 /* ============ HOME PAGE ============ */
+
+/* Container principal */
 .home-container {
     background-color: var(--dark-bg);
+    padding: 2rem;
 }
 
+/* Cartão central */
+.home-card {
+    background-color: #2c2c3a;
+    border-radius: 16px;
+    border: 1px solid #3d3d3d;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+    animation: fadeInUp 0.5s ease-in-out;
+}
+
+/* Botões da Home */
 .btn-home {
     background-color: var(--accent-color);
     color: #fff;
@@ -164,6 +177,7 @@ html, body {
     border-radius: 0.6rem;
     padding: 0.75rem 1.25rem;
     transition: background-color 0.3s ease, transform 0.2s ease;
+    font-size: 1rem;
 }
 
     .btn-home:hover {
@@ -171,13 +185,28 @@ html, body {
         transform: translateY(-2px);
     }
 
+    /* Botão de logout com estilo separado */
     .btn-home.logout {
         background-color: var(--danger-color);
     }
 
         .btn-home.logout:hover {
             background-color: #bb2d3b;
+            transform: translateY(-2px);
         }
+
+/* Animação de entrada */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
 
 
 /* ======== SORTEIO PAGE (ISOLADO POR ID) ======== */

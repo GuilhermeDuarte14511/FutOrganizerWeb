@@ -1,0 +1,63 @@
+﻿@model FutOrganizerWeb.Application.DTOs.DetalhesPartidaDTO
+@using FutOrganizerWeb.Domain.Helpers
+
+@{
+    ViewData["Title"] = "Detalhes da Partida";
+    var localizacao = $"{Model.Latitude},{Model.Longitude}";
+    var mapaUrl = AppHelper.GenerateEmbedMapUrl(localizacao);
+    var endereco = AppHelper.ObterEnderecoPorCoordenadasAsync(Model.Latitude, Model.Longitude);
+}
+
+<div class="container py-5" id="detalhesPartidaPage">
+    <a href="javascript:history.back()" class="btn btn-outline-light mb-3">
+        <i class="fas fa-arrow-left"></i> Voltar
+    </a>
+
+    <h2 class="text-center mb-4 text-white">⚽ @Model.NomeSorteio</h2>
+
+    <div class="card shadow-lg mb-4">
+        <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+            <strong>Data:</strong> <span>@Model.DataHora.ToString("dd/MM/yyyy HH:mm")</span>
+        </div>
+        <div class="card-body">
+            <p><strong>Local:</strong> @endereco.Result.ToString()</p>
+
+            <div class="rounded-3 overflow-hidden mb-3" style="height: 300px;">
+                <iframe src="@mapaUrl"
+                        style="width: 100%; height: 100%; border: 0;"
+                        allowfullscreen
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade">
+                </iframe>
+            </div>
+        </div>
+    </div>
+
+    <h4 class="text-white mb-3">Times</h4>
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+        @foreach (var time in Model.Times)
+        {
+            <div class="col">
+                <div class="card border-0 shadow h-100 rounded-4">
+                    <div class="card-header text-white d-flex justify-content-between align-items-center"
+                         style="background-color: @time.CorHex;">
+                        <strong>@time.Nome</strong>
+                    </div>
+                    <div class="card-body">
+                        <p class="fw-bold mb-2">Jogadores:</p>
+                        <ul class="list-group list-group-flush mb-2">
+                            @foreach (var jogador in time.Jogadores)
+                            {
+                                <li class="list-group-item">@jogador.Nome</li>
+                            }
+                        </ul>
+                        @if (time.Goleiro != null)
+                        {
+                            <p class="fw-bold mb-0">🧤 Goleiro: @time.Goleiro.Nome</p>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+    </div>
+</div>

@@ -1,4 +1,4 @@
-﻿using FutOrganizerWeb.Application.Interfaces;
+﻿using FutOrganizerWeb.Domain.Interfaces;
 using FutOrganizerWeb.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using System.Diagnostics;

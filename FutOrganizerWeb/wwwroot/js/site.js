@@ -103,6 +103,32 @@ if (sorteioPage) {
     let playerToTransfer = null;
     let editablePlayer = null;
 
+    // Localização
+    function salvarLocalizacaoCookie(lat, long) {
+        document.cookie = `localizacao=${lat},${long}; path=/; max-age=86400`; // expira em 1 dia
+        showToast(`Localização salva: ${lat}, ${long}`, 'success');
+    }
+
+    function solicitarLocalizacao() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(
+                (pos) => {
+                    const { latitude, longitude } = pos.coords;
+                    salvarLocalizacaoCookie(latitude, longitude);
+                },
+                (err) => {
+                    showToast('Não foi possível obter a localização.', 'danger');
+                    console.error(err);
+                }
+            );
+        } else {
+            showToast('Geolocalização não é suportada neste navegador.', 'warning');
+        }
+    }
+
+    // Solicita localização ao carregar a página
+    solicitarLocalizacao();
+
     function showToast(message, type = 'info') {
         const toastContainer = document.getElementById('toastContainer');
         const toast = document.createElement('div');
@@ -116,7 +142,7 @@ if (sorteioPage) {
             <div class="toast-body">${message}</div>
             <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
         </div>
-    `;
+        `;
 
         toastContainer.appendChild(toast);
         setTimeout(() => {
@@ -130,7 +156,7 @@ if (sorteioPage) {
         const hasFixedGoalkeeper = document.getElementById('hasFixedGoalkeeper').checked;
         const goalkeeperInput = document.getElementById('goalkeeperNames');
         goalkeeperInput.disabled = !hasFixedGoalkeeper;
-        goalkeeperInput.value = ''; // Limpa o campo se desabilitar
+        goalkeeperInput.value = '';
     }
 
     function generateTeams() {
@@ -191,8 +217,143 @@ if (sorteioPage) {
         }
 
         renderTeams();
+        document.getElementById("btnResortear").style.display = "block";
         showToast('Times gerados automaticamente!', 'success');
+        criarSorteioAutomaticamente();
     }
+
+    async function criarSorteioAutomaticamente() {
+        const nomeSorteio = prompt("Digite o nome do sorteio:");
+        if (!nomeSorteio) return showToast("Nome obrigatório para salvar o sorteio.", "warning");
+
+        const localizacao = getCookie("localizacao")?.split(',') || [];
+        const latitude = parseFloat(localizacao[0]) || null;
+        const longitude = parseFloat(localizacao[1]) || null;
+
+        const request = {
+            nomeSorteio,
+            local: null,
+            latitude,
+            longitude,
+            times: teams.map(t => ({
+                nome: t.name,
+                corHex: t.color,
+                jogadores: t.players,
+                goleiro: t.goalkeeper ? t.goalkeeper.replace("🧤 ", "") : null
+            }))
+        };
+
+        try {
+            const res = await fetch("/Sorteio/Criar", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(request)
+            });
+            const data = await res.json();
+            if (data.sucesso) {
+                sessionStorage.setItem("sorteioId", data.sorteioId);
+                showToast("✅ Sorteio salvo com sucesso!", "success");
+            } else {
+                showToast("Erro ao salvar sorteio.", "danger");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Erro na conexão ao salvar sorteio.", "danger");
+        }
+    }
+    document.getElementById('btnResortear').addEventListener('click', resortearTimes);
+
+    async function resortearTimes() {
+        const sorteioId = sessionStorage.getItem("sorteioId");
+        if (!sorteioId) return showToast("Sorteio não encontrado para resortear.", "danger");
+
+        const playersPerTeam = parseInt(document.getElementById('playersPerTeam').value);
+        const hasFixedGoalkeeper = document.getElementById('hasFixedGoalkeeper').checked;
+
+        let playerNames = document.getElementById('playerNames').value
+            .split('\n')
+            .map(name => name.trim())
+            .filter(name => name);
+
+        let goalkeeperNames = document.getElementById('goalkeeperNames').value
+            .split('\n')
+            .map(name => name.trim())
+            .filter(name => name);
+
+        if (!playersPerTeam || playersPerTeam <= 0) {
+            return showToast('Quantidade de jogadores inválida.', 'warning');
+        }
+
+        const totalTeams = Math.ceil(playerNames.length / playersPerTeam);
+
+        // embaralha várias vezes
+        for (let i = 0; i < 3; i++) {
+            playerNames.sort(() => Math.random() - 0.5);
+            goalkeeperNames.sort(() => Math.random() - 0.5);
+        }
+
+        if (hasFixedGoalkeeper) {
+            while (goalkeeperNames.length < totalTeams) {
+                const randomGoalkeeper = goalkeeperNames[Math.floor(Math.random() * goalkeeperNames.length)];
+                goalkeeperNames.push(randomGoalkeeper);
+            }
+        }
+
+        teams.length = 0;
+
+        for (let i = 0; i < totalTeams; i++) {
+            const playersForTeam = playerNames.splice(0, playersPerTeam);
+            let goalkeeper = '';
+
+            if (hasFixedGoalkeeper) {
+                goalkeeper = `🧤 ${goalkeeperNames[i % goalkeeperNames.length]}`;
+            }
+
+            teams.push({
+                name: `Time ${i + 1}`,
+                color: gerarCorHexAleatoria(),
+                players: playersForTeam,
+                goalkeeper: goalkeeper
+            });
+        }
+
+        renderTeams();
+
+        const request = {
+            sorteioId,
+            times: teams.map(t => ({
+                nome: t.name,
+                corHex: t.color,
+                jogadores: t.players,
+                goleiro: t.goalkeeper ? t.goalkeeper.replace("🧤 ", "") : null
+            }))
+        };
+
+        try {
+            const res = await fetch("/Sorteio/Resortear", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(request)
+            });
+            const data = await res.json();
+            if (data.sucesso) {
+                showToast("🔁 Times resortados com sucesso!", "success");
+            } else {
+                showToast("Erro ao resortear os times.", "danger");
+            }
+        } catch (err) {
+            console.error(err);
+            showToast("Erro ao conectar com o servidor para resortear.", "danger");
+        }
+    }
+
+    function gerarCorHexAleatoria() {
+        const array = new Uint8Array(3);
+        crypto.getRandomValues(array);
+        return "#" + Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+
 
     function renderTeams() {
         const container = document.getElementById('teamsContainer');
@@ -203,45 +364,45 @@ if (sorteioPage) {
             const cardClass = isIncomplete ? 'team-card incomplete' : 'team-card';
 
             const goalkeeperHTML = team.goalkeeper ? `
-            <h6 class="text-white">Gol:</h6>
-            <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>${team.goalkeeper}</span>
-                </li>
-            </ul>` : '';
+                <h6 class="text-white">Gol:</h6>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>${team.goalkeeper}</span>
+                    </li>
+                </ul>` : '';
 
             const linePlayersHTML = team.players.map((player, playerIndex) => `
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-info" onclick="openTransferModal(${teamIndex}, ${playerIndex})">Transferir</button>
-                    <button class="btn btn-sm btn-warning" onclick="enableEditing(${teamIndex}, ${playerIndex})">Editar</button>
-                </div>
-            </li>`).join('');
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-info" onclick="openTransferModal(${teamIndex}, ${playerIndex})">Transferir</button>
+                        <button class="btn btn-sm btn-warning" onclick="enableEditing(${teamIndex}, ${playerIndex})">Editar</button>
+                    </div>
+                </li>`).join('');
 
             container.innerHTML += `
-            <div class="col-md-4">
-                <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
-                    <div class="card-header" style="color: white;">
-                        ${team.name} (${team.players.length} jogadores)
+                <div class="col-md-4">
+                    <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
+                        <div class="card-header" style="color: white;">
+                            ${team.name} (${team.players.length} jogadores)
+                        </div>
+                        <div class="card-body">
+                            ${goalkeeperHTML}
+                            <h6 class="text-white">Linha:</h6>
+                            <ul class="list-group">
+                                ${linePlayersHTML}
+                            </ul>
+                        </div>
                     </div>
-                    <div class="card-body">
-                        ${goalkeeperHTML}
-                        <h6 class="text-white">Linha:</h6>
-                        <ul class="list-group">
-                            ${linePlayersHTML}
-                        </ul>
-                    </div>
-                </div>
-            </div>`;
+                </div>`;
         });
     }
 
     function renderPlayerName(player, teamIndex, playerIndex) {
         if (editablePlayer?.teamIndex === teamIndex && editablePlayer?.playerIndex === playerIndex) {
             return `<input type="text" class="form-control player-input" value="${player}" 
-                onblur="updatePlayerName(${teamIndex}, ${playerIndex}, this.value)" 
-                onkeydown="if(event.key === 'Enter') this.blur()" autofocus />`;
+                    onblur="updatePlayerName(${teamIndex}, ${playerIndex}, this.value)" 
+                    onkeydown="if(event.key === 'Enter') this.blur()" autofocus />`;
         }
         return `<span class="player-name">${player}</span>`;
     }
@@ -289,12 +450,12 @@ if (sorteioPage) {
 
         team.players.forEach((player, index) => {
             list.innerHTML += `
-            <div class="d-flex justify-content-between align-items-center mb-2">
-                <span class="text-white">${player}</span>
-                <button class="btn btn-sm btn-info" onclick="executeTransfer(${teamIndex}, ${index})">
-                    Trocar com ${player}
-                </button>
-            </div>`;
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="text-white">${player}</span>
+                    <button class="btn btn-sm btn-info" onclick="executeTransfer(${teamIndex}, ${index})">
+                        Trocar com ${player}
+                    </button>
+                </div>`;
         });
     }
 
@@ -308,7 +469,7 @@ if (sorteioPage) {
         document.getElementById('playerCount').textContent = `${count} jogador(es) adicionado(s)`;
 
         const playerList = document.getElementById('playerList');
-        playerList.innerHTML = ''; // Limpa a lista antes de adicionar os jogadores
+        playerList.innerHTML = '';
 
         playerNames.forEach((name, index) => {
             const listItem = document.createElement('li');
@@ -333,7 +494,15 @@ if (sorteioPage) {
         bootstrap.Modal.getInstance(document.getElementById('transferModal')).hide();
         showToast('Jogadores trocados com sucesso!', 'success');
     }
+
+    function getCookie(name) {
+        const value = `; ${document.cookie}`;
+        const parts = value.split(`; ${name}=`);
+        if (parts.length === 2) return parts.pop().split(';').shift();
+    }
+
 }
+
 
 const cronometroPage = document.getElementById('cronometroPage');
 
@@ -415,4 +584,74 @@ if (cronometroPage) {
     btnResetar.addEventListener('click', resetarContagem);
 
     atualizarDisplay(); // inicializa com 00:00
+}
+
+var historicoPage = document.getElementById('historicoPage');
+if (historicoPage) {
+    const container = document.getElementById('historicoContainer');
+
+    fetch('/Partida/ObterHistoricoJson')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Erro ao carregar o histórico de partidas.');
+            }
+            return response.json();
+        })
+        .then(partidas => {
+            container.innerHTML = ''; // limpa os placeholders
+
+            const exibirIncremental = partidas.length > 4;
+
+            partidas.forEach((partida, index) => {
+                const delay = exibirIncremental ? index * 300 : 0;
+
+                setTimeout(() => {
+                    const col = document.createElement('div');
+                    col.className = 'col';
+
+                    const mapaUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${partida.longitude},${partida.latitude},${partida.longitude},${partida.latitude}&layer=mapnik&marker=${partida.latitude},${partida.longitude}`;
+
+                    col.innerHTML = `
+                        <div class="card border-0 shadow-lg h-100 rounded-4 animate__animated animate__fadeIn">
+                            <div class="card-header bg-gradient bg-dark text-white rounded-top-4 d-flex justify-content-between align-items-center">
+                                <h5 class="mb-0">${partida.nome}</h5>
+                                <span class="badge bg-secondary">${formatarDataHora(partida.data)}</span>
+                            </div>
+                            <div class="card-body">
+                                <p class="mb-1"><strong>Local:</strong> ${partida.local || "Não informado"}</p>
+                                <div class="rounded-3 overflow-hidden mb-3" style="height: 200px;">
+                                    <iframe src="${mapaUrl}"
+                                            style="width: 100%; height: 100%; border: 0;"
+                                            allowfullscreen
+                                            loading="lazy"
+                                            referrerpolicy="no-referrer-when-downgrade">
+                                    </iframe>
+                                </div>
+                                <a href="/Partida/Detalhes/${partida.partidaId}" class="btn btn-outline-primary w-100">
+                                    <i class="fas fa-eye me-2"></i> Ver Detalhes
+                                </a>
+                            </div>
+                        </div>
+                    `;
+
+                    container.appendChild(col);
+                }, delay);
+            });
+        })
+        .catch(error => {
+            container.innerHTML = `
+                <div class="col">
+                    <div class="alert alert-danger text-center w-100">${error.message}</div>
+                </div>`;
+        });
+
+    function formatarDataHora(data) {
+        const d = new Date(data);
+        const dia = d.getDate().toString().padStart(2, '0');
+        const mes = (d.getMonth() + 1).toString().padStart(2, '0');
+        const ano = d.getFullYear();
+        const hora = d.getHours().toString().padStart(2, '0');
+        const minuto = d.getMinutes().toString().padStart(2, '0');
+        return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
+    }
 }

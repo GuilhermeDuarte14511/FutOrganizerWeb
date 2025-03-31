@@ -1,7 +1,7 @@
 ﻿using FutOrganizerWeb.Domain.Entities;
 using Microsoft.AspNetCore.Http;
 
-namespace FutOrganizerWeb.Application.Interfaces
+namespace FutOrganizerWeb.Domain.Interfaces
 {
     public interface IAuthService
     {

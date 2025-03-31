@@ -1,6 +1,6 @@
-﻿using FutOrganizerWeb.Application.Interfaces;
-using FutOrganizerWeb.Application.Interfaces_Repositories;
-using FutOrganizerWeb.Domain.Entities;
+﻿using FutOrganizerWeb.Domain.Entities;
+using FutOrganizerWeb.Domain.Interfaces;
+using FutOrganizerWeb.Domain.Interfaces_Repositories;
 
 namespace FutOrganizerWeb.Application.Services
 {
