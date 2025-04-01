@@ -2,6 +2,7 @@
 using FutOrganizerWeb.Application.Interfaces;
 using FutOrganizerWeb.Domain.Entities;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 
 namespace FutOrganizerWeb.Controllers
 {
@@ -69,7 +70,7 @@ namespace FutOrganizerWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CriarSala(DateTime DataHora, string Local, double? Latitude, double? Longitude)
+        public async Task<IActionResult> CriarSala(DateTime DataHora, string Local, string Latitude, string Longitude)
         {
             var usuarioIdStr = HttpContext.Session.GetString("UsuarioId");
             if (string.IsNullOrEmpty(usuarioIdStr) || !Guid.TryParse(usuarioIdStr, out Guid usuarioId))
@@ -77,12 +78,16 @@ namespace FutOrganizerWeb.Controllers
 
             var codigoLobby = Guid.NewGuid().ToString("N")[..6].ToUpper();
 
+            // Força a leitura usando cultura que aceita ponto
+            var latitudeParsed = double.TryParse(Latitude, NumberStyles.Any, CultureInfo.InvariantCulture, out double lat) ? lat : (double?)null;
+            var longitudeParsed = double.TryParse(Longitude, NumberStyles.Any, CultureInfo.InvariantCulture, out double lng) ? lng : (double?)null;
+
             var novaPartida = new Partida
             {
                 DataHora = DateTime.UtcNow.AddHours(-3),
                 Local = Local,
-                Latitude = Latitude,
-                Longitude = Longitude,
+                Latitude = latitudeParsed,
+                Longitude = longitudeParsed,
                 CodigoLobby = codigoLobby,
                 UsuarioCriadorId = usuarioId
             };

@@ -28,14 +28,14 @@ namespace FutOrganizerWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> ObterHistoricoJson()
+        public async Task<IActionResult> ObterHistoricoJson(int pagina = 1, int quantidade = 10)
         {
             var usuarioIdStr = HttpContext.Session.GetString("UsuarioId");
 
             if (string.IsNullOrEmpty(usuarioIdStr) || !Guid.TryParse(usuarioIdStr, out Guid usuarioId))
                 return Unauthorized("Usuário não autenticado.");
 
-            var partidas = await _partidaService.ObterPartidasPorUsuarioAsync(usuarioId);
+            var partidas = await _partidaService.ObterPartidasPaginadasPorUsuarioAsync(usuarioId, pagina, quantidade);
 
             var tarefas = partidas.Select(async p =>
             {
@@ -54,7 +54,6 @@ namespace FutOrganizerWeb.Controllers
 
             var dto = await Task.WhenAll(tarefas);
             return Json(dto);
-
         }
     }
 }

@@ -545,61 +545,129 @@
     var historicoPage = document.getElementById('historicoPage');
     if (historicoPage) {
         const container = document.getElementById('historicoContainer');
+        const btnMostrarMais = document.getElementById('btnMostrarMais');
+        const mostrarMaisContainer = document.getElementById('mostrarMaisContainer');
 
-        fetch('/Partida/ObterHistoricoJson')
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error('Erro ao carregar o histórico de partidas.');
-                }
-                return response.json();
-            })
-            .then(partidas => {
-                container.innerHTML = ''; // limpa os placeholders
+        let paginaAtual = 1;
+        const quantidadePorPagina = 10;
+        let carregando = false;
 
-                const exibirIncremental = partidas.length > 4;
+        carregarPagina(); // carrega a primeira
 
-                partidas.forEach((partida, index) => {
-                    const delay = exibirIncremental ? index * 300 : 0;
+        btnMostrarMais.addEventListener('click', () => {
+            if (!carregando) {
+                carregarPagina(); // carrega próxima página automaticamente
+            }
+        });
 
-                    setTimeout(() => {
-                        const col = document.createElement('div');
-                        col.className = 'col';
+        function carregarPagina() {
+            carregando = true;
+            mostrarPlaceholders();
 
-                        const mapaUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${partida.longitude},${partida.latitude},${partida.longitude},${partida.latitude}&layer=mapnik&marker=${partida.latitude},${partida.longitude}`;
+            fetch(`/Partida/ObterHistoricoJson?pagina=${paginaAtual}&quantidade=${quantidadePorPagina}`)
+                .then(response => {
+                    if (!response.ok) throw new Error('Erro ao carregar o histórico de partidas.');
+                    return response.json();
+                })
+                .then(partidas => {
+                    removePlaceholders();
 
-                        col.innerHTML = `
-                        <div class="card border-0 shadow-lg h-100 rounded-4 animate__animated animate__fadeIn">
-                            <div class="card-header bg-gradient bg-dark text-white rounded-top-4 d-flex justify-content-between align-items-center">
-                                <h5 class="mb-0">${partida.nome}</h5>
-                                <span class="badge bg-secondary">${formatarDataHora(partida.data)}</span>
-                            </div>
-                            <div class="card-body">
-                                <p class="mb-1"><strong>Local:</strong> ${partida.local || "Não informado"}</p>
-                                <div class="rounded-3 overflow-hidden mb-3" style="height: 200px;">
-                                    <iframe src="${mapaUrl}"
-                                            style="width: 100%; height: 100%; border: 0;"
-                                            allowfullscreen
-                                            loading="lazy"
-                                            referrerpolicy="no-referrer-when-downgrade">
-                                    </iframe>
+                    if (paginaAtual === 1) container.innerHTML = ''; // limpa só na 1ª
+
+                    if (partidas.length === 0) {
+                        mostrarMaisContainer.style.display = 'none';
+                        if (paginaAtual === 1) {
+                            container.innerHTML = `
+                            <div class="col">
+                                <div class="alert alert-info text-center w-100">
+                                    Nenhuma partida encontrada.
                                 </div>
-                                <a href="/Partida/Detalhes/${partida.partidaId}" class="btn btn-outline-primary w-100">
-                                    <i class="fas fa-eye me-2"></i> Ver Detalhes
-                                </a>
-                            </div>
-                        </div>
-                    `;
+                            </div>`;
+                        } else {
+                            container.innerHTML += `
+                            <div class="col">
+                                <div class="alert alert-info text-center w-100">
+                                    🏁 Fim do histórico. Nenhuma partida a mais encontrada.
+                                </div>
+                            </div>`;
+                        }
+                        return;
+                    }
 
-                        container.appendChild(col);
-                    }, delay);
+                    const exibirIncremental = partidas.length > 2;
+
+                    partidas.forEach((partida, index) => {
+                        const delay = exibirIncremental ? index * 300 : 0;
+
+                        setTimeout(() => {
+                            const col = document.createElement('div');
+                            col.className = 'col';
+
+                            const mapaUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${partida.longitude},${partida.latitude},${partida.longitude},${partida.latitude}&layer=mapnik&marker=${partida.latitude},${partida.longitude}`;
+
+                            col.innerHTML = `
+                            <div class="card border-0 shadow-lg h-100 rounded-4 animate__animated animate__fadeIn">
+                                <div class="card-header bg-gradient bg-dark text-white rounded-top-4 d-flex justify-content-between align-items-center">
+                                    <h5 class="mb-0">${partida.nome}</h5>
+                                    <span class="badge bg-secondary">${formatarDataHora(partida.data)}</span>
+                                </div>
+                                <div class="card-body">
+                                    <p class="mb-1"><strong>Local:</strong> ${partida.local || "Não informado"}</p>
+                                    <div class="rounded-3 overflow-hidden mb-3" style="height: 200px;">
+                                        <iframe src="${mapaUrl}"
+                                                style="width: 100%; height: 100%; border: 0;"
+                                                allowfullscreen
+                                                loading="lazy"
+                                                referrerpolicy="no-referrer-when-downgrade">
+                                        </iframe>
+                                    </div>
+                                    <a href="/Partida/Detalhes/${partida.partidaId}" class="btn btn-outline-primary w-100">
+                                        <i class="fas fa-eye me-2"></i> Ver Detalhes
+                                    </a>
+                                </div>
+                            </div>`;
+                            container.appendChild(col);
+                        }, delay);
+                    });
+
+                    mostrarMaisContainer.style.display = 'block';
+                    paginaAtual++; // <-- incrementa após carregamento bem-sucedido
+                    carregando = false;
+                })
+                .catch(error => {
+                    removePlaceholders();
+                    container.innerHTML += `
+                    <div class="col">
+                        <div class="alert alert-danger text-center w-100">${error.message}</div>
+                    </div>`;
+                    carregando = false;
                 });
-            })
-            .catch(error => {
-                container.innerHTML = `
-                <div class="col">
-                    <div class="alert alert-danger text-center w-100">${error.message}</div>
+        }
+
+        function mostrarPlaceholders() {
+            for (let i = 0; i < quantidadePorPagina; i++) {
+                const placeholder = document.createElement('div');
+                placeholder.className = 'col placeholder-loading';
+                placeholder.innerHTML = `
+                <div class="card border-0 shadow-lg h-100 rounded-4 placeholder-glow">
+                    <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center rounded-top-4">
+                        <h5 class="placeholder col-6 mb-0">&nbsp;</h5>
+                        <span class="placeholder col-3 badge bg-secondary">&nbsp;</span>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-1"><strong>Local:</strong></p>
+                        <p class="placeholder col-8"></p>
+                        <div class="rounded-3 overflow-hidden mb-3 bg-secondary placeholder" style="height: 200px;"></div>
+                        <div class="placeholder btn btn-outline-primary disabled w-100">&nbsp;</div>
+                    </div>
                 </div>`;
-            });
+                container.appendChild(placeholder);
+            }
+        }
+
+        function removePlaceholders() {
+            document.querySelectorAll('.placeholder-loading').forEach(el => el.remove());
+        }
 
         function formatarDataHora(data) {
             const d = new Date(data);
@@ -612,40 +680,52 @@
         }
     }
 
+
     const formCriarSala = document.getElementById('formCriarSala');
+
     if (formCriarSala) {
-        formCriarSala.addEventListener('submit', (e) => {
-            const localizacao = getCookie("localizacao")?.split(',') || [];
-            const latitude = localizacao[0] ? parseFloat(localizacao[0]).toFixed(7) : '';
-            const longitude = localizacao[1] ? parseFloat(localizacao[1]).toFixed(7) : '';
+        formCriarSala.addEventListener('submit', async (e) => {
+            e.preventDefault(); // evita o envio até obter localização
 
-            const inputLatitude = document.createElement("input");
-            inputLatitude.type = "hidden";
-            inputLatitude.name = "Latitude";
-            inputLatitude.value = latitude;
+            if (!navigator.geolocation) {
+                mostrarToast("Geolocalização não suportada pelo navegador.", false);
+                formCriarSala.submit(); // ainda assim envia a sala sem localização
+                return;
+            }
 
-            const inputLongitude = document.createElement("input");
-            inputLongitude.type = "hidden";
-            inputLongitude.name = "Longitude";
-            inputLongitude.value = longitude;
+            navigator.geolocation.getCurrentPosition((pos) => {
+                const latitude = pos.coords.latitude.toFixed(7);
+                const longitude = pos.coords.longitude.toFixed(7);
 
-            const inputDataHora = document.createElement("input");
-            inputDataHora.type = "hidden";
-            inputDataHora.name = "DataHora";
-            inputDataHora.value = new Date().toISOString();
+                const inputLatitude = document.createElement("input");
+                inputLatitude.type = "hidden";
+                inputLatitude.name = "Latitude";
+                inputLatitude.value = latitude;
 
-            formCriarSala.appendChild(inputLatitude);
-            formCriarSala.appendChild(inputLongitude);
-            formCriarSala.appendChild(inputDataHora);
+                const inputLongitude = document.createElement("input");
+                inputLongitude.type = "hidden";
+                inputLongitude.name = "Longitude";
+                inputLongitude.value = longitude;
+
+                const inputDataHora = document.createElement("input");
+                inputDataHora.type = "hidden";
+                inputDataHora.name = "DataHora";
+                inputDataHora.value = new Date().toISOString();
+
+                formCriarSala.appendChild(inputLatitude);
+                formCriarSala.appendChild(inputLongitude);
+                formCriarSala.appendChild(inputDataHora);
+
+                formCriarSala.submit();
+            }, (err) => {
+                console.error("Erro ao obter localização:", err);
+                mostrarToast("Não foi possível obter sua localização atual.", false);
+                formCriarSala.submit(); // continua mesmo sem localização
+            });
         });
-
-
-        function getCookie(name) {
-            const value = `; ${document.cookie}`;
-            const parts = value.split(`; ${name}=`);
-            if (parts.length === 2) return parts.pop().split(';').shift();
-        }
     }
+
+
 
 
 

@@ -19,6 +19,13 @@ namespace FutOrganizerWeb.Application.Services
             return await _repository.ObterPartidasPorUsuarioAsync(usuarioId);
         }
 
+        public async Task<List<Partida>> ObterPartidasPaginadasPorUsuarioAsync(Guid usuarioId, int page, int pageSize)
+        {
+            return await _repository.ObterPartidasPaginadasPorUsuarioAsync(usuarioId, page, pageSize);
+        }
+
+      
+
         public async Task<DetalhesPartidaDTO> ObterDetalhesDaPartidaAsync(Guid partidaId)
         {
             var partida = await _repository.ObterPartidaComSorteioAsync(partidaId)
@@ -87,14 +94,9 @@ namespace FutOrganizerWeb.Application.Services
             await _repository.RemoverJogadorAsync(codigo, jogadorId);
         }
 
-
-
-
         public async Task CriarPartidaAsync(Partida partida)
         {
             await _repository.CriarPartidaAsync(partida);
         }
-
-
     }
 }

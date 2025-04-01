@@ -23,6 +23,17 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
                 .ToListAsync();
         }
 
+        public async Task<List<Partida>> ObterPartidasPaginadasPorUsuarioAsync(Guid usuarioId, int pagina, int tamanhoPagina)
+        {
+            return await _context.Partidas
+                .Include(p => p.Sorteios)
+                .Where(p => p.UsuarioCriadorId == usuarioId)
+                .OrderByDescending(p => p.DataHora)
+                .Skip((pagina - 1) * tamanhoPagina)
+                .Take(tamanhoPagina)
+                .ToListAsync();
+        }
+
         public async Task<Partida?> ObterPartidaComSorteioAsync(Guid partidaId)
         {
             return await _context.Partidas
