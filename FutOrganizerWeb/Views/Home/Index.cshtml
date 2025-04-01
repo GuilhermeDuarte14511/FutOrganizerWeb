@@ -9,20 +9,38 @@
 
     <hr class="border-light opacity-25 mb-4" style="width: 200px;">
 
-    <div class="home-card p-4 rounded shadow-lg animate__animated animate__fadeInUp" style="max-width: 360px; width: 100%; background-color: #222230;">
+    <div class="home-card p-4 rounded shadow-lg animate__animated animate__fadeInUp"
+         style="max-width: 360px; width: 100%; background-color: #222230;">
         <div class="button-group d-grid gap-3 w-100">
-            <a href="/Sorteio" class="btn btn-home shadow-sm" title="Clique para sortear os times">
-                <i class="fas fa-random me-2"></i> Gerar Sorteio
+
+            <!-- Criar nova sala com link compartilhável -->
+            <form method="post" action="/Sorteio/CriarSala">
+                <button type="submit" class="btn btn-home shadow-sm" title="Crie uma sala com link para convidados">
+                    <i class="fas fa-plus me-2"></i> Criar Sala
+                </button>
+            </form>
+
+            <!-- Ver todas as salas já criadas -->
+            <a href="/Sorteio/MinhasSalas" class="btn btn-home shadow-sm" title="Visualize todas as salas criadas por você">
+                <i class="fas fa-list me-2"></i> Minhas Salas
             </a>
+
+            <!-- Sorteio rápido (fluxo atual) -->
+            <a href="/Sorteio" class="btn btn-home shadow-sm" title="Clique para sortear os times">
+                <i class="fas fa-random me-2"></i> Sorteio Rápido
+            </a>
+
+            <!-- Histórico de partidas já finalizadas -->
             <a href="/Sorteio/Historico" class="btn btn-home shadow-sm" title="Veja partidas anteriores">
                 <i class="fas fa-history me-2"></i> Histórico de Partidas
             </a>
-            <a href="/Lobby" class="btn btn-home shadow-sm" title="Veja quem está na pelada">
-                <i class="fas fa-users me-2"></i> Lobby
-            </a>
+
+            <!-- Cronômetro para o jogo -->
             <a href="/Cronometro" class="btn btn-home shadow-sm" title="Abrir cronômetro para partidas">
                 <i class="fas fa-stopwatch me-2"></i> Cronômetro
             </a>
+
+            <!-- Logout -->
             <a href="/Login/Logout" class="btn btn-home logout shadow-sm" title="Sair do sistema">
                 <i class="fas fa-sign-out-alt me-2"></i> Logout
             </a>

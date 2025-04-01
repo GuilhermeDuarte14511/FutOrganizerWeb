@@ -4,6 +4,7 @@ using FutOrganizerWeb.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FutOrganizerWeb.Infrastructure.Migrations
 {
     [DbContext(typeof(FutOrganizerDbContext))]
-    partial class FutOrganizerDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250331210618_AddDataAtualizacaoToSorteio2")]
+    partial class AddDataAtualizacaoToSorteio2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -171,16 +174,11 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Property<Guid?>("UsuarioCriadorId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("UsuarioTemporarioId")
-                        .HasColumnType("uniqueidentifier");
-
                     b.HasKey("Id");
 
                     b.HasIndex("EventoId");
 
                     b.HasIndex("UsuarioCriadorId");
-
-                    b.HasIndex("UsuarioTemporarioId");
 
                     b.ToTable("Partidas");
                 });
@@ -238,24 +236,6 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Usuarios");
-                });
-
-            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.UsuarioTemporario", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTime>("DataCriacao")
-                        .HasColumnType("datetime2");
-
-                    b.Property<string>("Nome")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("UsuariosTemporarios");
                 });
 
             modelBuilder.Entity("Sorteio", b =>
@@ -335,10 +315,6 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         .HasForeignKey("UsuarioCriadorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
-                    b.HasOne("FutOrganizerWeb.Domain.Entities.UsuarioTemporario", null)
-                        .WithMany("Partidas")
-                        .HasForeignKey("UsuarioTemporarioId");
-
                     b.Navigation("Evento");
 
                     b.Navigation("UsuarioCriador");
@@ -392,11 +368,6 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Navigation("EventosCriados");
 
                     b.Navigation("PartidasCriadas");
-                });
-
-            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.UsuarioTemporario", b =>
-                {
-                    b.Navigation("Partidas");
                 });
 
             modelBuilder.Entity("Sorteio", b =>

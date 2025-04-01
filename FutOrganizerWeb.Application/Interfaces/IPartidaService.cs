@@ -12,6 +12,10 @@ namespace FutOrganizerWeb.Application.Interfaces
     {
         Task<List<Partida>> ObterPartidasPorUsuarioAsync(Guid usuarioId);
         Task<DetalhesPartidaDTO> ObterDetalhesDaPartidaAsync(Guid partidaId);
+        Task<Partida?> ObterPorCodigoAsync(string codigo);
+        Task<Guid> AdicionarJogadorAoLobbyAsync(string codigo, string nomeJogador);
+        Task CriarPartidaAsync(Partida partida);
+        Task RemoverJogadorAsync(string codigo, Guid jogadorId);
 
     }
 }

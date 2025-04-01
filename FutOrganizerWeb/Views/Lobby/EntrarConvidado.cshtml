@@ -1,0 +1,40 @@
+﻿@model FutOrganizerWeb.Application.DTOs.SorteioLobbyViewModel
+
+@{
+    ViewData["Title"] = "Entrar na Sala";
+}
+
+<div class="container py-5" id="entrarLobbyPageConvidado">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-header bg-dark text-white text-center rounded-top-4">
+                    <h4><i class="fas fa-door-open me-2"></i>Entrar na Sala</h4>
+                    <p class="mb-0 small">Código da Sala: <strong>@Model.Codigo</strong></p>
+                </div>
+                <div class="card-body">
+                    <div class="card-body">
+                        <div id="formEntrarLobbyConvidado">
+                            <input type="hidden" id="codigoSala" value="@Model.Codigo" />
+
+                            <div class="mb-3">
+                                <label for="nomeJogador" class="form-label">Seu Nome</label>
+                                <input type="text" class="form-control" id="nomeJogador" placeholder="Digite seu nome" required />
+                            </div>
+
+                            <button id="btnEntrarLobby" class="btn btn-primary w-100" type="button">
+                                <i class="fas fa-door-open me-2"></i> Entrar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="/Home" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-2"></i> Voltar para Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

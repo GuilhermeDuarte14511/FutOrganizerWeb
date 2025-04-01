@@ -34,5 +34,43 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
                         .ThenInclude(t => t.Goleiro)
                 .FirstOrDefaultAsync(p => p.Id == partidaId);
         }
+
+        public async Task<Partida?> ObterPorCodigoAsync(string codigo)
+        {
+            return await _context.Partidas
+                .Include(p => p.JogadoresLobby)
+                .Include(p => p.Sorteios)
+                .FirstOrDefaultAsync(p => p.CodigoLobby == codigo);
+        }
+
+        public async Task SalvarAsync()
+        {
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task CriarPartidaAsync(Partida partida)
+        {
+            _context.Partidas.Add(partida);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task AdicionarJogadorAsync(JogadorLobby jogador)
+        {
+            _context.JogadoresLobby.Add(jogador);
+            await _context.SaveChangesAsync();
+        }
+
+        public async Task RemoverJogadorAsync(string codigo, Guid jogadorId)
+        {
+            var partida = await ObterPorCodigoAsync(codigo);
+            if (partida == null) throw new Exception("Partida não encontrada");
+
+            var jogador = partida.JogadoresLobby.FirstOrDefault(j => j.Id == jogadorId);
+            if (jogador != null)
+            {
+                _context.JogadoresLobby.Remove(jogador);
+                await _context.SaveChangesAsync();
+            }
+        }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using FutOrganizerWeb.Application.DTOs;
 using FutOrganizerWeb.Application.Interfaces;
 using FutOrganizerWeb.Domain.Entities;
-using FutOrganizerWeb.Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 
 namespace FutOrganizerWeb.Controllers
@@ -17,12 +16,25 @@ namespace FutOrganizerWeb.Controllers
             _partidaService = partidaService;
         }
 
-
-        // GET: /Sorteio
-        public IActionResult Index()
+        public async Task<IActionResult> Index(string? codigo = null)
         {
-            return View();
+            if (string.IsNullOrEmpty(codigo))
+                return View(); // fluxo normal (sem lobby)
+
+            var partida = await _partidaService.ObterPorCodigoAsync(codigo);
+            if (partida == null) return NotFound();
+
+            var jogadores = partida.JogadoresLobby.Select(j => j.Nome).ToList();
+
+            var viewModel = new SorteioLobbyViewModel
+            {
+                Codigo = codigo,
+                Jogadores = jogadores
+            };
+
+            return View(viewModel);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Criar([FromBody] SorteioRequest request)
@@ -40,8 +52,6 @@ namespace FutOrganizerWeb.Controllers
             return Ok(new { sucesso = true, sorteioId });
         }
 
-
-        // POST: /Sorteio/Resortear
         [HttpPost]
         public async Task<IActionResult> Resortear([FromBody] ResortearRequest request)
         {
@@ -58,6 +68,52 @@ namespace FutOrganizerWeb.Controllers
             return View();
         }
 
+        [HttpPost]
+        public async Task<IActionResult> CriarSala(DateTime DataHora, string Local, double? Latitude, double? Longitude)
+        {
+            var usuarioIdStr = HttpContext.Session.GetString("UsuarioId");
+            if (string.IsNullOrEmpty(usuarioIdStr) || !Guid.TryParse(usuarioIdStr, out Guid usuarioId))
+                return Unauthorized("Usuário não autenticado.");
 
+            var codigoLobby = Guid.NewGuid().ToString("N")[..6].ToUpper();
+
+            var novaPartida = new Partida
+            {
+                DataHora = DataHora,
+                Local = Local,
+                Latitude = Latitude,
+                Longitude = Longitude,
+                CodigoLobby = codigoLobby,
+                UsuarioCriadorId = usuarioId
+            };
+
+            await _partidaService.CriarPartidaAsync(novaPartida);
+
+            return Redirect($"/Sorteio?codigo={codigoLobby}");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> MinhasSalas()
+        {
+            var usuarioIdStr = HttpContext.Session.GetString("UsuarioId");
+
+            if (string.IsNullOrEmpty(usuarioIdStr) || !Guid.TryParse(usuarioIdStr, out Guid usuarioId))
+                return Unauthorized("Usuário não autenticado.");
+
+            var partidas = await _partidaService.ObterPartidasPorUsuarioAsync(usuarioId);
+
+            var salas = partidas.Select(p => new SalaViewModel
+            {
+                PartidaId = p.Id,
+                Codigo = p.CodigoLobby ?? "",
+                DataHora = p.DataHora,
+                Local = p.Local ?? "Não informado",
+                Finalizada = p.Sorteios.Any(),
+                Latitude = p.Latitude ?? 0.0,
+                Longitude = p.Longitude ?? 0.0
+            }).ToList();
+
+            return View(salas);
+        }
     }
 }

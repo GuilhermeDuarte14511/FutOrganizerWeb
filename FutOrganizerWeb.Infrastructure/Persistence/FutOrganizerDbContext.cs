@@ -19,6 +19,8 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
         public DbSet<Goleiro> Goleiros { get; set; }
         public DbSet<EstatisticaJogador> Estatisticas { get; set; }
         public DbSet<ConfiguracaoPelada> ConfiguracoesPelada { get; set; }
+        public DbSet<JogadorLobby> JogadoresLobby { get; set; }
+        public DbSet<UsuarioTemporario> UsuariosTemporarios { get; set; } 
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,43 +35,45 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
             modelBuilder.Entity<EstatisticaJogador>().HasKey(e => e.Id);
             modelBuilder.Entity<Jogador>().HasKey(j => j.Id);
             modelBuilder.Entity<Goleiro>().HasKey(g => g.Id);
+            modelBuilder.Entity<JogadorLobby>().HasKey(j => j.Id);
+            modelBuilder.Entity<UsuarioTemporario>().HasKey(u => u.Id);
 
-            // Relacionamentos: Usuario -> Evento
             modelBuilder.Entity<Evento>()
                 .HasOne(e => e.UsuarioCriador)
                 .WithMany(u => u.EventosCriados)
                 .HasForeignKey(e => e.UsuarioCriadorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Relacionamentos: Usuario -> Partida
             modelBuilder.Entity<Partida>()
                 .HasOne(p => p.UsuarioCriador)
                 .WithMany(u => u.PartidasCriadas)
                 .HasForeignKey(p => p.UsuarioCriadorId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Evento -> Partidas
             modelBuilder.Entity<Evento>()
                 .HasMany(e => e.Partidas)
                 .WithOne(p => p.Evento)
                 .HasForeignKey(p => p.EventoId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Evento -> Estatísticas
             modelBuilder.Entity<Evento>()
                 .HasMany(e => e.Estatisticas)
                 .WithOne(e => e.Evento)
                 .HasForeignKey(e => e.EventoId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Partida -> Sorteios
             modelBuilder.Entity<Partida>()
                 .HasMany(p => p.Sorteios)
                 .WithOne(s => s.Partida)
                 .HasForeignKey(s => s.PartidaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Entidades sem persistência direta
+            modelBuilder.Entity<JogadorLobby>()
+                .HasOne(j => j.Partida)
+                .WithMany(p => p.JogadoresLobby)
+                .HasForeignKey(j => j.PartidaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
             modelBuilder.Entity<ConfiguracaoPelada>().HasNoKey();
         }
     }

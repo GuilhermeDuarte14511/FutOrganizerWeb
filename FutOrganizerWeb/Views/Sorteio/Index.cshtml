@@ -1,4 +1,10 @@
-﻿<div id="sorteioPage" class="container">
+﻿@using FutOrganizerWeb.Application.DTOs
+@model SorteioLobbyViewModel
+
+@{
+    var isLobby = !string.IsNullOrEmpty(Model?.Codigo);
+}
+<div id="sorteioPage" class="container">
     <div class="container">
 
         <!-- Botão de Voltar -->
@@ -11,6 +17,22 @@
 
         <h1 class="mb-4 text-center animate__animated animate__fadeInDown">Organizador de Pelada</h1>
 
+        @if (isLobby)
+        {
+            <div class="text-center mb-4 p-3 rounded-3" style="background-color: #1a1a2e; color: #fff;">
+                <p class="mb-1 fw-bold">Compartilhe o link da sala:</p>
+                <div class="d-flex flex-column flex-md-row align-items-center justify-content-center gap-2">
+                    <input type="text"
+                           class="form-control text-center bg-dark text-white border-0"
+                           style="max-width: 400px;"
+                           id="linkCompartilhavel"
+                           value="@($"https://{Context.Request.Host}/Lobby/{Model.Codigo}")" readonly />
+                    <button class="btn btn-outline-light" onclick="copiarLink()">
+                        <i class="fas fa-copy me-1"></i> Copiar
+                    </button>
+                </div>
+            </div>
+        }
         <!-- Configuração dos Times -->
         <div class="mb-4" data-aos="fade-up">
             <h4>Configurar Times</h4>

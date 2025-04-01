@@ -16,5 +16,8 @@
 
         public Guid? UsuarioCriadorId { get; set; }
         public Usuario? UsuarioCriador { get; set; }
+        public string CodigoLobby { get; set; } = Guid.NewGuid().ToString("N")[..6];
+        public List<JogadorLobby> JogadoresLobby { get; set; } = new();
+
     }
 }

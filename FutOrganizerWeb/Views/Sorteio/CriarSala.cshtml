@@ -1,0 +1,48 @@
+﻿@{
+    ViewData["Title"] = "Criar Sala";
+}
+
+<div class="container py-5" id="criarSalaPage">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-header bg-primary text-white rounded-top-4">
+                    <h4 class="mb-0 text-center"><i class="fas fa-plus-circle me-2"></i>Nova Sala</h4>
+                </div>
+                <div class="card-body">
+                    <form method="post" action="/Sorteio/CriarSala">
+                        <div class="mb-3">
+                            <label for="dataHora" class="form-label">Data e Hora do Jogo</label>
+                            <input type="datetime-local" class="form-control" id="dataHora" name="DataHora" required />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="local" class="form-label">Local</label>
+                            <input type="text" class="form-control" id="local" name="Local" placeholder="Ex: Campo do bairro" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="latitude" class="form-label">Latitude</label>
+                            <input type="text" class="form-control" id="latitude" name="Latitude" placeholder="-23.5629" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="longitude" class="form-label">Longitude</label>
+                            <input type="text" class="form-control" id="longitude" name="Longitude" placeholder="-46.6544" />
+                        </div>
+
+                        <button type="submit" class="btn btn-success w-100">
+                            <i class="fas fa-check-circle me-2"></i> Criar Sala
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="/Home" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-2"></i> Voltar para Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>

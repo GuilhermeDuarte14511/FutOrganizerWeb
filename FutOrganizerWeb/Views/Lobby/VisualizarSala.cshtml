@@ -1,0 +1,41 @@
+﻿@model FutOrganizerWeb.Application.DTOs.SorteioLobbyViewModel
+
+@{
+    ViewData["Title"] = "Lobby da Pelada";
+}
+
+<div class="container py-5" id="lobbyPublicoPage">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+            <div class="card shadow-lg rounded-4 border-0">
+                <div class="card-header bg-dark text-white text-center rounded-top-4">
+                    <h4><i class="fas fa-users me-2"></i>Lobby da Sala</h4>
+                    <p id="codigoSalaLobby" class="mb-0 small" data-codigo="@Model.Codigo">
+                        Código: <strong>@Model.Codigo</strong>
+                    </p>
+                </div>
+                <div class="card-body">
+                    <h5 class="text-center">👥 Jogadores na Sala</h5>
+                    <ul class="list-group" id="listaJogadores">
+                        @for (int i = 0; i < Model.Jogadores.Count; i++)
+                        {
+                            <li class="list-group-item">
+                                <strong>@(i + 1).</strong> @Model.Jogadores[i]
+                            </li>
+                        }
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-3">
+                <button id="btnSairLobby" class="btn btn-danger">
+                    <i class="fas fa-sign-out-alt me-1"></i> Sair da Sala
+                </button>
+            </div>
+            <div class="text-center mt-4">
+                <a href="/Home" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left me-2"></i> Voltar
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
