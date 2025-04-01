@@ -224,9 +224,24 @@
 
         function renderTeams() {
             const container = document.getElementById('teamsContainer');
+            console.log("🔄 Chamando renderTeams()");
+            console.log("📦 Container encontrado:", container);
+            console.log("📊 Lista de teams:", teams);
+
+            if (!container) {
+                console.error("❌ Container 'teamsContainer' não encontrado no DOM.");
+                return;
+            }
+
+            if (isLobbyMode()) {
+                pararAtualizacaoLobby = true;
+            }
+
             container.innerHTML = '';
 
             teams.forEach((team, teamIndex) => {
+                console.log(`➡️ Renderizando ${team.name}`, team);
+
                 const isIncomplete = team.players.length < parseInt(document.getElementById('playersPerTeam').value);
                 const cardClass = isIncomplete ? 'team-card incomplete' : 'team-card';
 
@@ -238,40 +253,59 @@
                 </li>
             </ul>` : '';
 
-                const linePlayersHTML = team.players.map((player, playerIndex) => `
-            <li class="list-group-item d-flex justify-content-between align-items-center">
-                <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
-                <div class="btn-group">
-                    <button class="btn btn-sm btn-info transfer-btn" data-team="${teamIndex}" data-player="${playerIndex}">Transferir</button>
-                    <button class="btn btn-sm btn-warning edit-btn" data-team="${teamIndex}" data-player="${playerIndex}">Editar</button>
-                </div>
-            </li>`).join('');
+                const linePlayersHTML = team.players.map((player, playerIndex) => {
+                    console.log(`👤 Jogador: ${player} (Team ${teamIndex}, Index ${playerIndex})`);
+                    return `
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
+                    <div class="btn-group">
+                        <button class="btn btn-sm btn-info transfer-btn" data-team="${teamIndex}" data-player="${playerIndex}">Transferir</button>
+                        <button class="btn btn-sm btn-warning edit-btn" data-team="${teamIndex}" data-player="${playerIndex}">Editar</button>
+                    </div>
+                </li>`;
+                }).join('');
 
-                container.innerHTML += `
-            <div class="col-md-4">
-                <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
-                    <div class="card-header" style="color: white;">
-                        ${team.name} (${team.players.length} jogadores)
-                    </div>
-                    <div class="card-body">
-                        ${goalkeeperHTML}
-                        <h6 class="text-white">Linha:</h6>
-                        <ul class="list-group">
-                            ${linePlayersHTML}
-                        </ul>
-                    </div>
+                const cardHTML = `
+        <div class="col-md-4" data-aos="fade-up">
+            <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
+                <div class="card-header" style="color: white;">
+                    ${team.name} (${team.players.length} jogadores)
                 </div>
-            </div>`;
+                <div class="card-body">
+                    ${goalkeeperHTML}
+                    <h6 class="text-white">Linha:</h6>
+                    <ul class="list-group">
+                        ${linePlayersHTML}
+                    </ul>
+                </div>
+            </div>
+        </div>`;
+
+                container.innerHTML += cardHTML;
+                console.log(`🧩 HTML gerado para ${team.name}:\n`, cardHTML);
             });
 
-            // Reanexa os eventos após render
+            // 🔗 Reanexa eventos
+            console.log("🔗 Reanexando eventos de edição e transferência...");
             document.querySelectorAll('.edit-btn').forEach(btn =>
                 btn.addEventListener('click', e => enableEditing(+btn.dataset.team, +btn.dataset.player))
             );
             document.querySelectorAll('.transfer-btn').forEach(btn =>
                 btn.addEventListener('click', e => openTransferModal(+btn.dataset.team, +btn.dataset.player))
             );
+
+            // ✨ Força animação AOS (em caso de não ser aplicada automaticamente)
+            if (window.AOS && typeof AOS.refresh === 'function') {
+                AOS.refresh();
+                console.log('✨ AOS.refresh() chamado');
+            }
+
+            // ✅ Força a visibilidade no caso do AOS não aplicar a animação
+            document.querySelectorAll('[data-aos]').forEach(el => el.classList.add('aos-animate'));
+
+            console.log("✅ Finalizado renderTeams()");
         }
+
 
         function renderPlayerName(player, teamIndex, playerIndex) {
             if (editablePlayer?.teamIndex === teamIndex && editablePlayer?.playerIndex === playerIndex) {
@@ -390,19 +424,7 @@
         let typingTimeout;
         let isTyping = false;
         let pararAtualizacaoLobby = false;
-
-        const textarea = document.getElementById('playerNames');
-        const count = document.getElementById('playerCount');
-        const list = document.getElementById('playerList');
-
-        textarea?.addEventListener('input', () => {
-            isTyping = true;
-            clearTimeout(typingTimeout);
-
-            typingTimeout = setTimeout(() => {
-                isTyping = false;
-            }, 5000);
-        });
+        let jogadoresAntigos = [];
 
         if (isLobbyMode()) {
             setInterval(async () => {
@@ -415,34 +437,44 @@
                     const res = await fetch(`/Lobby/Jogadores?codigo=${codigo}`);
                     const jogadoresServidor = await res.json();
 
-                    const jogadoresAtuais = textarea.value
-                        .split('\n')
-                        .map(j => j.trim())
-                        .filter(j => j);
+                    console.log("📥 Jogadores do servidor:", jogadoresServidor);
+                    console.log("🧠 Jogadores antigos:", jogadoresAntigos);
 
-                    const novos = jogadoresServidor.filter(j => !jogadoresAtuais.includes(j));
-                    const todos = [...jogadoresAtuais, ...novos];
+                    const novos = jogadoresServidor.filter(j => !jogadoresAntigos.includes(j));
+                    const sairam = jogadoresAntigos.filter(j => !jogadoresServidor.includes(j));
 
-                    textarea.value = todos.join('\n');
+                    novos.forEach(nome => {
+                        if (nome) showToast(`🎉 ${nome} entrou no lobby!`, 'success');
+                    });
 
-                    count.textContent = `${todos.length} jogador(es) adicionado(s)`;
+                    sairam.forEach(nome => {
+                        if (nome) showToast(`👋 ${nome} saiu do lobby.`, 'warning');
+                    });
+
+                    jogadoresAntigos = [...jogadoresServidor]; // Atualiza com o novo estado vindo do servidor
+
+                    // Atualiza visual
+                    textarea.value = jogadoresServidor.join('\n');
+                    count.textContent = `${jogadoresServidor.length} jogador(es) adicionado(s)`;
                     list.innerHTML = '';
-                    todos.forEach((j, i) => {
+                    jogadoresServidor.forEach((j, i) => {
                         const li = document.createElement('li');
                         li.className = 'list-group-item show';
                         li.innerHTML = `<span>${i + 1} - ${j}</span>`;
                         list.appendChild(li);
                     });
                 } catch (err) {
-                    console.error('Erro ao buscar jogadores do lobby:', err);
+                    console.error('❌ Erro ao buscar jogadores do lobby:', err);
                 }
             }, 3000);
         }
+
 
         function isLobbyMode() {
             const urlParams = new URLSearchParams(window.location.search);
             return urlParams.has('codigo');
         }
+
 
 
 
