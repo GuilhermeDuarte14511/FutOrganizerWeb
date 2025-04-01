@@ -99,15 +99,15 @@
         });
     }
 
+
     var sorteioPage = document.getElementById('sorteioPage');
     if (sorteioPage) {
         const teams = [];
         let playerToTransfer = null;
         let editablePlayer = null;
 
-        // Localização
         function salvarLocalizacaoCookie(lat, long) {
-            document.cookie = `localizacao=${lat},${long}; path=/; max-age=86400`; // expira em 1 dia
+            document.cookie = `localizacao=${lat},${long}; path=/; max-age=86400`;
             showToast(`Localização salva: ${lat}, ${long}`, 'success');
         }
 
@@ -128,7 +128,6 @@
             }
         }
 
-        // Solicita localização ao carregar a página
         solicitarLocalizacao();
 
         function showToast(message, type = 'info') {
@@ -212,7 +211,7 @@
 
                 teams.push({
                     name: `Time ${i + 1}`,
-                    color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+                    color: gerarCorHexAleatoria(),
                     players: playersForTeam,
                     goalkeeper: goalkeeper
                 });
@@ -221,141 +220,7 @@
             renderTeams();
             document.getElementById("btnResortear").style.display = "block";
             showToast('Times gerados automaticamente!', 'success');
-            criarSorteioAutomaticamente();
         }
-
-        async function criarSorteioAutomaticamente() {
-            const nomeSorteio = prompt("Digite o nome do sorteio:");
-            if (!nomeSorteio) return showToast("Nome obrigatório para salvar o sorteio.", "warning");
-
-            const localizacao = getCookie("localizacao")?.split(',') || [];
-            const latitude = parseFloat(localizacao[0]) || null;
-            const longitude = parseFloat(localizacao[1]) || null;
-
-            const request = {
-                nomeSorteio,
-                local: null,
-                latitude,
-                longitude,
-                times: teams.map(t => ({
-                    nome: t.name,
-                    corHex: t.color,
-                    jogadores: t.players,
-                    goleiro: t.goalkeeper ? t.goalkeeper.replace("🧤 ", "") : null
-                }))
-            };
-
-            try {
-                const res = await fetch("/Sorteio/Criar", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(request)
-                });
-                const data = await res.json();
-                if (data.sucesso) {
-                    sessionStorage.setItem("sorteioId", data.sorteioId);
-                    showToast("✅ Sorteio salvo com sucesso!", "success");
-                } else {
-                    showToast("Erro ao salvar sorteio.", "danger");
-                }
-            } catch (err) {
-                console.error(err);
-                showToast("Erro na conexão ao salvar sorteio.", "danger");
-            }
-        }
-        document.getElementById('btnResortear').addEventListener('click', resortearTimes);
-
-        async function resortearTimes() {
-            const sorteioId = sessionStorage.getItem("sorteioId");
-            if (!sorteioId) return showToast("Sorteio não encontrado para resortear.", "danger");
-
-            const playersPerTeam = parseInt(document.getElementById('playersPerTeam').value);
-            const hasFixedGoalkeeper = document.getElementById('hasFixedGoalkeeper').checked;
-
-            let playerNames = document.getElementById('playerNames').value
-                .split('\n')
-                .map(name => name.trim())
-                .filter(name => name);
-
-            let goalkeeperNames = document.getElementById('goalkeeperNames').value
-                .split('\n')
-                .map(name => name.trim())
-                .filter(name => name);
-
-            if (!playersPerTeam || playersPerTeam <= 0) {
-                return showToast('Quantidade de jogadores inválida.', 'warning');
-            }
-
-            const totalTeams = Math.ceil(playerNames.length / playersPerTeam);
-
-            // embaralha várias vezes
-            for (let i = 0; i < 3; i++) {
-                playerNames.sort(() => Math.random() - 0.5);
-                goalkeeperNames.sort(() => Math.random() - 0.5);
-            }
-
-            if (hasFixedGoalkeeper) {
-                while (goalkeeperNames.length < totalTeams) {
-                    const randomGoalkeeper = goalkeeperNames[Math.floor(Math.random() * goalkeeperNames.length)];
-                    goalkeeperNames.push(randomGoalkeeper);
-                }
-            }
-
-            teams.length = 0;
-
-            for (let i = 0; i < totalTeams; i++) {
-                const playersForTeam = playerNames.splice(0, playersPerTeam);
-                let goalkeeper = '';
-
-                if (hasFixedGoalkeeper) {
-                    goalkeeper = `🧤 ${goalkeeperNames[i % goalkeeperNames.length]}`;
-                }
-
-                teams.push({
-                    name: `Time ${i + 1}`,
-                    color: gerarCorHexAleatoria(),
-                    players: playersForTeam,
-                    goalkeeper: goalkeeper
-                });
-            }
-
-            renderTeams();
-
-            const request = {
-                sorteioId,
-                times: teams.map(t => ({
-                    nome: t.name,
-                    corHex: t.color,
-                    jogadores: t.players,
-                    goleiro: t.goalkeeper ? t.goalkeeper.replace("🧤 ", "") : null
-                }))
-            };
-
-            try {
-                const res = await fetch("/Sorteio/Resortear", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(request)
-                });
-                const data = await res.json();
-                if (data.sucesso) {
-                    showToast("🔁 Times resortados com sucesso!", "success");
-                } else {
-                    showToast("Erro ao resortear os times.", "danger");
-                }
-            } catch (err) {
-                console.error(err);
-                showToast("Erro ao conectar com o servidor para resortear.", "danger");
-            }
-        }
-
-        function gerarCorHexAleatoria() {
-            const array = new Uint8Array(3);
-            crypto.getRandomValues(array);
-            return "#" + Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
-        }
-
-
 
         function renderTeams() {
             const container = document.getElementById('teamsContainer');
@@ -366,45 +231,53 @@
                 const cardClass = isIncomplete ? 'team-card incomplete' : 'team-card';
 
                 const goalkeeperHTML = team.goalkeeper ? `
-                <h6 class="text-white">Gol:</h6>
-                <ul class="list-group mb-3">
-                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                        <span>${team.goalkeeper}</span>
-                    </li>
-                </ul>` : '';
+            <h6 class="text-white">Gol:</h6>
+            <ul class="list-group mb-3">
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>${team.goalkeeper}</span>
+                </li>
+            </ul>` : '';
 
                 const linePlayersHTML = team.players.map((player, playerIndex) => `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-info" onclick="openTransferModal(${teamIndex}, ${playerIndex})">Transferir</button>
-                        <button class="btn btn-sm btn-warning" onclick="enableEditing(${teamIndex}, ${playerIndex})">Editar</button>
-                    </div>
-                </li>`).join('');
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
+                <div class="btn-group">
+                    <button class="btn btn-sm btn-info transfer-btn" data-team="${teamIndex}" data-player="${playerIndex}">Transferir</button>
+                    <button class="btn btn-sm btn-warning edit-btn" data-team="${teamIndex}" data-player="${playerIndex}">Editar</button>
+                </div>
+            </li>`).join('');
 
                 container.innerHTML += `
-                <div class="col-md-4">
-                    <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
-                        <div class="card-header" style="color: white;">
-                            ${team.name} (${team.players.length} jogadores)
-                        </div>
-                        <div class="card-body">
-                            ${goalkeeperHTML}
-                            <h6 class="text-white">Linha:</h6>
-                            <ul class="list-group">
-                                ${linePlayersHTML}
-                            </ul>
-                        </div>
+            <div class="col-md-4">
+                <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
+                    <div class="card-header" style="color: white;">
+                        ${team.name} (${team.players.length} jogadores)
                     </div>
-                </div>`;
+                    <div class="card-body">
+                        ${goalkeeperHTML}
+                        <h6 class="text-white">Linha:</h6>
+                        <ul class="list-group">
+                            ${linePlayersHTML}
+                        </ul>
+                    </div>
+                </div>
+            </div>`;
             });
+
+            // Reanexa os eventos após render
+            document.querySelectorAll('.edit-btn').forEach(btn =>
+                btn.addEventListener('click', e => enableEditing(+btn.dataset.team, +btn.dataset.player))
+            );
+            document.querySelectorAll('.transfer-btn').forEach(btn =>
+                btn.addEventListener('click', e => openTransferModal(+btn.dataset.team, +btn.dataset.player))
+            );
         }
 
         function renderPlayerName(player, teamIndex, playerIndex) {
             if (editablePlayer?.teamIndex === teamIndex && editablePlayer?.playerIndex === playerIndex) {
                 return `<input type="text" class="form-control player-input" value="${player}" 
-                    onblur="updatePlayerName(${teamIndex}, ${playerIndex}, this.value)" 
-                    onkeydown="if(event.key === 'Enter') this.blur()" autofocus />`;
+            onblur="updatePlayerName(${teamIndex}, ${playerIndex}, this.value)" 
+            onkeydown="if(event.key === 'Enter') this.blur()" autofocus />`;
             }
             return `<span class="player-name">${player}</span>`;
         }
@@ -437,10 +310,11 @@
             });
 
             document.getElementById('teamPlayersList').innerHTML = '';
-            selectTeam.addEventListener('change', loadTeamPlayers);
             const transferModal = new bootstrap.Modal(document.getElementById('transferModal'));
             transferModal.show();
         }
+
+        document.getElementById('selectTeam')?.addEventListener('change', loadTeamPlayers);
 
         function loadTeamPlayers() {
             const teamIndex = parseInt(document.getElementById('selectTeam').value);
@@ -451,14 +325,34 @@
             list.innerHTML = '<h5 class="text-white">Jogadores do Time Selecionado:</h5>';
 
             team.players.forEach((player, index) => {
-                list.innerHTML += `
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                    <span class="text-white">${player}</span>
-                    <button class="btn btn-sm btn-info" onclick="executeTransfer(${teamIndex}, ${index})">
-                        Trocar com ${player}
-                    </button>
-                </div>`;
+                const button = document.createElement('button');
+                button.className = 'btn btn-sm btn-info';
+                button.textContent = `Trocar com ${player}`;
+                button.addEventListener('click', () => executeTransfer(teamIndex, index));
+
+                const wrapper = document.createElement('div');
+                wrapper.className = 'd-flex justify-content-between align-items-center mb-2';
+                wrapper.innerHTML = `<span class="text-white">${player}</span>`;
+                wrapper.appendChild(button);
+
+                list.appendChild(wrapper);
             });
+        }
+
+        function executeTransfer(newTeamIndex, newPlayerIndex) {
+            if (!playerToTransfer) return;
+
+            const { teamIndex, playerIndex } = playerToTransfer;
+            const oldTeam = teams[teamIndex];
+            const newTeam = teams[newTeamIndex];
+
+            [oldTeam.players[playerIndex], newTeam.players[newPlayerIndex]] =
+                [newTeam.players[newPlayerIndex], oldTeam.players[playerIndex]];
+
+            playerToTransfer = null;
+            renderTeams();
+            bootstrap.Modal.getInstance(document.getElementById('transferModal')).hide();
+            showToast('Jogadores trocados com sucesso!', 'success');
         }
 
         function updatePlayerCount() {
@@ -481,20 +375,10 @@
             });
         }
 
-        function executeTransfer(newTeamIndex, newPlayerIndex) {
-            if (!playerToTransfer) return;
-
-            const { teamIndex, playerIndex } = playerToTransfer;
-            const oldTeam = teams[teamIndex];
-            const newTeam = teams[newTeamIndex];
-
-            [oldTeam.players[playerIndex], newTeam.players[newPlayerIndex]] =
-                [newTeam.players[newPlayerIndex], oldTeam.players[playerIndex]];
-
-            playerToTransfer = null;
-            renderTeams();
-            bootstrap.Modal.getInstance(document.getElementById('transferModal')).hide();
-            showToast('Jogadores trocados com sucesso!', 'success');
+        function gerarCorHexAleatoria() {
+            const array = new Uint8Array(3);
+            crypto.getRandomValues(array);
+            return "#" + Array.from(array).map(b => b.toString(16).padStart(2, '0')).join('');
         }
 
         function getCookie(name) {
@@ -503,7 +387,77 @@
             if (parts.length === 2) return parts.pop().split(';').shift();
         }
 
+        let typingTimeout;
+        let isTyping = false;
+        let pararAtualizacaoLobby = false;
+
+        const textarea = document.getElementById('playerNames');
+        const count = document.getElementById('playerCount');
+        const list = document.getElementById('playerList');
+
+        textarea?.addEventListener('input', () => {
+            isTyping = true;
+            clearTimeout(typingTimeout);
+
+            typingTimeout = setTimeout(() => {
+                isTyping = false;
+            }, 5000);
+        });
+
+        if (isLobbyMode()) {
+            setInterval(async () => {
+                if (isTyping || pararAtualizacaoLobby) return;
+
+                const codigo = new URLSearchParams(window.location.search).get('codigo');
+                if (!codigo) return;
+
+                try {
+                    const res = await fetch(`/Lobby/Jogadores?codigo=${codigo}`);
+                    const jogadoresServidor = await res.json();
+
+                    const jogadoresAtuais = textarea.value
+                        .split('\n')
+                        .map(j => j.trim())
+                        .filter(j => j);
+
+                    const novos = jogadoresServidor.filter(j => !jogadoresAtuais.includes(j));
+                    const todos = [...jogadoresAtuais, ...novos];
+
+                    textarea.value = todos.join('\n');
+
+                    count.textContent = `${todos.length} jogador(es) adicionado(s)`;
+                    list.innerHTML = '';
+                    todos.forEach((j, i) => {
+                        const li = document.createElement('li');
+                        li.className = 'list-group-item show';
+                        li.innerHTML = `<span>${i + 1} - ${j}</span>`;
+                        list.appendChild(li);
+                    });
+                } catch (err) {
+                    console.error('Erro ao buscar jogadores do lobby:', err);
+                }
+            }, 3000);
+        }
+
+        function isLobbyMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.has('codigo');
+        }
+
+
+
+        document.getElementById('playerNames')?.addEventListener('input', updatePlayerCount);
+        // Gerar ao apertar Enter no input
+        document.getElementById('playersPerTeam')?.addEventListener('keydown', e => {
+            if (e.key === 'Enter') generateTeams();
+        });
+
+        // Gerar ao clicar no botão
+        document.getElementById('btnGerarTimes')?.addEventListener('click', generateTeams);
+        document.getElementById('btnResortear')?.addEventListener('click', generateTeams);
+        document.getElementById('hasFixedGoalkeeper')?.addEventListener('change', toggleGoalkeeperInput);
     }
+
 
 
     const cronometroPage = document.getElementById('cronometroPage');
@@ -657,6 +611,43 @@
             return `${dia}/${mes}/${ano} ${hora}:${minuto}`;
         }
     }
+
+    const formCriarSala = document.getElementById('formCriarSala');
+    if (formCriarSala) {
+        formCriarSala.addEventListener('submit', (e) => {
+            const localizacao = getCookie("localizacao")?.split(',') || [];
+            const latitude = localizacao[0] ? parseFloat(localizacao[0]).toFixed(7) : '';
+            const longitude = localizacao[1] ? parseFloat(localizacao[1]).toFixed(7) : '';
+
+            const inputLatitude = document.createElement("input");
+            inputLatitude.type = "hidden";
+            inputLatitude.name = "Latitude";
+            inputLatitude.value = latitude;
+
+            const inputLongitude = document.createElement("input");
+            inputLongitude.type = "hidden";
+            inputLongitude.name = "Longitude";
+            inputLongitude.value = longitude;
+
+            const inputDataHora = document.createElement("input");
+            inputDataHora.type = "hidden";
+            inputDataHora.name = "DataHora";
+            inputDataHora.value = new Date().toISOString();
+
+            formCriarSala.appendChild(inputLatitude);
+            formCriarSala.appendChild(inputLongitude);
+            formCriarSala.appendChild(inputDataHora);
+        });
+
+
+        function getCookie(name) {
+            const value = `; ${document.cookie}`;
+            const parts = value.split(`; ${name}=`);
+            if (parts.length === 2) return parts.pop().split(';').shift();
+        }
+    }
+
+
 
     var criarSalaPage = document.getElementById('criarSalaPage');
     if (criarSalaPage) {

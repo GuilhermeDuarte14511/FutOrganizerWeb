@@ -32,6 +32,7 @@
             var status = sala.Finalizada ? "Finalizada" : "Aberta";
             var badgeClass = sala.Finalizada ? "bg-success" : "bg-warning text-dark";
             var mapaUrl = AppHelper.GenerateEmbedMapUrl($"{sala.Latitude},{sala.Longitude}");
+            var local = AppHelper.ObterEnderecoPorCoordenadasAsync(sala.Latitude, sala.Longitude).Result.ToString();
             var linkCompartilhavel = $"https://{Context.Request.Host}/Sorteio?codigo={sala.Codigo}";
 
             <div class="card mb-4 shadow sala-item" data-status="@(sala.Finalizada ? "finalizadas" : "abertas")" data-codigo="@sala.Codigo">
@@ -40,7 +41,7 @@
                     <span class="badge @badgeClass">@status</span>
                 </div>
                 <div class="card-body">
-                    <p><strong>Local:</strong> @sala.Local</p>
+                    <p><strong>Local:</strong> @local</p>
                     <p><strong>Código:</strong> <span class="text-primary">@sala.Codigo</span></p>
 
                     <div style="height: 300px; overflow: hidden; border-radius: 12px;" class="mb-3">

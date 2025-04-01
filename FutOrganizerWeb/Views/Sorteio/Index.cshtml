@@ -14,7 +14,6 @@
             </a>
         </div>
 
-
         <h1 class="mb-4 text-center animate__animated animate__fadeInDown">Organizador de Pelada</h1>
 
         @if (isLobby)
@@ -27,12 +26,13 @@
                            style="max-width: 400px;"
                            id="linkCompartilhavel"
                            value="@($"https://{Context.Request.Host}/Lobby/{Model.Codigo}")" readonly />
-                    <button class="btn btn-outline-light" onclick="copiarLink()">
+                    <button class="btn btn-outline-light" id="btnCopiarLink">
                         <i class="fas fa-copy me-1"></i> Copiar
                     </button>
                 </div>
             </div>
         }
+
         <!-- Configuração dos Times -->
         <div class="mb-4" data-aos="fade-up">
             <h4>Configurar Times</h4>
@@ -41,7 +41,7 @@
                     <input type="number" id="playersPerTeam" class="form-control" placeholder="Jogadores por Time" min="1">
                 </div>
                 <div class="col-4 col-md-3">
-                    <button class="btn btn-primary w-100" onclick="generateTeams()">
+                    <button class="btn btn-primary w-100" id="btnGerarTimes">
                         <i class="fas fa-cogs"></i> Gerar Times
                     </button>
                 </div>
@@ -57,13 +57,11 @@
             </div>
         </div>
 
-
         <!-- Adicionar Jogadores -->
         <div class="mb-4" data-aos="fade-up" data-aos-delay="100">
             <h4>Adicionar Jogadores</h4>
             <textarea id="playerNames" class="form-control mb-2"
-                      placeholder="Insira os nomes dos jogadores, um por linha"
-                      oninput="updatePlayerCount()"></textarea>
+                      placeholder="Insira os nomes dos jogadores, um por linha"></textarea>
 
             <h6 class="text-white">Jogadores Adicionados:</h6>
             <small id="playerCount" class="text-white">0 jogadores adicionados</small>
@@ -73,13 +71,13 @@
         <!-- Configuração do Goleiro -->
         <h4 data-aos="fade-up" data-aos-delay="200">Configuração do Goleiro</h4>
         <div class="mb-3 form-check">
-            <input type="checkbox" class="form-check-input" id="hasFixedGoalkeeper" onchange="toggleGoalkeeperInput()">
+            <input type="checkbox" class="form-check-input" id="hasFixedGoalkeeper">
             <label class="form-check-label" for="hasFixedGoalkeeper">Tem Goleiro Fixo?</label>
         </div>
 
         <textarea id="goalkeeperNames" class="form-control mb-3" placeholder="Insira os nomes dos goleiros, um por linha" disabled></textarea>
 
-        <button class="btn btn-primary w-100 mb-4" id="sortGoalkeepersBtn" onclick="sortGoalkeepers()" style="display:none;">
+        <button class="btn btn-primary w-100 mb-4" id="sortGoalkeepersBtn" style="display:none;">
             <i class="fas fa-futbol"></i> Sortear Goleiros
         </button>
 
@@ -97,7 +95,7 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label for="selectTeam" class="form-label">Selecione o Time</label>
-                            <select class="form-select" id="selectTeam" onchange="loadTeamPlayers()"></select>
+                            <select class="form-select" id="selectTeam"></select>
                         </div>
                         <div id="teamPlayersList"></div>
                     </div>
@@ -105,6 +103,7 @@
             </div>
         </div>
     </div>
+
     <!-- Toast Container -->
     <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
 </div>

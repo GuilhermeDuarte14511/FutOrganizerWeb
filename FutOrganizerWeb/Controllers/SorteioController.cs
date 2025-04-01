@@ -17,7 +17,7 @@ namespace FutOrganizerWeb.Controllers
         }
 
         public async Task<IActionResult> Index(string? codigo = null)
-        {
+        {   
             if (string.IsNullOrEmpty(codigo))
                 return View(); // fluxo normal (sem lobby)
 
@@ -79,7 +79,7 @@ namespace FutOrganizerWeb.Controllers
 
             var novaPartida = new Partida
             {
-                DataHora = DataHora,
+                DataHora = DateTime.UtcNow.AddHours(-3),
                 Local = Local,
                 Latitude = Latitude,
                 Longitude = Longitude,
