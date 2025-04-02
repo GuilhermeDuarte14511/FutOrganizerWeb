@@ -9,10 +9,12 @@ namespace FutOrganizerWeb.Application.Services
     public class SorteioService : ISorteioService
     {
         private readonly ISorteioRepository _repository;
+        private readonly IPartidaRepository _partidaRepository;
 
-        public SorteioService(ISorteioRepository repository)
+        public SorteioService(ISorteioRepository repository, IPartidaRepository partidaRepository)
         {
             _repository = repository;
+            _partidaRepository = partidaRepository;
         }
 
         public async Task<Guid> CriarSorteioAsync(SorteioRequest request)
@@ -96,8 +98,34 @@ namespace FutOrganizerWeb.Application.Services
             return await _repository.CriarPartidaComSorteioAsync(novaPartida);
         }
 
+        public async Task<Guid?> CriarSorteioParaLobbyAsync(string codigoLobby, SorteioRequest request)
+        {
+            var partida = await _partidaRepository.ObterPorCodigoAsync(codigoLobby);
+            if (partida == null)
+                return null;
 
+            var sorteio = new Sorteio
+            {
+                Nome = request.NomeSorteio,
+                Data = DateTime.UtcNow,
+                PartidaId = partida.Id, // relacionamento direto com a Partida
+                Times = request.Times.Select(t => new Time
+                {
+                    Nome = t.Nome,
+                    CorHex = t.CorHex,
+                    Jogadores = t.Jogadores.Select(j => new Jogador { Nome = j }).ToList(),
+                    Goleiro = string.IsNullOrWhiteSpace(t.Goleiro) ? null : new Goleiro { Nome = t.Goleiro }
+                }).ToList()
+            };
 
+            await _repository.CriarSorteioParaPartidaExistenteAsync(sorteio);
+
+            return sorteio.Id;
+        }
 
     }
+
+
+
+
 }

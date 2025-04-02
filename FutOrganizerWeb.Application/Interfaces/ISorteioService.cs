@@ -6,5 +6,6 @@ namespace FutOrganizerWeb.Application.Interfaces
     {
         Task<Guid> CriarSorteioAsync(SorteioRequest request);
         Task<Guid> ResortearAsync(Guid sorteioId, List<TimeRequest> novosTimes);
+        Task<Guid?> CriarSorteioParaLobbyAsync(string codigoLobby, SorteioRequest request);
     }
 }

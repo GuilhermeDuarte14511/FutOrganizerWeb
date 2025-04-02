@@ -4,13 +4,21 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Adiciona o contexto com suporte a retry automático
 builder.Services.AddDbContext<FutOrganizerDbContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions =>
+        {
+            sqlOptions.EnableRetryOnFailure(
+                maxRetryCount: 5,
+                maxRetryDelay: TimeSpan.FromSeconds(10),
+                errorNumbersToAdd: null
+            );
+        }));
 
 builder.Services.AddProjectServices();
-
 builder.Services.AddControllersWithViews();
-
 builder.Services.AddSession();
 
 var app = builder.Build();
@@ -21,8 +29,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHsts();
 }
 
-
-app.UseSession(); 
+app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 app.UseRouting();

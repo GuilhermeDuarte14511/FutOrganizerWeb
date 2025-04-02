@@ -14,7 +14,9 @@ namespace FutOrganizerWeb.Application.DTOs
         public string? Local { get; set; }
         public Guid UsuarioCriadorId { get; set; }
         public List<TimeRequest> Times { get; set; } = new();
+        public string CodigoLobby { get; set; }
+
     }
 
-   
+
 }

@@ -146,6 +146,14 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
             }
         }
 
+        public async Task<Guid> CriarSorteioParaPartidaExistenteAsync(Sorteio sorteio)
+        {
+            await _context.Sorteios.AddAsync(sorteio);
+            await _context.SaveChangesAsync();
+            return sorteio.Id;
+        }
+
+
 
 
     }

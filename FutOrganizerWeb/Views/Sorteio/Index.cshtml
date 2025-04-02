@@ -48,7 +48,7 @@
             </div>
         </div>
 
-        <!-- Botão para Resortear (começa invisível) -->
+        <!-- Botão para Resortear -->
         <div class="row mb-4">
             <div class="col-12">
                 <button id="btnResortear" class="btn btn-warning w-100" style="display: none;">
@@ -83,27 +83,32 @@
 
         <!-- Container de Times -->
         <div id="teamsContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" data-aos="fade-up">
+            <!-- Times renderizados via JS aqui -->
+        </div>
 
-        <!-- Modal para Transferência de Jogadores -->
-        <div class="modal fade animate__animated animate__zoomIn" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
-            <div class="modal-dialog modal-lg">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="transferModalLabel">Transferir Jogador</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label for="selectTeam" class="form-label">Selecione o Time</label>
-                            <select class="form-select" id="selectTeam"></select>
-                        </div>
-                        <div id="teamPlayersList"></div>
-                    </div>
-                </div>
+    </div>
+</div>
+
+<!-- Transferência de jogador - FORA do #teamsContainer -->
+<div class="modal fade" id="transferModal" tabindex="-1" aria-labelledby="transferModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white">
+            <div class="modal-header">
+                <h5 class="modal-title" id="transferModalLabel">Transferir Jogador</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Fechar"></button>
+            </div>
+            <div class="modal-body">
+                <label for="selectTeam" class="form-label">Escolha o time de destino:</label>
+                <select id="selectTeam" class="form-select mb-3"></select>
+                <div id="teamPlayersList"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-primary" onclick="confirmTransfer()">Confirmar Transferência</button>
             </div>
         </div>
     </div>
-
-    <!-- Toast Container -->
-    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
 </div>
+
+<!-- Toast Container -->
+<div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>

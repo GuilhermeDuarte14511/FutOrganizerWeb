@@ -85,5 +85,25 @@ public class LobbyController : Controller
         return Ok();
     }
 
+    [HttpGet("/Lobby/VerificarSorteio")]
+    public async Task<IActionResult> VerificarSorteio(string codigo)
+    {
+        var sorteio = await _partidaService.ObterSorteioDaPartidaAsync(codigo);
+        if (sorteio == null)
+            return Ok(new { sorteioRealizado = false });
+
+        var jogadorIdCookie = Request.Cookies[$"JogadorLobby_{codigo}"];
+        Guid.TryParse(jogadorIdCookie, out Guid jogadorId);
+
+        return Ok(new
+        {
+            sorteioRealizado = true,
+            sorteio,
+            jogadorId = jogadorId
+        });
+    }
+
+
+
 
 }

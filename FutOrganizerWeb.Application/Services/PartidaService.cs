@@ -98,5 +98,39 @@ namespace FutOrganizerWeb.Application.Services
         {
             await _repository.CriarPartidaAsync(partida);
         }
+
+        public async Task<SorteioDTO?> ObterSorteioDaPartidaAsync(string codigo)
+        {
+            var partida = await _repository.ObterPorCodigoAsync(codigo);
+
+            if (partida == null)
+                return null;
+
+            var sorteio = partida.Sorteios
+                .OrderByDescending(s => s.Data)
+                .FirstOrDefault();
+
+            if (sorteio == null)
+                return null;
+
+            return new SorteioDTO
+            {
+                Id = sorteio.Id,
+                Nome = sorteio.Nome,
+                Data = sorteio.Data,
+                Times = sorteio.Times.Select(t => new TimeDTO
+                {
+                    Nome = t.Nome,
+                    CorHex = t.CorHex,
+                    Jogadores = t.Jogadores.Select(j => new JogadorDTO
+                    {
+                        Id = j.Id,
+                        Nome = j.Nome
+                    }).ToList(),
+                    Goleiro = t.Goleiro?.Nome
+                }).ToList()
+            };
+        }
+
     }
 }

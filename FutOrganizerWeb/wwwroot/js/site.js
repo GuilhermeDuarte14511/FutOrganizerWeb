@@ -217,6 +217,37 @@
                 });
             }
 
+            // Envia para o backend se estiver no modo lobby
+            if (isLobbyMode()) {
+                const codigo = new URLSearchParams(window.location.search).get('codigo');
+
+                fetch('/Sorteio/Criar', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        CodigoLobby: codigo,
+                        NomeSorteio: `Sorteio - ${new Date().toLocaleTimeString()}`,
+                        Times: teams.map(team => ({
+                            Nome: team.name,
+                            CorHex: team.color,
+                            Jogadores: team.players,
+                            Goleiro: team.goalkeeper?.replace('🧤 ', '') || ''
+                        }))
+                    })
+                })
+                    .then(res => res.json())
+                    .then(res => {
+                        if (res.sucesso) {
+                            showToast('Sorteio salvo com sucesso!', 'success');
+                        } else {
+                            showToast('Erro ao salvar o sorteio!', 'danger');
+                        }
+                    })
+                    .catch(() => showToast('Erro ao se comunicar com o servidor.', 'danger'));
+            }
+
             renderTeams();
             document.getElementById("btnResortear").style.display = "block";
             showToast('Times gerados automaticamente!', 'success');
@@ -246,44 +277,45 @@
                 const cardClass = isIncomplete ? 'team-card incomplete' : 'team-card';
 
                 const goalkeeperHTML = team.goalkeeper ? `
-            <h6 class="text-white">Gol:</h6>
-            <ul class="list-group mb-3">
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>${team.goalkeeper}</span>
-                </li>
-            </ul>` : '';
+                    <h6 class="text-white">Gol:</h6>
+                    <ul class="list-group mb-3">
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>${team.goalkeeper}</span>
+                        </li>
+                    </ul>` : '';
 
-                const linePlayersHTML = team.players.map((player, playerIndex) => {
-                    console.log(`👤 Jogador: ${player} (Team ${teamIndex}, Index ${playerIndex})`);
-                    return `
-                <li class="list-group-item d-flex justify-content-between align-items-center">
-                    <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
-                    <div class="btn-group">
-                        <button class="btn btn-sm btn-info transfer-btn" data-team="${teamIndex}" data-player="${playerIndex}">Transferir</button>
-                        <button class="btn btn-sm btn-warning edit-btn" data-team="${teamIndex}" data-player="${playerIndex}">Editar</button>
+                                const linePlayersHTML = team.players.map((player, playerIndex) => {
+                                    console.log(`👤 Jogador: ${player} (Team ${teamIndex}, Index ${playerIndex})`);
+                                    return `
+                        <li class="list-group-item d-flex justify-content-between align-items-center">
+                            <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
+                            <div class="btn-group">
+                                <button class="btn btn-sm btn-info transfer-btn" data-team="${teamIndex}" data-player="${playerIndex}">Transferir</button>
+                                <button class="btn btn-sm btn-warning edit-btn" data-team="${teamIndex}" data-player="${playerIndex}">Editar</button>
+                            </div>
+                        </li>`;
+                                }).join('');
+
+                                const cardHTML = `
+                <div class="col-md-4" data-aos="fade-up">
+                    <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
+                        <div class="card-header" style="color: white;">
+                            ${team.name} (${team.players.length} jogadores)
+                        </div>
+                        <div class="card-body">
+                            ${goalkeeperHTML}
+                            <h6 class="text-white">Linha:</h6>
+                            <ul class="list-group">
+                                ${linePlayersHTML}
+                            </ul>
+                        </div>
                     </div>
-                </li>`;
-                }).join('');
+                </div>`;
 
-                const cardHTML = `
-        <div class="col-md-4" data-aos="fade-up">
-            <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
-                <div class="card-header" style="color: white;">
-                    ${team.name} (${team.players.length} jogadores)
-                </div>
-                <div class="card-body">
-                    ${goalkeeperHTML}
-                    <h6 class="text-white">Linha:</h6>
-                    <ul class="list-group">
-                        ${linePlayersHTML}
-                    </ul>
-                </div>
-            </div>
-        </div>`;
-
-                container.innerHTML += cardHTML;
-                console.log(`🧩 HTML gerado para ${team.name}:\n`, cardHTML);
-            });
+                                container.innerHTML += cardHTML;
+                                console.log(`🧩 HTML gerado para ${team.name}:
+                `, cardHTML);
+                            });
 
             // 🔗 Reanexa eventos
             console.log("🔗 Reanexando eventos de edição e transferência...");
@@ -305,7 +337,6 @@
 
             console.log("✅ Finalizado renderTeams()");
         }
-
 
         function renderPlayerName(player, teamIndex, playerIndex) {
             if (editablePlayer?.teamIndex === teamIndex && editablePlayer?.playerIndex === playerIndex) {
@@ -426,6 +457,19 @@
         let pararAtualizacaoLobby = false;
         let jogadoresAntigos = [];
 
+        const textarea = document.getElementById('playerNames');
+        const count = document.getElementById('playerCount');
+        const list = document.getElementById('playerList');
+
+        textarea?.addEventListener('input', () => {
+            isTyping = true;
+            clearTimeout(typingTimeout);
+
+            typingTimeout = setTimeout(() => {
+                isTyping = false;
+            }, 5000);
+        });
+
         if (isLobbyMode()) {
             setInterval(async () => {
                 if (isTyping || pararAtualizacaoLobby) return;
@@ -440,35 +484,48 @@
                     console.log("📥 Jogadores do servidor:", jogadoresServidor);
                     console.log("🧠 Jogadores antigos:", jogadoresAntigos);
 
-                    const novos = jogadoresServidor.filter(j => !jogadoresAntigos.includes(j));
+                    let jogadoresAtuais = textarea.value
+                        .split('\n')
+                        .map(j => j.trim())
+                        .filter(j => j);
+
+                    const novos = jogadoresServidor.filter(j => !jogadoresAtuais.includes(j));
                     const sairam = jogadoresAntigos.filter(j => !jogadoresServidor.includes(j));
 
+                    // ✅ Toast + adiciona os novos
                     novos.forEach(nome => {
-                        if (nome) showToast(`🎉 ${nome} entrou no lobby!`, 'success');
+                        if (nome) {
+                            showToast(`🎉 ${nome} entrou no lobby!`, 'success');
+                            jogadoresAtuais.push(nome);
+                        }
                     });
 
+                    // ✅ Toast + remove os que saíram
                     sairam.forEach(nome => {
-                        if (nome) showToast(`👋 ${nome} saiu do lobby.`, 'warning');
+                        if (nome) {
+                            showToast(`👋 ${nome} saiu do lobby.`, 'warning');
+                            jogadoresAtuais = jogadoresAtuais.filter(j => j !== nome);
+                        }
                     });
 
-                    jogadoresAntigos = [...jogadoresServidor]; // Atualiza com o novo estado vindo do servidor
+                    jogadoresAntigos = [...jogadoresServidor];
 
                     // Atualiza visual
-                    textarea.value = jogadoresServidor.join('\n');
-                    count.textContent = `${jogadoresServidor.length} jogador(es) adicionado(s)`;
+                    textarea.value = jogadoresAtuais.join('\n');
+                    count.textContent = `${jogadoresAtuais.length} jogador(es) adicionado(s)`;
                     list.innerHTML = '';
-                    jogadoresServidor.forEach((j, i) => {
+                    jogadoresAtuais.forEach((j, i) => {
                         const li = document.createElement('li');
                         li.className = 'list-group-item show';
                         li.innerHTML = `<span>${i + 1} - ${j}</span>`;
                         list.appendChild(li);
                     });
+
                 } catch (err) {
                     console.error('❌ Erro ao buscar jogadores do lobby:', err);
                 }
             }, 3000);
         }
-
 
         function isLobbyMode() {
             const urlParams = new URLSearchParams(window.location.search);
@@ -789,7 +846,6 @@
         const codigo = codigoInput.value.trim();
         const cookieKey = `JogadorLobby_${codigo}`;
 
-        // Se já tiver o cookie, redireciona direto
         if (getCookie(cookieKey)) {
             console.log("🔁 Jogador já entrou nessa sala. Redirecionando...");
             window.location.href = `/Sorteio?codigo=${codigo}`;
@@ -797,13 +853,10 @@
         }
 
         btnEntrar.addEventListener('click', async function () {
-            console.log("🔘 Botão clicado para entrar no lobby");
-
             const nome = nomeInput.value.trim();
 
             if (!nome) {
                 alert("Por favor, informe seu nome.");
-                console.warn("⚠️ Nome está vazio, abortando.");
                 return;
             }
 
@@ -811,8 +864,6 @@
                 Codigo: codigo,
                 Nome: nome
             };
-
-            console.log("📦 Payload sendo enviado:", payload);
 
             try {
                 const response = await fetch('/Lobby/Entrar', {
@@ -824,17 +875,13 @@
                 if (response.ok) {
                     const jogadorId = await response.text();
                     setCookie(cookieKey, jogadorId, 2);
-
-                    console.log("🟢 Entrada confirmada. ID salvo no cookie:", jogadorId);
                     window.location.href = `/Lobby/${codigo}`;
                 } else {
-                    console.error("❌ Erro ao entrar na sala. Status:", response.status);
-                    alert("Erro ao entrar na sala. Tente novamente.");
+                    alert("Erro ao entrar na sala.");
                 }
 
             } catch (err) {
-                console.error("🔥 Erro inesperado ao enviar requisição:", err);
-                alert("Erro inesperado. Tente novamente mais tarde.");
+                alert("Erro inesperado. Tente novamente.");
             }
         });
 
@@ -855,24 +902,88 @@
 
         const codigoLobby = document.getElementById('codigoSalaLobby').dataset.codigo;
         const listaJogadores = document.getElementById("listaJogadores");
+        const jogadorAtualId = getCookie(`JogadorLobby_${codigoLobby}`)?.replace(/"/g, '');
+
+        const containerTimes = document.createElement("div");
+        containerTimes.className = "mt-4";
+        containerTimes.id = "timesSorteadosContainer";
+        lobbyPublicoPage.appendChild(containerTimes);
 
         async function atualizarLista() {
-            const response = await fetch(`/Lobby/Jogadores?codigo=${codigoLobby}`);
-            if (!response.ok) return;
+            try {
+                const response = await fetch(`/Lobby/Jogadores?codigo=${codigoLobby}`);
+                if (!response.ok) return;
 
-            const jogadores = await response.json();
-            listaJogadores.innerHTML = "";
+                const jogadores = await response.json();
+                listaJogadores.innerHTML = "";
 
-            jogadores.forEach((j, index) => {
-                const li = document.createElement("li");
-                li.className = "list-group-item";
-                li.innerHTML = `<strong>${index + 1}.</strong> ${j}`;
-                listaJogadores.appendChild(li);
-            });
+                jogadores.forEach((j, index) => {
+                    const li = document.createElement("li");
+                    li.className = "list-group-item";
+                    li.innerHTML = `<strong>${index + 1}.</strong> ${j}`;
+                    listaJogadores.appendChild(li);
+                });
+            } catch (err) {
+                console.error("❌ Erro ao atualizar jogadores:", err);
+            }
+        }
+
+        async function verificarSorteio() {
+            try {
+                const res = await fetch(`/Lobby/VerificarSorteio?codigo=${codigoLobby}`);
+                if (!res.ok) return;
+
+                const data = await res.json();
+                const sorteio = data.sorteio;
+
+                if (!sorteio || !sorteio.times || !sorteio.times.length) return;
+
+                const btnSair = document.getElementById("btnSairLobby");
+                const btnVoltar = document.querySelector("a[href='/Home']");
+                if (btnSair) btnSair.style.display = "none";
+                if (btnVoltar) btnVoltar.style.display = "none";
+
+                const container = document.getElementById('timesSorteadosContainer');
+                container.innerHTML = "<h5 class='text-center text-white mt-4'>🏆 Times Sorteados</h5>";
+
+                const timesOrdenados = [...sorteio.times].sort((a, b) => {
+                    const numA = parseInt(a.nome.replace(/\D/g, '')) || 0;
+                    const numB = parseInt(b.nome.replace(/\D/g, '')) || 0;
+                    return numA - numB;
+                });
+
+                timesOrdenados.forEach(time => {
+                    const contemJogadorAtual = time.jogadores.some(j => j.id === jogadorAtualId);
+
+                    const card = document.createElement("div");
+                    card.className = `card shadow-sm mb-3 time-card ${contemJogadorAtual ? "destaque-time-jogador" : ""}`;
+
+                    const jogadoresHTML = time.jogadores.map(j => {
+                        const isJogadorAtual = j.id === jogadorAtualId;
+                        return `<li class="list-group-item ${isJogadorAtual ? "fw-bold text-success" : ""}">${j.nome}</li>`;
+                    }).join("");
+
+                    card.innerHTML = `
+                    <div class="card-header bg-dark text-white">
+                        ${time.nome}
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        ${jogadoresHTML}
+                    </ul>
+                `;
+
+                    container.appendChild(card);
+                });
+
+            } catch (err) {
+                console.error("❌ Erro ao verificar sorteio:", err);
+            }
         }
 
         setInterval(atualizarLista, 5000);
-        atualizarLista(); // Atualiza logo ao entrar
+        setInterval(verificarSorteio, 5000);
+        atualizarLista();
+        verificarSorteio();
 
         const btnSair = document.getElementById("btnSairLobby");
         if (btnSair) {
@@ -890,15 +1001,15 @@
                 });
 
                 if (response.ok) {
-                    // Remove o cookie
                     document.cookie = `JogadorLobby_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
-                    window.location.reload(); // Recarrega para cair na tela de entrada
+                    window.location.reload();
                 } else {
                     alert("Erro ao sair da sala.");
                 }
             });
         }
     }
+
 
     // Função utilitária para ler cookie
     function getCookie(name) {

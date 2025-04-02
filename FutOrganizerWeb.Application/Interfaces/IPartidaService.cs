@@ -17,6 +17,8 @@ namespace FutOrganizerWeb.Application.Interfaces
         Task CriarPartidaAsync(Partida partida);
         Task RemoverJogadorAsync(string codigo, Guid jogadorId);
         Task<List<Partida>> ObterPartidasPaginadasPorUsuarioAsync(Guid usuarioId, int page, int pageSize);
+        Task<SorteioDTO?> ObterSorteioDaPartidaAsync(string codigo);
+
 
     }
 }

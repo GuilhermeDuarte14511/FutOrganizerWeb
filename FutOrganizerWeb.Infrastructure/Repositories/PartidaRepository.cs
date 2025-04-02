@@ -51,8 +51,14 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
             return await _context.Partidas
                 .Include(p => p.JogadoresLobby)
                 .Include(p => p.Sorteios)
+                    .ThenInclude(s => s.Times)
+                        .ThenInclude(t => t.Jogadores)
+                .Include(p => p.Sorteios)
+                    .ThenInclude(s => s.Times)
+                        .ThenInclude(t => t.Goleiro)
                 .FirstOrDefaultAsync(p => p.CodigoLobby == codigo);
         }
+
 
         public async Task SalvarAsync()
         {

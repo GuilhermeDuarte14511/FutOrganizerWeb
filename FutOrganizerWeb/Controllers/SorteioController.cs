@@ -49,9 +49,22 @@ namespace FutOrganizerWeb.Controllers
 
             request.UsuarioCriadorId = usuarioId;
 
-            var sorteioId = await _sorteioService.CriarSorteioAsync(request);
+            Guid? sorteioId;
+
+            if (!string.IsNullOrWhiteSpace(request.CodigoLobby))
+            {
+                // Criação do sorteio em uma partida já existente (modo lobby)
+                sorteioId = await _sorteioService.CriarSorteioParaLobbyAsync(request.CodigoLobby, request);
+            }
+            else
+            {
+                // Criação de nova partida e sorteio (modo normal)
+                sorteioId = await _sorteioService.CriarSorteioAsync(request);
+            }
+
             return Ok(new { sucesso = true, sorteioId });
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Resortear([FromBody] ResortearRequest request)

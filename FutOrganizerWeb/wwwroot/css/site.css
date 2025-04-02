@@ -571,6 +571,31 @@ html, body {
 }
 
 
+/* ============ LobbyConvidado ============ */
+
+
+.destaque-time-jogador {
+    border: 2px solid #00ff73 !important;
+    box-shadow: 0 0 15px #00ff73;
+    animation: pulseGlow 1.5s infinite;
+}
+
+@keyframes pulseGlow {
+    0% {
+        box-shadow: 0 0 10px #00ff73;
+    }
+
+    50% {
+        box-shadow: 0 0 20px #00ff73;
+    }
+
+    100% {
+        box-shadow: 0 0 10px #00ff73;
+    }
+}
+
+
+
 /* Responsividade */
 @media (max-width: 576px) {
     #cronometroPage .digital-clock {
