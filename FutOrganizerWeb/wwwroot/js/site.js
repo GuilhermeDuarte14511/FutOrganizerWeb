@@ -545,6 +545,30 @@
         document.getElementById('btnGerarTimes')?.addEventListener('click', generateTeams);
         document.getElementById('btnResortear')?.addEventListener('click', generateTeams);
         document.getElementById('hasFixedGoalkeeper')?.addEventListener('change', toggleGoalkeeperInput);
+
+
+        // Função de copiar link
+        var btnCopiarLink = document.getElementById('btnCopiarLink');
+        if (btnCopiarLink) {
+            btnCopiarLink.addEventListener('click', function () {
+                var inputLink = document.getElementById('linkCompartilhavel');
+                if (inputLink) {
+                    inputLink.select();
+                    inputLink.setSelectionRange(0, 99999); // para mobile
+                    document.execCommand("copy");
+
+                    // Exibir toast
+                    mostrarToast('Link copiado com sucesso!');
+
+                    // Feedback visual no botão (opcional)
+                    btnCopiarLink.innerHTML = '<i class="fas fa-check me-1"></i> Copiado!';
+                    setTimeout(() => {
+                        btnCopiarLink.innerHTML = '<i class="fas fa-copy me-1"></i> Copiar';
+                    }, 2000);
+                }
+            });
+        }
+
     }
 
 
