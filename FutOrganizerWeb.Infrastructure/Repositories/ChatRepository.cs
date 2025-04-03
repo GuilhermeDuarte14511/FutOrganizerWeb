@@ -27,5 +27,8 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
                 .Where(m => m.Partida!.CodigoLobby == codigoSala)
                 .ToListAsync();
         }
+
+
+
     }
 }

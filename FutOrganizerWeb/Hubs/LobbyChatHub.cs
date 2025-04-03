@@ -1,4 +1,5 @@
-﻿using FutOrganizerWeb.Application.Interfaces;
+﻿using FutOrganizerWeb.Application.DTOs;
+using FutOrganizerWeb.Application.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 using System.Linq;
@@ -23,10 +24,12 @@ namespace FutOrganizerWeb.Hubs
             if (string.IsNullOrWhiteSpace(codigoSala) || string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(mensagem))
                 return;
 
-            await _chatService.SalvarMensagemAsync(codigoSala, usuario, mensagem);
+            var mensagemSalva = await _chatService.SalvarMensagemAsync(codigoSala, usuario, mensagem);
+            if (mensagemSalva == null) return;
 
-            var agora = DateTime.UtcNow;
-            await Clients.Group(codigoSala).SendAsync("ReceberMensagem", usuario, mensagem, agora);
+            var horaEnvio = mensagemSalva.DataEnvio.ToString("HH:mm");
+
+            await Clients.Group(codigoSala).SendAsync("ReceberMensagem", usuario, mensagem, horaEnvio);
         }
 
         public async Task UsuarioDigitando(string codigoSala, string usuario)

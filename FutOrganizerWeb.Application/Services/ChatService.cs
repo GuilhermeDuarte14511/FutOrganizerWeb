@@ -17,10 +17,11 @@ namespace FutOrganizerWeb.Application.Services
             _partidaRepository = partidaRepository;
         }
 
-        public async Task SalvarMensagemAsync(string codigoSala, string nomeUsuario, string mensagem)
+        public async Task<MensagemChatDTO?> SalvarMensagemAsync(string codigoSala, string nomeUsuario, string mensagem)
         {
             var partida = await _partidaRepository.ObterPorCodigoAsync(codigoSala);
-            if (partida == null) return;
+            if (partida == null) return null;
+
             var fusoBrasilia = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
             var horaBrasilia = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow, fusoBrasilia);
 
@@ -33,6 +34,13 @@ namespace FutOrganizerWeb.Application.Services
             };
 
             await _repository.AdicionarMensagemAsync(novaMensagem);
+
+            return new MensagemChatDTO
+            {
+                NomeUsuario = novaMensagem.NomeJogador,
+                Conteudo = novaMensagem.Conteudo,
+                DataEnvio = novaMensagem.DataHoraEnvio
+            };
         }
 
         public async Task<List<MensagemChatDTO>> ObterMensagensAsync(string codigoSala)
@@ -45,11 +53,9 @@ namespace FutOrganizerWeb.Application.Services
                 {
                     NomeUsuario = m.NomeJogador,
                     Conteudo = m.Conteudo,
-                    DataEnvio = m.DataHoraEnvio 
+                    DataEnvio = m.DataHoraEnvio
                 })
                 .ToList();
         }
-
-
     }
 }
