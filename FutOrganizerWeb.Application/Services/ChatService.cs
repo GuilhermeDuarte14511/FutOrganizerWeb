@@ -39,19 +39,17 @@ namespace FutOrganizerWeb.Application.Services
         {
             var mensagens = await _repository.ObterMensagensPorCodigoSalaAsync(codigoSala);
 
-            var fusoBrasilia = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
-
             return mensagens
                 .OrderBy(m => m.DataHoraEnvio)
                 .Select(m => new MensagemChatDTO
                 {
                     NomeUsuario = m.NomeJogador,
                     Conteudo = m.Conteudo,
-                    DataEnvio = TimeZoneInfo.ConvertTime(m.DataHoraEnvio, fusoBrasilia)
+                    DataEnvio = m.DataHoraEnvio 
                 })
                 .ToList();
-
         }
+
 
     }
 }

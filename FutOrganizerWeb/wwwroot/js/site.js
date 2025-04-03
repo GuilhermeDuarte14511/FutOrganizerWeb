@@ -1073,8 +1073,10 @@
         // ========================== ✅ CHAT - SignalR ==========================
         const connection = new signalR.HubConnectionBuilder()
             .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}`)
+            .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Information)
             .build();
+
 
         btnEnviar.addEventListener("click", async () => {
             const mensagem = inputMensagem.value.trim();
