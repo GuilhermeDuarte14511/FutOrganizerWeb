@@ -7,61 +7,77 @@
 <div class="container py-5" id="lobbyPublicoPage">
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
-            <div class="card shadow-lg rounded-4 border-0">
-                <div class="card-header bg-dark text-white text-center rounded-top-4">
-                    <h4><i class="fas fa-users me-2"></i>Lobby da Sala</h4>
-                    <p id="codigoSalaLobby" class="mb-0 small" data-codigo="@Model.Codigo">
-                        Código: <strong>@Model.Codigo</strong>
-                    </p>
-                </div>
-                <div class="card-body">
-                    <h5 class="text-center"><i class="fas fa-user-friends me-2"></i>Jogadores na Sala</h5>
-                    <ul class="list-group" id="listaJogadores">
-                        @for (int i = 0; i < Model.Jogadores.Count; i++)
-                        {
-                            var nome = Model.Jogadores[i];
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <span>
-                                    <i class="fas fa-futbol me-2 text-secondary"></i>
-                                    <strong>@(i + 1).</strong> @nome
-                                </span>
-                                <span class="badge rounded-pill" id="status-@nome.Replace(" ", "-")">
-                                    <i class="fas fa-circle text-secondary"></i> <!-- será atualizado via JS -->
-                                </span>
-                            </li>
-                        }
-                    </ul>
-                </div>
-            </div>
 
-            <hr class="my-4" />
+            <div class="rounded-4 p-4" style="background-color: #111;border: 2px solid rgba(255, 255, 255, 0.1);box-shadow: 0 0 25px rgba(255, 255, 255, 0.05); transition: all 0.3s ease;">
+                <!-- 🔔 Notificações no topo direito -->
+                <div class="d-flex justify-content-end align-items-center mb-3">
+                    <label class="me-2 fw-bold text-white mb-0">Notificações</label>
+                    <label class="switch mb-0">
+                        <input type="checkbox" id="toggleNotificacoes">
+                        <span class="slider round"></span>
+                    </label>
+                </div>
 
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <i class="fas fa-comments me-2"></i>Chat da Sala
+                <!-- Card: Info da sala -->
+                <div class="card shadow-lg rounded-4 border-0 mb-4">
+                    <div class="card-header bg-dark text-white text-center rounded-top-4">
+                        <h4><i class="fas fa-users me-2"></i>Lobby da Sala</h4>
+                        <p id="codigoSalaLobby" class="mb-0 small" data-codigo="@Model.Codigo">
+                            Código: <strong>@Model.Codigo</strong>
+                        </p>
+                    </div>
+                    <div class="card-body">
+                        <h5 class="text-center"><i class="fas fa-user-friends me-2"></i>Jogadores na Sala</h5>
+                        <ul class="list-group" id="listaJogadores">
+                            @for (int i = 0; i < Model.Jogadores.Count; i++)
+                            {
+                                var nome = Model.Jogadores[i];
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span>
+                                        <i class="fas fa-futbol me-2 text-secondary"></i>
+                                        <strong>@(i + 1).</strong> @nome
+                                    </span>
+                                    <span class="badge rounded-pill" id="status-@nome.Replace(" ", "-")">
+                                        <i class="fas fa-circle text-secondary"></i>
+                                    </span>
+                                </li>
+                            }
+                        </ul>
+                    </div>
                 </div>
-                <div class="card-body" style="max-height: 300px; overflow-y: auto;" id="chatMensagens">
-                    <p class="text-muted text-center"><i class="fas fa-comment-dots me-2"></i>Nenhuma mensagem ainda.</p>
+
+                <!-- Card: Chat -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white">
+                        <i class="fas fa-comments me-2"></i>Chat da Sala
+                    </div>
+                    <div class="card-body" style="max-height: 300px; overflow-y: auto;" id="chatMensagens">
+                        <p class="text-muted text-center"><i class="fas fa-comment-dots me-2"></i>Nenhuma mensagem ainda.</p>
+                    </div>
+                    <div id="statusDigitando" class="text-muted small fst-italic mt-2 ms-2"></div>
+                    <div class="card-footer d-flex">
+                        <input type="text" id="inputMensagem" class="form-control me-2" placeholder="Digite sua mensagem..." autocomplete="off" />
+                        <button class="btn btn-success" id="btnEnviarMensagem" title="Enviar">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
                 </div>
-                <div id="statusDigitando" class="text-muted small fst-italic mt-2 ms-1"></div>
-                <div class="card-footer d-flex">
-                    <input type="text" id="inputMensagem" class="form-control me-2" placeholder="Digite sua mensagem..." autocomplete="off" />
-                    <button class="btn btn-success" id="btnEnviarMensagem" title="Enviar">
-                        <i class="fas fa-paper-plane"></i>
+
+                <!-- Botões -->
+                <div class="text-center mb-3">
+                    <button id="btnSairLobby" class="btn btn-danger">
+                        <i class="fas fa-sign-out-alt me-1"></i> Sair da Sala
                     </button>
                 </div>
-            </div>
+                <div class="text-center">
+                    <a href="/Home" class="btn btn-outline-light">
+                        <i class="fas fa-arrow-left me-2"></i> Voltar
+                    </a>
+                </div>
 
-            <div class="text-center mt-3">
-                <button id="btnSairLobby" class="btn btn-danger">
-                    <i class="fas fa-sign-out-alt me-1"></i> Sair da Sala
-                </button>
             </div>
-            <div class="text-center mt-4">
-                <a href="/Home" class="btn btn-outline-light">
-                    <i class="fas fa-arrow-left me-2"></i> Voltar
-                </a>
-            </div>
+            <!-- 🔚 Fim wrapper -->
+
         </div>
     </div>
 </div>

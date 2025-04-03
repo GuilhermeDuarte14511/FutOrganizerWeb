@@ -924,6 +924,7 @@
         }
     }
 
+
     var lobbyPublicoPage = document.getElementById('lobbyPublicoPage');
     if (lobbyPublicoPage) {
         const codigoLobby = document.getElementById('codigoSalaLobby').dataset.codigo;
@@ -934,29 +935,82 @@
         const inputMensagem = document.getElementById("inputMensagem");
         const btnEnviar = document.getElementById("btnEnviarMensagem");
         const typingStatus = document.getElementById("statusDigitando");
+        const toggleSwitch = document.getElementById("toggleNotificacoes");
+
+        const audioNotification = new Audio('/sounds/notification_message.mp3');
+
+        let digitandoTimeouts = {};
+        let mensagensNaoLidas = 0;
+        const tituloOriginal = document.title;
+        const digitandoUsuarios = new Set();
+
+        function salvarPreferenciaNotificacao(ativa) {
+            localStorage.setItem("notificacaoPushAtiva", ativa ? "1" : "0");
+        }
+
+        function estaNotificacaoAtiva() {
+            return localStorage.getItem("notificacaoPushAtiva") === "1" && Notification.permission === "granted";
+        }
+
+        async function inicializarToggleNotificacoes() {
+            if (!("Notification" in window) || !toggleSwitch) return;
+
+            const permissao = Notification.permission;
+            const localPref = localStorage.getItem("notificacaoPushAtiva");
+
+            toggleSwitch.checked = (permissao === "granted" && localPref === "1");
+
+            toggleSwitch.addEventListener("change", async () => {
+                if (toggleSwitch.checked) {
+                    if (Notification.permission === "granted") {
+                        salvarPreferenciaNotificacao(true);
+                    } else if (Notification.permission !== "denied") {
+                        const perm = await Notification.requestPermission();
+                        if (perm === "granted") {
+                            salvarPreferenciaNotificacao(true);
+                        } else {
+                            toggleSwitch.checked = false;
+                            salvarPreferenciaNotificacao(false);
+                            alert("Você precisa permitir notificações no navegador.");
+                        }
+                    } else {
+                        toggleSwitch.checked = false;
+                        salvarPreferenciaNotificacao(false);
+                        alert("As notificações estão bloqueadas nas configurações do navegador.");
+                    }
+                } else {
+                    salvarPreferenciaNotificacao(false);
+                }
+            });
+        }
+
+        inicializarToggleNotificacoes();
+
+        document.addEventListener("visibilitychange", () => {
+            if (!document.hidden) {
+                mensagensNaoLidas = 0;
+                document.title = tituloOriginal;
+            }
+        });
 
         async function carregarHistoricoMensagens() {
             try {
                 const res = await fetch(`/Lobby/Mensagens?codigo=${codigoLobby}`);
                 if (!res.ok) return;
-
                 const mensagens = await res.json();
+
                 if (mensagens.length > 0) {
                     const mensagemVazia = chatMensagens.querySelector(".text-muted.text-center");
                     if (mensagemVazia) mensagemVazia.remove();
                 }
 
                 mensagens.forEach(m => {
-                    // Extrai a hora e minuto diretamente da string sem conversão de fuso
-                    const dataParts = m.dataEnvio.split("T");
-                    const timeParts = dataParts[1].split(":");
-                    const horas = timeParts[0];
-                    const minutos = timeParts[1];
-
+                    const [_, time] = m.dataEnvio.split("T");
+                    const [horas, minutos] = time.split(":");
                     adicionarMensagemNoChat(m.nomeUsuario, m.conteudo, `${horas}:${minutos}`);
                 });
             } catch (err) {
-                console.error("❌ Erro ao buscar histórico do chat:", err);
+                console.error("❌ Erro ao buscar histórico:", err);
             }
         }
 
@@ -973,6 +1027,25 @@
         </div>`;
             chatMensagens.appendChild(novaMsg);
             chatMensagens.scrollTop = chatMensagens.scrollHeight;
+
+            const deveNotificar = estaNotificacaoAtiva() && nome !== jogadorAtualNome;
+
+            if (document.hidden) {
+                mensagensNaoLidas++;
+                document.title = `(${mensagensNaoLidas}) Nova mensagem - ${tituloOriginal}`;
+            }
+
+            if (deveNotificar) {
+                try {
+                    new Notification(`Nova mensagem de ${nome}`, {
+                        body: mensagem,
+                        icon: "/favicon.ico"
+                    });
+                    audioNotification.play().catch(() => { });
+                } catch (e) {
+                    console.warn("❌ Notificação falhou:", e);
+                }
+            }
         }
 
         async function atualizarLista() {
@@ -981,6 +1054,7 @@
                 if (!res.ok) return;
                 const jogadores = await res.json();
                 listaJogadores.innerHTML = "";
+
                 jogadores.forEach((j, i) => {
                     const nomeId = `status-${j.replace(/\s/g, "-")}`;
                     const li = document.createElement("li");
@@ -988,12 +1062,11 @@
                     li.innerHTML = `
                 <span><i class="fas fa-futbol me-2 text-secondary"></i><strong>${i + 1}.</strong> ${j}</span>
                 <span class="badge rounded-pill" id="${nomeId}">
-                    <i class="fas fa-circle" style="color: #6c757d;"></i>
+                    <i class="fas fa-circle" style="color: #dc3545;"></i>
                 </span>`;
                     listaJogadores.appendChild(li);
                 });
 
-                // 👉 Verifica status de online/offline imediatamente após lista ser montada
                 atualizarStatusUsuariosOnline();
             } catch (err) {
                 console.error("❌ Erro ao atualizar jogadores:", err);
@@ -1004,46 +1077,27 @@
             try {
                 const res = await fetch(`/Lobby/UsuariosOnline?codigo=${codigoLobby}`);
                 if (!res.ok) return;
-
                 const usuariosOnline = await res.json();
 
                 const todosNomes = Array.from(listaJogadores.querySelectorAll("li span"))
-                    .map(span => {
-                        const texto = span.innerText || "";
-                        return texto.includes(". ") ? texto.split(". ")[1] : null;
-                    })
+                    .map(span => span.innerText.split(". ")[1])
                     .filter(Boolean);
 
-                // Aplica ponto vermelho (offline) a todos inicialmente
                 todosNomes.forEach(nome => {
                     const id = `status-${nome.replace(/\s/g, "-")}`;
                     const badge = document.getElementById(id);
-                    if (badge) {
-                        badge.innerHTML = `<i class="fas fa-circle" style="color: #dc3545;"></i>`;
-                    }
+                    if (badge) badge.innerHTML = `<i class="fas fa-circle" style="color: #dc3545;"></i>`;
                 });
 
-                // Atualiza os que estão online com ponto verde
                 usuariosOnline.forEach(nome => {
                     const id = `status-${nome.replace(/\s/g, "-")}`;
                     const badge = document.getElementById(id);
-                    if (badge) {
-                        badge.innerHTML = `<i class="fas fa-circle" style="color: #28a745;"></i>`;
-                        console.log(`🟢 Online: ${nome}`);
-                    }
+                    if (badge) badge.innerHTML = `<i class="fas fa-circle" style="color: #28a745;"></i>`;
                 });
-
-                todosNomes.forEach(nome => {
-                    if (!usuariosOnline.includes(nome)) {
-                        console.log(`🔴 Offline: ${nome}`);
-                    }
-                });
-
             } catch (err) {
-                console.error("❌ Erro ao verificar usuários online:", err);
+                console.error("❌ Erro ao verificar online:", err);
             }
         }
-
 
         async function verificarSorteio() {
             try {
@@ -1057,9 +1111,7 @@
                 container.innerHTML = "<h5 class='text-center text-white mt-4'>🏆 Times Sorteados</h5>";
 
                 const timesOrdenados = [...sorteio.times].sort((a, b) => {
-                    const numA = parseInt(a.nome.replace(/\D/g, '')) || 0;
-                    const numB = parseInt(b.nome.replace(/\D/g, '')) || 0;
-                    return numA - numB;
+                    return parseInt(a.nome.replace(/\D/g, '')) - parseInt(b.nome.replace(/\D/g, ''));
                 });
 
                 timesOrdenados.forEach(time => {
@@ -1071,8 +1123,8 @@
                         return `<li class="list-group-item ${isJogadorAtual ? "fw-bold text-success" : ""}">${j.nome}</li>`;
                     }).join("");
                     card.innerHTML = `
-                    <div class="card-header bg-dark text-white">${time.nome}</div>
-                    <ul class="list-group list-group-flush">${jogadoresHTML}</ul>`;
+                <div class="card-header bg-dark text-white">${time.nome}</div>
+                <ul class="list-group list-group-flush">${jogadoresHTML}</ul>`;
                     container.appendChild(card);
                 });
             } catch (err) {
@@ -1083,8 +1135,8 @@
         const btnSair = document.getElementById("btnSairLobby");
         if (btnSair) {
             btnSair.addEventListener("click", async () => {
-                const response = await fetch(`/Lobby/Sair?codigo=${codigoLobby}&jogadorId=${jogadorAtualId}`, { method: "DELETE" });
-                if (response.ok) {
+                const res = await fetch(`/Lobby/Sair?codigo=${codigoLobby}&jogadorId=${jogadorAtualId}`, { method: "DELETE" });
+                if (res.ok) {
                     document.cookie = `JogadorLobbyId_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                     document.cookie = `JogadorLobbyNome_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                     window.location.reload();
@@ -1092,7 +1144,6 @@
             });
         }
 
-        // ===================== SignalR =====================
         const connection = new signalR.HubConnectionBuilder()
             .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}&nome=${jogadorAtualNome}`)
             .withAutomaticReconnect()
@@ -1110,33 +1161,45 @@
             connection.invoke("UsuarioDigitando", codigoLobby, jogadorAtualNome);
         });
 
+        connection.on("MostrarDigitando", (nome) => {
+            digitandoUsuarios.add(nome);
+            atualizarStatusDigitando();
+            clearTimeout(digitandoTimeouts[nome]);
+            digitandoTimeouts[nome] = setTimeout(() => {
+                digitandoUsuarios.delete(nome);
+                atualizarStatusDigitando();
+            }, 3000);
+        });
+
+        function atualizarStatusDigitando() {
+            const nomes = Array.from(digitandoUsuarios).filter(n => n !== jogadorAtualNome);
+            typingStatus.innerText = nomes.length > 0
+                ? `${nomes.join(", ")} ${nomes.length > 1 ? "estão" : "está"} digitando...`
+                : "";
+        }
+
         connection.on("ReceberMensagem", (nome, mensagem, hora) => {
             adicionarMensagemNoChat(nome, mensagem, hora);
-            typingStatus.innerText = "";
         });
 
-        connection.on("MostrarDigitando", (nome) => {
-            typingStatus.innerText = `${nome} está digitando...`;
-            clearTimeout(typingStatus.timeout);
-            typingStatus.timeout = setTimeout(() => typingStatus.innerText = "", 3000);
-        });
-
-        connection.on("AtualizarUsuariosOnline", () => {
-            atualizarStatusUsuariosOnline(); // 🔄 sempre que alguém conecta/desconecta
-        });
+        connection.on("AtualizarUsuariosOnline", atualizarStatusUsuariosOnline);
 
         connection.start()
             .then(() => {
                 console.log("🟢 Conectado ao chat via SignalR");
                 atualizarLista();
             })
-            .catch(err => console.error("❌ Erro ao conectar ao chat:", err));
+            .catch(err => console.error("❌ Erro ao conectar:", err));
 
         setInterval(atualizarLista, 10000);
         setInterval(verificarSorteio, 5000);
         carregarHistoricoMensagens();
         verificarSorteio();
     }
+
+
+
+
 
 
 
