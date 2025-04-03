@@ -484,13 +484,17 @@
                     console.log("📥 Jogadores do servidor:", jogadoresServidor);
                     console.log("🧠 Jogadores antigos:", jogadoresAntigos);
 
+                    // Extrai apenas os nomes vindos do servidor
+                    const nomesServidor = jogadoresServidor.map(j => j.nome);
+
+                    // Lista atual do textarea
                     let jogadoresAtuais = textarea.value
                         .split('\n')
                         .map(j => j.trim())
                         .filter(j => j);
 
-                    const novos = jogadoresServidor.filter(j => !jogadoresAtuais.includes(j));
-                    const sairam = jogadoresAntigos.filter(j => !jogadoresServidor.includes(j));
+                    const novos = nomesServidor.filter(nome => !jogadoresAtuais.includes(nome));
+                    const sairam = jogadoresAntigos.filter(nome => !nomesServidor.includes(nome));
 
                     // ✅ Toast + adiciona os novos
                     novos.forEach(nome => {
@@ -508,7 +512,7 @@
                         }
                     });
 
-                    jogadoresAntigos = [...jogadoresServidor];
+                    jogadoresAntigos = [...nomesServidor];
 
                     // Atualiza visual
                     textarea.value = jogadoresAtuais.join('\n');
