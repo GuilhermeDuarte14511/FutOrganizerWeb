@@ -23,22 +23,43 @@ public class LobbyController : Controller
             return NotFound();
 
         var jogadorIdCookie = Request.Cookies[$"JogadorLobby_{codigo}"];
+
         if (!string.IsNullOrEmpty(jogadorIdCookie))
         {
-            var jogadores = partida.JogadoresLobby
-                .OrderBy(j => j.DataEntrada)
-                .Select(j => j.Nome)
-                .ToList();
-
-            var viewModel = new SorteioLobbyViewModel
+            try
             {
-                Codigo = codigo,
-                Jogadores = jogadores
-            };
+                // Desserializa o cookie
+                var jogador = JsonSerializer.Deserialize<JogadorDTO>(jogadorIdCookie);
 
-            return View("VisualizarSala", viewModel); // já entrou antes, exibe sala
+                // Verifica se o jogador ainda está na lista da partida
+                var jogadorExiste = partida.JogadoresLobby.Any(j => j.Id == jogador.Id);
+                if (jogadorExiste)
+                {
+                    var jogadores = partida.JogadoresLobby
+                        .OrderBy(j => j.DataEntrada)
+                        .Select(j => j.Nome)
+                        .ToList();
+
+                    var viewModel = new SorteioLobbyViewModel
+                    {
+                        Codigo = codigo,
+                        Jogadores = jogadores
+                    };
+
+                    return View("VisualizarSala", viewModel); // já entrou antes, exibe sala
+                }
+
+                // ⚠️ Se não estiver mais na lista, remove o cookie
+                Response.Cookies.Delete($"JogadorLobby_{codigo}");
+            }
+            catch
+            {
+                // Caso ocorra erro na deserialização, também remove o cookie
+                Response.Cookies.Delete($"JogadorLobby_{codigo}");
+            }
         }
 
+        // Redireciona para a tela de entrada novamente
         var vm = new SorteioLobbyViewModel
         {
             Codigo = codigo,
@@ -50,6 +71,7 @@ public class LobbyController : Controller
 
         return View("EntrarConvidado", vm);
     }
+
 
     [HttpPost]
     public async Task<IActionResult> Entrar([FromBody] EntrarLobbyRequest request)
