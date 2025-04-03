@@ -53,7 +53,6 @@
             iconeOlho.classList.toggle('fa-eye-slash', mostrar);
         });
 
-        // Login
         form.addEventListener('submit', function (e) {
             e.preventDefault();
 
@@ -66,7 +65,8 @@
             btnText.textContent = "Entrando...";
             btnSpinner.classList.remove('d-none');
 
-            fetch('/Login/Logar', {
+            // ✅ CHAMADA CORRETA PARA A NOVA API
+            fetch('/api/login/logar', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/x-www-form-urlencoded',

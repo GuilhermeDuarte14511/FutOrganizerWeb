@@ -27,30 +27,34 @@ public class LobbyController : Controller
         {
             try
             {
-                // Desserializa o cookie
+                // Desserializa o cookie usando System.Text.Json
                 var jogador = JsonSerializer.Deserialize<JogadorDTO>(jogadorIdCookie);
 
-                // Verifica se o jogador ainda está na lista da partida
-                var jogadorExiste = partida.JogadoresLobby.Any(j => j.Id == jogador.Id);
-                if (jogadorExiste)
+                if (jogador != null)
                 {
-                    var jogadores = partida.JogadoresLobby
-                        .OrderBy(j => j.DataEntrada)
-                        .Select(j => j.Nome)
-                        .ToList();
-
-                    var viewModel = new SorteioLobbyViewModel
+                    // Verifica se o jogador ainda está na lista da partida
+                    var jogadorExiste = partida.JogadoresLobby.Any(j => j.Id == jogador.Id);
+                    if (jogadorExiste)
                     {
-                        Codigo = codigo,
-                        Jogadores = jogadores
-                    };
+                        var jogadores = partida.JogadoresLobby
+                            .OrderBy(j => j.DataEntrada)
+                            .Select(j => j.Nome)
+                            .ToList();
 
-                    return View("VisualizarSala", viewModel);
+                        var viewModel = new SorteioLobbyViewModel
+                        {
+                            Codigo = codigo,
+                            Jogadores = jogadores
+                        };
+
+                        return View("VisualizarSala", viewModel);
+                    }
                 }
 
+                // Se não conseguir desserializar ou jogador não existe mais
                 Response.Cookies.Delete($"JogadorLobby_{codigo}");
             }
-            catch
+            catch (JsonException)
             {
                 Response.Cookies.Delete($"JogadorLobby_{codigo}");
             }

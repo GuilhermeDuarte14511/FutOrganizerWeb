@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FutOrganizerMobile.Pages.LoginPage"
+             BackgroundColor="#121212"
+             Title="LoginPage">
+    <Grid RowDefinitions="*,Auto,*">
+        <ScrollView Grid.Row="1">
+            <VerticalStackLayout Padding="24"
+                                 HorizontalOptions="Center"
+                                 Spacing="20"
+                                 WidthRequest="400">
+
+                <Label Text="&#xf1e3;"
+                    FontFamily="FontAwesome"
+                       FontSize="48"
+                       TextColor="#007bff"
+                       HorizontalOptions="Center" />
+
+                    <Label Text="FutOrganizer"
+                       FontSize="28"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       HorizontalOptions="Center" />
+
+                    <Label Text="Bem-vindo de volta!"
+                       FontSize="14"
+                       TextColor="LightGray"
+                       HorizontalOptions="Center" />
+
+                    <VerticalStackLayout>
+                        <Label Text="E-mail" TextColor="White" />
+                        <Border BackgroundColor="#2c2c3c"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 6">
+                            <Grid ColumnDefinitions="30, *" Padding="5">
+                                <Label Text="&#xf0e0;" FontFamily="FontAwesome" TextColor="LightGray" FontSize="16" />
+                                <Entry x:Name="EmailEntry"
+                                   Grid.Column="1"
+                                   Placeholder="nome@exemplo.com"
+                                   TextColor="White"
+                                   PlaceholderColor="Gray" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <VerticalStackLayout>
+                        <Label Text="Senha" TextColor="White" />
+                        <Border BackgroundColor="#2c2c3c"
+                            StrokeThickness="0"
+                            StrokeShape="RoundRectangle 6">
+                            <Grid ColumnDefinitions="30, *, 40" Padding="5">
+                                <Label Text="&#xf023;" FontFamily="FontAwesome" TextColor="LightGray" FontSize="16" />
+                                <Entry x:Name="SenhaEntry"
+                                   Grid.Column="1"
+                                   IsPassword="True"
+                                   Placeholder="Senha"
+                                   TextColor="White"
+                                   PlaceholderColor="Gray" />
+                                <Button x:Name="ToggleSenhaBtn"
+                                    Grid.Column="2"
+                                    Text="&#xf070;"
+                                    BackgroundColor="Transparent"
+                                    TextColor="LightGray"
+                                    Clicked="OnToggleSenhaClicked" />
+                            </Grid>
+                        </Border>
+                    </VerticalStackLayout>
+
+                    <Button x:Name="BtnEntrar"
+                        Text="Entrar"
+                        FontAttributes="Bold"
+                        BackgroundColor="#007bff"
+                        TextColor="White"
+                        CornerRadius="10"
+                        Clicked="OnEntrarClicked" />
+
+                    <Label Text="Esqueceu sua senha?"
+                       FontSize="12"
+                       TextColor="LightGray"
+                       HorizontalOptions="Center" />
+
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

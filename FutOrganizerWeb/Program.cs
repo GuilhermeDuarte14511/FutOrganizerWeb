@@ -5,7 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// ? Configuração do banco de dados com retry automático
 builder.Services.AddDbContext<FutOrganizerDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -18,19 +17,19 @@ builder.Services.AddDbContext<FutOrganizerDbContext>(options =>
             );
         }));
 
-// ? Injeção de dependência dos serviços do projeto
+// Injeção de dependência dos serviços do projeto
 builder.Services.AddProjectServices();
 
-// ? Serviços MVC e sessão
+// Serviços MVC e sessão
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 
-// ? Adiciona suporte ao SignalR (para o chat em tempo real)
+// Adiciona suporte ao SignalR
 builder.Services.AddSignalR();
 
 var app = builder.Build();
 
-// ? Tratamento de erros e HTTPS
+// Tratamento de erros e HTTPS
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
@@ -48,6 +47,6 @@ app.MapHub<LobbyChatHub>("/hubs/lobbychat");
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Index}/{id?}");
+    pattern: "{controller=Login}/{action=Logar}/{id?}");
 
 app.Run();
