@@ -151,10 +151,13 @@ namespace FutOrganizerWeb.Application.Services
             var jogador = partida.JogadoresLobby.FirstOrDefault(j => j.Nome == nomeJogador);
             if (jogador != null)
             {
-                jogador.UltimaAtividade = DateTime.Now;
+                jogador.UltimaAtividade = TimeZoneInfo.ConvertTimeFromUtc(DateTime.UtcNow,
+                    TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time"));
+
                 await _repository.SalvarAsync();
             }
         }
+
 
 
     }
