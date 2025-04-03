@@ -617,6 +617,13 @@ html, body {
     }
 }
 
+.status-online i {
+    color: #28a745 !important; /* verde Bootstrap */
+}
+
+.status-offline i {
+    color: #6c757d !important; /* cinza Bootstrap */
+}
 
 /* Responsividade */
 @media (max-width: 576px) {

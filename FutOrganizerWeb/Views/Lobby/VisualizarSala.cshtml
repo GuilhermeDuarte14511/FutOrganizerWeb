@@ -19,8 +19,15 @@
                     <ul class="list-group" id="listaJogadores">
                         @for (int i = 0; i < Model.Jogadores.Count; i++)
                         {
-                            <li class="list-group-item">
-                                <i class="fas fa-futbol me-2 text-secondary"></i><strong>@(i + 1).</strong> @Model.Jogadores[i]
+                            var nome = Model.Jogadores[i];
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <span>
+                                    <i class="fas fa-futbol me-2 text-secondary"></i>
+                                    <strong>@(i + 1).</strong> @nome
+                                </span>
+                                <span class="badge rounded-pill" id="status-@nome.Replace(" ", "-")">
+                                    <i class="fas fa-circle text-secondary"></i> <!-- será atualizado via JS -->
+                                </span>
                             </li>
                         }
                     </ul>
@@ -28,6 +35,7 @@
             </div>
 
             <hr class="my-4" />
+
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
                     <i class="fas fa-comments me-2"></i>Chat da Sala
@@ -35,8 +43,9 @@
                 <div class="card-body" style="max-height: 300px; overflow-y: auto;" id="chatMensagens">
                     <p class="text-muted text-center"><i class="fas fa-comment-dots me-2"></i>Nenhuma mensagem ainda.</p>
                 </div>
+                <div id="statusDigitando" class="text-muted small fst-italic mt-2 ms-1"></div>
                 <div class="card-footer d-flex">
-                    <input type="text" id="inputMensagem" class="form-control me-2" placeholder="Digite sua mensagem..." />
+                    <input type="text" id="inputMensagem" class="form-control me-2" placeholder="Digite sua mensagem..." autocomplete="off" />
                     <button class="btn btn-success" id="btnEnviarMensagem" title="Enviar">
                         <i class="fas fa-paper-plane"></i>
                     </button>

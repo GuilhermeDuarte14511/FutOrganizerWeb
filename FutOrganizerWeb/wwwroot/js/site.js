@@ -926,57 +926,38 @@
 
     var lobbyPublicoPage = document.getElementById('lobbyPublicoPage');
     if (lobbyPublicoPage) {
-        console.log("✅ Página do lobby público carregada");
-
         const codigoLobby = document.getElementById('codigoSalaLobby').dataset.codigo;
         const listaJogadores = document.getElementById("listaJogadores");
-
         const jogadorAtualId = getCookie(`JogadorLobbyId_${codigoLobby}`);
         const jogadorAtualNome = getCookie(`JogadorLobbyNome_${codigoLobby}`);
-
-        const containerTimes = document.createElement("div");
-        containerTimes.className = "mt-4";
-        containerTimes.id = "timesSorteadosContainer";
-        lobbyPublicoPage.appendChild(containerTimes);
-
         const chatMensagens = document.getElementById("chatMensagens");
         const inputMensagem = document.getElementById("inputMensagem");
         const btnEnviar = document.getElementById("btnEnviarMensagem");
+        const typingStatus = document.getElementById("statusDigitando");
 
         async function carregarHistoricoMensagens() {
             try {
                 const res = await fetch(`/Lobby/Mensagens?codigo=${codigoLobby}`);
                 if (!res.ok) return;
-
                 const mensagens = await res.json();
-
-                // Se houver mensagens, remove o aviso "Nenhuma mensagem ainda."
                 if (mensagens.length > 0) {
                     const mensagemVazia = chatMensagens.querySelector(".text-muted.text-center");
-                    if (mensagemVazia) {
-                        mensagemVazia.remove();
-                    }
+                    if (mensagemVazia) mensagemVazia.remove();
                 }
-
                 mensagens.forEach(m => {
                     const data = new Date(m.dataEnvio);
                     const horas = String(data.getHours()).padStart(2, '0');
                     const minutos = String(data.getMinutes()).padStart(2, '0');
-                    const horarioFormatado = `${horas}:${minutos}`;
-
-                    adicionarMensagemNoChat(m.nomeUsuario, m.conteudo, horarioFormatado);
+                    adicionarMensagemNoChat(m.nomeUsuario, m.conteudo, `${horas}:${minutos}`);
                 });
             } catch (err) {
                 console.error("❌ Erro ao buscar histórico do chat:", err);
             }
         }
 
-
-
         function adicionarMensagemNoChat(nome, mensagem, horario) {
             const novaMsg = document.createElement("div");
             novaMsg.className = "mb-2";
-
             novaMsg.innerHTML = `
         <div class="bg-light p-2 rounded shadow-sm d-flex justify-content-between align-items-start">
             <div>
@@ -985,44 +966,87 @@
             </div>
             <small class="text-muted ms-2">${horario}</small>
         </div>`;
-
             chatMensagens.appendChild(novaMsg);
             chatMensagens.scrollTop = chatMensagens.scrollHeight;
         }
 
         async function atualizarLista() {
             try {
-                const response = await fetch(`/Lobby/Jogadores?codigo=${codigoLobby}`);
-                if (!response.ok) return;
-
-                const jogadores = await response.json();
+                const res = await fetch(`/Lobby/Jogadores?codigo=${codigoLobby}`);
+                if (!res.ok) return;
+                const jogadores = await res.json();
                 listaJogadores.innerHTML = "";
-
-                jogadores.forEach((j, index) => {
+                jogadores.forEach((j, i) => {
+                    const nomeId = `status-${j.replace(/\s/g, "-")}`;
                     const li = document.createElement("li");
-                    li.className = "list-group-item";
-                    li.innerHTML = `<strong>${index + 1}.</strong> ${j}`;
+                    li.className = "list-group-item d-flex justify-content-between align-items-center";
+                    li.innerHTML = `
+                <span><i class="fas fa-futbol me-2 text-secondary"></i><strong>${i + 1}.</strong> ${j}</span>
+                <span class="badge rounded-pill" id="${nomeId}">
+                    <i class="fas fa-circle" style="color: #6c757d;"></i>
+                </span>`;
                     listaJogadores.appendChild(li);
                 });
+
+                // 👉 Verifica status de online/offline imediatamente após lista ser montada
+                atualizarStatusUsuariosOnline();
             } catch (err) {
                 console.error("❌ Erro ao atualizar jogadores:", err);
             }
         }
 
+        async function atualizarStatusUsuariosOnline() {
+            try {
+                const res = await fetch(`/Lobby/UsuariosOnline?codigo=${codigoLobby}`);
+                if (!res.ok) return;
+
+                const usuariosOnline = await res.json();
+
+                const todosNomes = Array.from(listaJogadores.querySelectorAll("li span"))
+                    .map(span => {
+                        const texto = span.innerText || "";
+                        return texto.includes(". ") ? texto.split(". ")[1] : null;
+                    })
+                    .filter(Boolean);
+
+                // Aplica ponto vermelho (offline) a todos inicialmente
+                todosNomes.forEach(nome => {
+                    const id = `status-${nome.replace(/\s/g, "-")}`;
+                    const badge = document.getElementById(id);
+                    if (badge) {
+                        badge.innerHTML = `<i class="fas fa-circle" style="color: #dc3545;"></i>`;
+                    }
+                });
+
+                // Atualiza os que estão online com ponto verde
+                usuariosOnline.forEach(nome => {
+                    const id = `status-${nome.replace(/\s/g, "-")}`;
+                    const badge = document.getElementById(id);
+                    if (badge) {
+                        badge.innerHTML = `<i class="fas fa-circle" style="color: #28a745;"></i>`;
+                        console.log(`🟢 Online: ${nome}`);
+                    }
+                });
+
+                todosNomes.forEach(nome => {
+                    if (!usuariosOnline.includes(nome)) {
+                        console.log(`🔴 Offline: ${nome}`);
+                    }
+                });
+
+            } catch (err) {
+                console.error("❌ Erro ao verificar usuários online:", err);
+            }
+        }
+
+
         async function verificarSorteio() {
             try {
                 const res = await fetch(`/Lobby/VerificarSorteio?codigo=${codigoLobby}`);
                 if (!res.ok) return;
-
                 const data = await res.json();
                 const sorteio = data.sorteio;
-
-                if (!sorteio || !sorteio.times || !sorteio.times.length) return;
-
-                const btnSair = document.getElementById("btnSairLobby");
-                const btnVoltar = document.querySelector("a[href='/Home']");
-                if (btnSair) btnSair.style.display = "none";
-                if (btnVoltar) btnVoltar.style.display = "none";
+                if (!sorteio || !sorteio.times?.length) return;
 
                 const container = document.getElementById('timesSorteadosContainer');
                 container.innerHTML = "<h5 class='text-center text-white mt-4'>🏆 Times Sorteados</h5>";
@@ -1041,13 +1065,11 @@
                         const isJogadorAtual = j.id === jogadorAtualId;
                         return `<li class="list-group-item ${isJogadorAtual ? "fw-bold text-success" : ""}">${j.nome}</li>`;
                     }).join("");
-
                     card.innerHTML = `
                     <div class="card-header bg-dark text-white">${time.nome}</div>
                     <ul class="list-group list-group-flush">${jogadoresHTML}</ul>`;
                     container.appendChild(card);
                 });
-
             } catch (err) {
                 console.error("❌ Erro ao verificar sorteio:", err);
             }
@@ -1056,52 +1078,67 @@
         const btnSair = document.getElementById("btnSairLobby");
         if (btnSair) {
             btnSair.addEventListener("click", async () => {
-                const response = await fetch(`/Lobby/Sair?codigo=${codigoLobby}&jogadorId=${jogadorAtualId}`, {
-                    method: "DELETE"
-                });
-
+                const response = await fetch(`/Lobby/Sair?codigo=${codigoLobby}&jogadorId=${jogadorAtualId}`, { method: "DELETE" });
                 if (response.ok) {
                     document.cookie = `JogadorLobbyId_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                     document.cookie = `JogadorLobbyNome_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                     window.location.reload();
-                } else {
-                    alert("Erro ao sair da sala.");
                 }
             });
         }
 
-        // ========================== ✅ CHAT - SignalR ==========================
+        // ===================== SignalR =====================
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}`)
+            .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}&nome=${jogadorAtualNome}`)
             .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Information)
             .build();
 
-
         btnEnviar.addEventListener("click", async () => {
             const mensagem = inputMensagem.value.trim();
-            if (mensagem === "") return;
-
+            if (!mensagem) return;
             await connection.invoke("EnviarMensagem", codigoLobby, jogadorAtualNome, mensagem);
             inputMensagem.value = "";
         });
 
-        connection.on("ReceberMensagem", (nome, mensagem) => {
-            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        inputMensagem.addEventListener("input", () => {
+            connection.invoke("UsuarioDigitando", codigoLobby, jogadorAtualNome);
+        });
+
+        connection.on("ReceberMensagem", (nome, mensagem, hora) => {
             adicionarMensagemNoChat(nome, mensagem, hora);
+            typingStatus.innerText = "";
+        });
+
+        connection.on("MostrarDigitando", (nome) => {
+            typingStatus.innerText = `${nome} está digitando...`;
+            clearTimeout(typingStatus.timeout);
+            typingStatus.timeout = setTimeout(() => typingStatus.innerText = "", 3000);
+        });
+
+        connection.on("AtualizarUsuariosOnline", () => {
+            atualizarStatusUsuariosOnline(); // 🔄 sempre que alguém conecta/desconecta
         });
 
         connection.start()
-            .then(() => console.log("🟢 Conectado ao chat"))
+            .then(() => {
+                console.log("🟢 Conectado ao chat via SignalR");
+                atualizarLista();
+            })
             .catch(err => console.error("❌ Erro ao conectar ao chat:", err));
-        // =======================================================================
 
-        setInterval(atualizarLista, 5000);
+        setInterval(atualizarLista, 10000);
         setInterval(verificarSorteio, 5000);
-        atualizarLista();
-        verificarSorteio();
         carregarHistoricoMensagens();
+        verificarSorteio();
     }
+
+
+
+
+
+
+
 
 
     // Função utilitária

@@ -116,5 +116,17 @@ public class LobbyController : Controller
         return Json(mensagens);
     }
 
+    [HttpGet("/Lobby/UsuariosOnline")]
+    public IActionResult UsuariosOnline(string codigo)
+    {
+        var usuariosOnline = FutOrganizerWeb.Hubs.LobbyChatHub.UsuariosConectados
+            .Where(kvp => kvp.Value.Sala == codigo)
+            .Select(kvp => kvp.Value.Nome)
+            .Distinct()
+            .ToList();
+
+        return Ok(usuariosOnline);
+    }
+
 
 }
