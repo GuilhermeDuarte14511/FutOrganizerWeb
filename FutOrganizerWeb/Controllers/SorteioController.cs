@@ -82,6 +82,12 @@ namespace FutOrganizerWeb.Controllers
             return View();
         }
 
+        [HttpGet]
+        public IActionResult MinhasSalas()
+        {
+            return View();
+        }
+
         [HttpPost]
         public async Task<IActionResult> CriarSala(DateTime DataHora, string Local, string Latitude, string Longitude)
         {
@@ -111,14 +117,15 @@ namespace FutOrganizerWeb.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> MinhasSalas()
+        [Route("Sorteio/ObterSalas")]
+        public async Task<IActionResult> ObterSalas(int pagina = 1, int tamanhoPagina = 10)
         {
             var usuarioIdStr = HttpContext.Session.GetString("UsuarioId");
 
             if (string.IsNullOrEmpty(usuarioIdStr) || !Guid.TryParse(usuarioIdStr, out Guid usuarioId))
                 return Unauthorized("Usuário não autenticado.");
 
-            var partidas = await _partidaService.ObterPartidasPorUsuarioAsync(usuarioId);
+            var partidas = await _partidaService.ObterPartidasPorUsuarioAsync(usuarioId, pagina, tamanhoPagina);
 
             var salas = partidas.Select(p => new SalaViewModel
             {
@@ -131,7 +138,9 @@ namespace FutOrganizerWeb.Controllers
                 Longitude = p.Longitude ?? 0.0
             }).ToList();
 
-            return View(salas);
+            return Json(salas);
         }
+
+
     }
 }

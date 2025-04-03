@@ -14,10 +14,11 @@ namespace FutOrganizerWeb.Application.Services
             _repository = repository;
         }
 
-        public async Task<List<Partida>> ObterPartidasPorUsuarioAsync(Guid usuarioId)
+        public async Task<List<Partida>> ObterPartidasPorUsuarioAsync(Guid usuarioId, int pagina, int tamanhoPagina)
         {
-            return await _repository.ObterPartidasPorUsuarioAsync(usuarioId);
+            return await _repository.ObterPartidasPorUsuarioAsync(usuarioId, pagina, tamanhoPagina);
         }
+
 
         public async Task<List<Partida>> ObterPartidasPaginadasPorUsuarioAsync(Guid usuarioId, int page, int pageSize)
         {
@@ -64,20 +65,24 @@ namespace FutOrganizerWeb.Application.Services
             return await _repository.ObterPorCodigoAsync(codigo);
         }
 
-        public async Task<Guid> AdicionarJogadorAoLobbyAsync(string codigo, string nomeJogador)
+        public async Task<JogadorDTO> AdicionarJogadorAoLobbyAsync(string codigo, string nomeJogador)
         {
             var partida = await _repository.ObterPorCodigoAsync(codigo);
             if (partida == null)
                 throw new Exception("Partida não encontrada");
 
-            // Verifica se o jogador já existe na sala
             var jogadorExistente = partida.JogadoresLobby
                 .FirstOrDefault(j => j.Nome.Equals(nomeJogador, StringComparison.OrdinalIgnoreCase));
 
             if (jogadorExistente != null)
-                return jogadorExistente.Id;
+            {
+                return new JogadorDTO
+                {
+                    Id = jogadorExistente.Id,
+                    Nome = jogadorExistente.Nome
+                };
+            }
 
-            // Cria o jogador e salva no banco
             var novoJogador = new JogadorLobby
             {
                 Nome = nomeJogador,
@@ -86,8 +91,14 @@ namespace FutOrganizerWeb.Application.Services
             };
 
             await _repository.AdicionarJogadorAsync(novoJogador);
-            return novoJogador.Id;
+
+            return new JogadorDTO
+            {
+                Id = novoJogador.Id,
+                Nome = novoJogador.Nome
+            };
         }
+
 
         public async Task RemoverJogadorAsync(string codigo, Guid jogadorId)
         {

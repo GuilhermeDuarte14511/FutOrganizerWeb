@@ -1,14 +1,18 @@
 ﻿using FutOrganizerWeb.Application.DTOs;
 using FutOrganizerWeb.Application.Interfaces;
+using FutOrganizerWeb.Application.Services;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
 
 public class LobbyController : Controller
 {
     private readonly IPartidaService _partidaService;
+    private readonly IChatService _chatService;
 
-    public LobbyController(IPartidaService partidaService)
+    public LobbyController(IPartidaService partidaService, IChatService chatService)
     {
         _partidaService = partidaService;
+        _chatService = chatService;
     }
 
     [HttpGet("/Lobby/{codigo}")]
@@ -50,17 +54,18 @@ public class LobbyController : Controller
     [HttpPost]
     public async Task<IActionResult> Entrar([FromBody] EntrarLobbyRequest request)
     {
-        var jogadorId = await _partidaService.AdicionarJogadorAoLobbyAsync(request.Codigo, request.Nome);
+        var jogador = await _partidaService.AdicionarJogadorAoLobbyAsync(request.Codigo, request.Nome);
 
-        // Salva cookie por 7 dias
-        Response.Cookies.Append($"JogadorLobby_{request.Codigo}", jogadorId.ToString(), new CookieOptions
+        var cookieValue = JsonSerializer.Serialize(jogador);
+        Response.Cookies.Append($"JogadorLobby_{request.Codigo}", cookieValue, new CookieOptions
         {
             Expires = DateTimeOffset.UtcNow.AddDays(7),
             IsEssential = true
         });
 
-        return Ok(jogadorId);
+        return Ok(jogador);
     }
+
 
     [HttpGet("/Lobby/Jogadores")]
     public async Task<IActionResult> Jogadores(string codigo)
@@ -104,6 +109,12 @@ public class LobbyController : Controller
     }
 
 
+    [HttpGet("/Lobby/Mensagens")]
+    public async Task<IActionResult> Mensagens(string codigo)
+    {
+        var mensagens = await _chatService.ObterMensagensAsync(codigo);
+        return Json(mensagens);
+    }
 
 
 }

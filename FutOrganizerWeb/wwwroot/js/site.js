@@ -897,12 +897,16 @@
                 });
 
                 if (response.ok) {
-                    const jogadorId = await response.text();
-                    setCookie(cookieKey, jogadorId, 2);
+                    const jogador = await response.json();
+
+                    setCookie(`JogadorLobbyId_${codigo}`, jogador.id, 2);
+                    setCookie(`JogadorLobbyNome_${codigo}`, jogador.nome, 2);
+
                     window.location.href = `/Lobby/${codigo}`;
                 } else {
                     alert("Erro ao entrar na sala.");
                 }
+
 
             } catch (err) {
                 alert("Erro inesperado. Tente novamente.");
@@ -926,12 +930,65 @@
 
         const codigoLobby = document.getElementById('codigoSalaLobby').dataset.codigo;
         const listaJogadores = document.getElementById("listaJogadores");
-        const jogadorAtualId = getCookie(`JogadorLobby_${codigoLobby}`)?.replace(/"/g, '');
+
+        const jogadorAtualId = getCookie(`JogadorLobbyId_${codigoLobby}`);
+        const jogadorAtualNome = getCookie(`JogadorLobbyNome_${codigoLobby}`);
 
         const containerTimes = document.createElement("div");
         containerTimes.className = "mt-4";
         containerTimes.id = "timesSorteadosContainer";
         lobbyPublicoPage.appendChild(containerTimes);
+
+        const chatMensagens = document.getElementById("chatMensagens");
+        const inputMensagem = document.getElementById("inputMensagem");
+        const btnEnviar = document.getElementById("btnEnviarMensagem");
+
+        async function carregarHistoricoMensagens() {
+            try {
+                const res = await fetch(`/Lobby/Mensagens?codigo=${codigoLobby}`);
+                if (!res.ok) return;
+
+                const mensagens = await res.json();
+
+                // Se houver mensagens, remove o aviso "Nenhuma mensagem ainda."
+                if (mensagens.length > 0) {
+                    const mensagemVazia = chatMensagens.querySelector(".text-muted.text-center");
+                    if (mensagemVazia) {
+                        mensagemVazia.remove();
+                    }
+                }
+
+                mensagens.forEach(m => {
+                    const data = new Date(m.dataEnvio);
+                    const horas = String(data.getHours()).padStart(2, '0');
+                    const minutos = String(data.getMinutes()).padStart(2, '0');
+                    const horarioFormatado = `${horas}:${minutos}`;
+
+                    adicionarMensagemNoChat(m.nomeUsuario, m.conteudo, horarioFormatado);
+                });
+            } catch (err) {
+                console.error("❌ Erro ao buscar histórico do chat:", err);
+            }
+        }
+
+
+
+        function adicionarMensagemNoChat(nome, mensagem, horario) {
+            const novaMsg = document.createElement("div");
+            novaMsg.className = "mb-2";
+
+            novaMsg.innerHTML = `
+        <div class="bg-light p-2 rounded shadow-sm d-flex justify-content-between align-items-start">
+            <div>
+                <strong><i class="fas fa-user me-1"></i>${nome}</strong>
+                <p class="mb-0">${mensagem}</p>
+            </div>
+            <small class="text-muted ms-2">${horario}</small>
+        </div>`;
+
+            chatMensagens.appendChild(novaMsg);
+            chatMensagens.scrollTop = chatMensagens.scrollHeight;
+        }
 
         async function atualizarLista() {
             try {
@@ -978,24 +1035,16 @@
 
                 timesOrdenados.forEach(time => {
                     const contemJogadorAtual = time.jogadores.some(j => j.id === jogadorAtualId);
-
                     const card = document.createElement("div");
                     card.className = `card shadow-sm mb-3 time-card ${contemJogadorAtual ? "destaque-time-jogador" : ""}`;
-
                     const jogadoresHTML = time.jogadores.map(j => {
                         const isJogadorAtual = j.id === jogadorAtualId;
                         return `<li class="list-group-item ${isJogadorAtual ? "fw-bold text-success" : ""}">${j.nome}</li>`;
                     }).join("");
 
                     card.innerHTML = `
-                    <div class="card-header bg-dark text-white">
-                        ${time.nome}
-                    </div>
-                    <ul class="list-group list-group-flush">
-                        ${jogadoresHTML}
-                    </ul>
-                `;
-
+                    <div class="card-header bg-dark text-white">${time.nome}</div>
+                    <ul class="list-group list-group-flush">${jogadoresHTML}</ul>`;
                     container.appendChild(card);
                 });
 
@@ -1004,46 +1053,221 @@
             }
         }
 
-        setInterval(atualizarLista, 5000);
-        setInterval(verificarSorteio, 5000);
-        atualizarLista();
-        verificarSorteio();
-
         const btnSair = document.getElementById("btnSairLobby");
         if (btnSair) {
             btnSair.addEventListener("click", async () => {
-                let jogadorId = getCookie(`JogadorLobby_${codigoLobby}`);
-                if (!jogadorId) return;
-
-                jogadorId = jogadorId.replace(/"/g, '');
-
-                const confirmed = confirm("Tem certeza que deseja sair da sala?");
-                if (!confirmed) return;
-
-                const response = await fetch(`/Lobby/Sair?codigo=${codigoLobby}&jogadorId=${jogadorId}`, {
+                const response = await fetch(`/Lobby/Sair?codigo=${codigoLobby}&jogadorId=${jogadorAtualId}`, {
                     method: "DELETE"
                 });
 
                 if (response.ok) {
-                    document.cookie = `JogadorLobby_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    document.cookie = `JogadorLobbyId_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    document.cookie = `JogadorLobbyNome_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                     window.location.reload();
                 } else {
                     alert("Erro ao sair da sala.");
                 }
             });
         }
+
+        // ========================== ✅ CHAT - SignalR ==========================
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}`)
+            .configureLogging(signalR.LogLevel.Information)
+            .build();
+
+        btnEnviar.addEventListener("click", async () => {
+            const mensagem = inputMensagem.value.trim();
+            if (mensagem === "") return;
+
+            await connection.invoke("EnviarMensagem", codigoLobby, jogadorAtualNome, mensagem);
+            inputMensagem.value = "";
+        });
+
+        connection.on("ReceberMensagem", (nome, mensagem) => {
+            const hora = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            adicionarMensagemNoChat(nome, mensagem, hora);
+        });
+
+        connection.start()
+            .then(() => console.log("🟢 Conectado ao chat"))
+            .catch(err => console.error("❌ Erro ao conectar ao chat:", err));
+        // =======================================================================
+
+        setInterval(atualizarLista, 5000);
+        setInterval(verificarSorteio, 5000);
+        atualizarLista();
+        verificarSorteio();
+        carregarHistoricoMensagens();
     }
 
 
-    // Função utilitária para ler cookie
+    // Função utilitária
     function getCookie(name) {
-        const cookies = document.cookie.split(';');
-        for (let c of cookies) {
-            const [k, v] = c.trim().split('=');
-            if (k === name) return v;
-        }
-        return null;
+        const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+        return match ? decodeURIComponent(match[2]) : null;
     }
+
+    var minhasSalasPage = document.getElementById('minhasSalasPage');
+    if (minhasSalasPage) {
+
+        let paginaAtual = 1;
+        const tamanhoPagina = 10;
+        let carregando = false;
+
+        async function carregarSalas() {
+            if (carregando) return;
+            carregando = true;
+
+            const btn = document.getElementById('btnCarregarMais');
+            if (btn) {
+                btn.disabled = true;
+                btn.innerHTML = '⏳ Carregando...';
+            }
+
+            const container = document.getElementById('salasContainer');
+            if (paginaAtual === 1) {
+                container.innerHTML = `
+                <div class="spinner-container">
+                    <span class="loader"></span>
+                </div>`;
+            }
+
+            try {
+                const response = await fetch(`/Sorteio/ObterSalas?pagina=${paginaAtual}&tamanhoPagina=${tamanhoPagina}`);
+                if (!response.ok) throw new Error('Erro na requisição');
+                const data = await response.json();
+
+                if (paginaAtual === 1) container.innerHTML = '';
+
+                if (data.length === 0) {
+                    if (paginaAtual === 1) {
+                        container.innerHTML = '<div class="alert alert-info text-center">Nenhuma sala encontrada.</div>';
+                    } else {
+                        showToast('Nenhuma sala adicional encontrada.', 'info');
+                    }
+                    if (btn) btn.classList.add('d-none');
+                    return;
+                }
+
+                for (const sala of data) {
+                    const status = sala.finalizada ? "Finalizada" : "Aberta";
+                    const badgeClass = sala.finalizada ? "bg-success" : "bg-warning text-dark";
+                    const mapaUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${sala.longitude},${sala.latitude},${sala.longitude},${sala.latitude}&layer=mapnik&marker=${sala.latitude},${sala.longitude}`;
+                    const link = `${location.origin}/Sorteio?codigo=${sala.codigo}`;
+
+                    const card = document.createElement('div');
+                    card.className = 'card mb-4 shadow sala-item';
+                    card.setAttribute('data-status', sala.finalizada ? 'finalizadas' : 'abertas');
+                    card.setAttribute('data-codigo', sala.codigo);
+
+                    // Requisição para endereço via Nominatim
+                    let endereco = `Coordenadas (${sala.latitude.toFixed(4)}, ${sala.longitude.toFixed(4)})`;
+                    try {
+                        const resEndereco = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${sala.latitude}&lon=${sala.longitude}&zoom=18&addressdetails=1`);
+                        const jsonEndereco = await resEndereco.json();
+                        if (jsonEndereco && jsonEndereco.display_name) {
+                            endereco = jsonEndereco.display_name;
+                        }
+                    } catch (e) {
+                        console.warn('Erro ao obter endereço:', e);
+                    }
+
+                    card.innerHTML = `
+                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                    <strong>${new Date(sala.dataHora).toLocaleString()}</strong>
+                    <span class="badge ${badgeClass}">${status}</span>
+                </div>
+                <div class="card-body">
+                    <p><strong>Local:</strong> ${endereco}</p>
+                    <p><strong>Código:</strong> <span class="text-primary">${sala.codigo}</span></p>
+
+                    <div style="height: 300px; overflow: hidden; border-radius: 12px;" class="mb-3">
+                        <iframe 
+                            src="${mapaUrl}"
+                            style="width: 100%; height: 100%; border: 0;"
+                            allowfullscreen
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
+
+                    <div class="input-group mb-3">
+                        <input type="text" class="form-control" value="${link}" readonly id="link-${sala.partidaId}">
+                        <button class="btn btn-outline-secondary" onclick="copiarLink('${sala.partidaId}')">📋 Copiar</button>
+                    </div>
+
+                    ${sala.finalizada
+                            ? `<a href="/Partida/Detalhes/${sala.partidaId}" class="btn btn-outline-info w-100">
+                               <i class="fas fa-info-circle me-2"></i> Ver Detalhes
+                           </a>`
+                            : `<a href="/Sorteio?codigo=${sala.codigo}" class="btn btn-primary w-100">
+                               <i class="fas fa-eye me-2"></i> Ver Sorteio
+                           </a>`
+                        }
+                </div>`;
+
+                    container.appendChild(card);
+                }
+
+                paginaAtual++;
+                carregando = false;
+
+                if (data.length < tamanhoPagina) {
+                    if (btn) btn.classList.add('d-none');
+                    if (paginaAtual > 1) showToast('Nenhuma sala adicional encontrada.', 'info');
+                } else {
+                    if (btn) {
+                        btn.classList.remove('d-none');
+                        btn.disabled = false;
+                        btn.innerHTML = '<i class="fas fa-redo-alt me-2"></i> Carregar Mais';
+                    }
+                }
+
+                aplicarFiltros();
+
+            } catch (err) {
+                console.error('Erro ao carregar salas:', err);
+                mostrarToast('Erro ao carregar salas. Tente novamente.', 'danger');
+                if (btn) btn.classList.remove('d-none');
+            }
+        }
+
+        function copiarLink(id) {
+            const input = document.getElementById('link-' + id);
+            input.select();
+            document.execCommand("copy");
+
+            const toast = document.createElement('div');
+            toast.className = 'alert alert-success mt-2 text-center';
+            toast.innerText = 'Link copiado!';
+            input.parentNode.appendChild(toast);
+            setTimeout(() => toast.remove(), 2000);
+        }
+
+        function aplicarFiltros() {
+            const statusSelecionado = document.getElementById('filtroStatus').value;
+            const busca = document.getElementById('filtroBusca').value.toLowerCase();
+
+            document.querySelectorAll('.sala-item').forEach(item => {
+                const status = item.dataset.status;
+                const codigo = item.dataset.codigo.toLowerCase();
+
+                const statusOk = (statusSelecionado === 'todos' || statusSelecionado === status);
+                const buscaOk = (codigo.includes(busca));
+
+                item.style.display = (statusOk && buscaOk) ? 'block' : 'none';
+            });
+        }
+
+        document.getElementById('filtroStatus').addEventListener('change', aplicarFiltros);
+        document.getElementById('filtroBusca').addEventListener('input', aplicarFiltros);
+        document.getElementById('btnCarregarMais').addEventListener('click', carregarSalas);
+
+        carregarSalas();
+    }
+
+
 
 
 });

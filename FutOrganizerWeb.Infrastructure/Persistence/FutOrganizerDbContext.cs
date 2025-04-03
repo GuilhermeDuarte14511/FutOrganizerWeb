@@ -20,7 +20,8 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
         public DbSet<EstatisticaJogador> Estatisticas { get; set; }
         public DbSet<ConfiguracaoPelada> ConfiguracoesPelada { get; set; }
         public DbSet<JogadorLobby> JogadoresLobby { get; set; }
-        public DbSet<UsuarioTemporario> UsuariosTemporarios { get; set; } 
+        public DbSet<UsuarioTemporario> UsuariosTemporarios { get; set; }
+        public DbSet<MensagemChat> MensagensChat { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -73,6 +74,15 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
                 .WithMany(p => p.JogadoresLobby)
                 .HasForeignKey(j => j.PartidaId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MensagemChat>().HasKey(m => m.Id);
+
+            modelBuilder.Entity<MensagemChat>()
+                .HasOne(m => m.Partida)
+                .WithMany(p => p.MensagensChat)
+                .HasForeignKey(m => m.PartidaId)
+                .OnDelete(DeleteBehavior.Cascade);
+
 
             modelBuilder.Entity<ConfiguracaoPelada>().HasNoKey();
         }

@@ -1,7 +1,4 @@
-﻿@model List<FutOrganizerWeb.Application.DTOs.SalaViewModel>
-@using FutOrganizerWeb.Domain.Helpers
-
-@{
+﻿@{
     ViewData["Title"] = "Minhas Salas";
 }
 
@@ -21,91 +18,13 @@
         <input type="text" id="filtroBusca" class="form-control" placeholder="Buscar por código..." style="max-width: 300px;" />
     </div>
 
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info text-center">Nenhuma sala encontrada.</div>
-    }
-    else
-    {
-        foreach (var sala in Model)
-        {
-            var status = sala.Finalizada ? "Finalizada" : "Aberta";
-            var badgeClass = sala.Finalizada ? "bg-success" : "bg-warning text-dark";
-            var mapaUrl = AppHelper.GenerateEmbedMapUrl($"{sala.Latitude},{sala.Longitude}");
-            var local = AppHelper.ObterEnderecoPorCoordenadasAsync(sala.Latitude, sala.Longitude).Result.ToString();
-            var linkCompartilhavel = $"https://{Context.Request.Host}/Sorteio?codigo={sala.Codigo}";
+    <div id="salasContainer">
+        <div class="alert alert-info text-center">Carregando salas...</div>
+    </div>
 
-            <div class="card mb-4 shadow sala-item" data-status="@(sala.Finalizada ? "finalizadas" : "abertas")" data-codigo="@sala.Codigo">
-                <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
-                    <strong>@sala.DataHora.ToString("dd/MM/yyyy HH:mm")</strong>
-                    <span class="badge @badgeClass">@status</span>
-                </div>
-                <div class="card-body">
-                    <p><strong>Local:</strong> @local</p>
-                    <p><strong>Código:</strong> <span class="text-primary">@sala.Codigo</span></p>
-
-                    <div style="height: 300px; overflow: hidden; border-radius: 12px;" class="mb-3">
-                        <iframe src="@mapaUrl"
-                                style="width: 100%; height: 100%; border: 0;"
-                                allowfullscreen
-                                loading="lazy"
-                                referrerpolicy="no-referrer-when-downgrade">
-                        </iframe>
-                    </div>
-
-                    <div class="input-group mb-3">
-                        <input type="text" class="form-control" value="@linkCompartilhavel" readonly id="link-@sala.PartidaId">
-                        <button class="btn btn-outline-secondary" onclick="copiarLink('@sala.PartidaId')">📋 Copiar</button>
-                    </div>
-
-                    @if (!sala.Finalizada)
-                    {
-                        <a href="/Sorteio?codigo=@sala.Codigo" class="btn btn-primary w-100">
-                            <i class="fas fa-eye me-2"></i> Ver Sorteio
-                        </a>
-                    }
-                    else
-                    {
-                        <a href="/Partida/Detalhes/@sala.PartidaId" class="btn btn-outline-info w-100">
-                            <i class="fas fa-info-circle me-2"></i> Ver Detalhes
-                        </a>
-                    }
-                </div>
-            </div>
-        }
-    }
+    <div class="text-center mt-3">
+        <button id="btnCarregarMais" class="btn btn-primary d-none">
+            <i class="fas fa-redo-alt me-2"></i> Carregar Mais
+        </button>
+    </div>
 </div>
-
-@section Scripts {
-    <script>
-        function copiarLink(id) {
-            const input = document.getElementById('link-' + id);
-            input.select();
-            document.execCommand("copy");
-
-            const toast = document.createElement('div');
-            toast.className = 'alert alert-success mt-2 text-center';
-            toast.innerText = 'Link copiado!';
-            input.parentNode.appendChild(toast);
-            setTimeout(() => toast.remove(), 2000);
-        }
-
-        document.getElementById('filtroStatus').addEventListener('change', aplicarFiltros);
-        document.getElementById('filtroBusca').addEventListener('input', aplicarFiltros);
-
-        function aplicarFiltros() {
-            const statusSelecionado = document.getElementById('filtroStatus').value;
-            const busca = document.getElementById('filtroBusca').value.toLowerCase();
-
-            document.querySelectorAll('.sala-item').forEach(item => {
-                const status = item.dataset.status;
-                const codigo = item.dataset.codigo.toLowerCase();
-
-                const statusOk = (statusSelecionado === 'todos' || statusSelecionado === status);
-                const buscaOk = (codigo.includes(busca));
-
-                item.style.display = (statusOk && buscaOk) ? 'block' : 'none';
-            });
-        }
-    </script>
-}

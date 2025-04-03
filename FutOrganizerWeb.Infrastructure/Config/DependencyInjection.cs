@@ -1,4 +1,5 @@
 ﻿using FutOrganizerWeb.Application.Interfaces;
+using FutOrganizerWeb.Application.Interfaces.Repositories;
 using FutOrganizerWeb.Application.Services;
 using FutOrganizerWeb.Domain.Interfaces;
 using FutOrganizerWeb.Domain.Interfaces_Repositories;
@@ -16,11 +17,13 @@ namespace FutOrganizerWeb.Infrastructure.Config
             services.AddScoped<IAuthService, AuthService>();
             services.AddScoped<ISorteioService, SorteioService>();
             services.AddScoped<IPartidaService, PartidaService>();
+            services.AddScoped<IChatService, ChatService>();
 
             // Repositories
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<ISorteioRepository, SorteioRepository>();
             services.AddScoped<IPartidaRepository, PartidaRepository>();
+            services.AddScoped<IChatRepository, ChatRepository>();
 
             return services;
         }

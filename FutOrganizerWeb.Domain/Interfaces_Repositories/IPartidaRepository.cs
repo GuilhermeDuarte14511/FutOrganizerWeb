@@ -4,7 +4,7 @@ namespace FutOrganizerWeb.Domain.Interfaces_Repositories
 {
     public interface IPartidaRepository
     {
-        Task<List<Partida>> ObterPartidasPorUsuarioAsync(Guid usuarioId);
+        Task<List<Partida>> ObterPartidasPorUsuarioAsync(Guid usuarioId, int pagina, int tamanhoPagina);
         Task<Partida?> ObterPartidaComSorteioAsync(Guid partidaId);
         Task<Partida?> ObterPorCodigoAsync(string codigo);
         Task SalvarAsync();

@@ -1,10 +1,11 @@
+using FutOrganizerWeb.Hubs;
 using FutOrganizerWeb.Infrastructure.Config;
 using FutOrganizerWeb.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Adiciona o contexto com suporte a retry automático
+// ? Configuração do banco de dados com retry automático
 builder.Services.AddDbContext<FutOrganizerDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection"),
@@ -17,25 +18,34 @@ builder.Services.AddDbContext<FutOrganizerDbContext>(options =>
             );
         }));
 
+// ? Injeção de dependência dos serviços do projeto
 builder.Services.AddProjectServices();
+
+// ? Serviços MVC e sessão
 builder.Services.AddControllersWithViews();
 builder.Services.AddSession();
 
+// ? Adiciona suporte ao SignalR (para o chat em tempo real)
+builder.Services.AddSignalR();
+
 var app = builder.Build();
 
+// ? Tratamento de erros e HTTPS
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
     app.UseHsts();
 }
 
-app.UseSession();
 app.UseHttpsRedirection();
 app.UseStaticFiles();
+
 app.UseRouting();
+app.UseSession();
 app.UseAuthorization();
 
-// Rota padrão para Login
+app.MapHub<LobbyChatHub>("/hubs/lobbychat");
+
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Login}/{action=Index}/{id?}");

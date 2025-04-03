@@ -14,14 +14,17 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
             _context = context;
         }
 
-        public async Task<List<Partida>> ObterPartidasPorUsuarioAsync(Guid usuarioId)
+        public async Task<List<Partida>> ObterPartidasPorUsuarioAsync(Guid usuarioId, int pagina, int tamanhoPagina)
         {
             return await _context.Partidas
                 .Include(p => p.Sorteios)
                 .Where(p => p.UsuarioCriadorId == usuarioId)
                 .OrderByDescending(p => p.DataHora)
+                .Skip((pagina - 1) * tamanhoPagina)
+                .Take(tamanhoPagina)
                 .ToListAsync();
         }
+
 
         public async Task<List<Partida>> ObterPartidasPaginadasPorUsuarioAsync(Guid usuarioId, int pagina, int tamanhoPagina)
         {
