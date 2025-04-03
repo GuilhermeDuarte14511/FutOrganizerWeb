@@ -939,15 +939,20 @@
             try {
                 const res = await fetch(`/Lobby/Mensagens?codigo=${codigoLobby}`);
                 if (!res.ok) return;
+
                 const mensagens = await res.json();
                 if (mensagens.length > 0) {
                     const mensagemVazia = chatMensagens.querySelector(".text-muted.text-center");
                     if (mensagemVazia) mensagemVazia.remove();
                 }
+
                 mensagens.forEach(m => {
-                    const data = new Date(m.dataEnvio);
-                    const horas = String(data.getHours()).padStart(2, '0');
-                    const minutos = String(data.getMinutes()).padStart(2, '0');
+                    // Extrai a hora e minuto diretamente da string sem conversão de fuso
+                    const dataParts = m.dataEnvio.split("T");
+                    const timeParts = dataParts[1].split(":");
+                    const horas = timeParts[0];
+                    const minutos = timeParts[1];
+
                     adicionarMensagemNoChat(m.nomeUsuario, m.conteudo, `${horas}:${minutos}`);
                 });
             } catch (err) {
