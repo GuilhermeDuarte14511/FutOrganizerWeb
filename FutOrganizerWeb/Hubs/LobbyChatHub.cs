@@ -25,8 +25,8 @@ namespace FutOrganizerWeb.Hubs
 
             await _chatService.SalvarMensagemAsync(codigoSala, usuario, mensagem);
 
-            var horaEnvio = DateTime.Now.ToString("HH:mm");
-            await Clients.Group(codigoSala).SendAsync("ReceberMensagem", usuario, mensagem, horaEnvio);
+            var agora = DateTime.UtcNow;
+            await Clients.Group(codigoSala).SendAsync("ReceberMensagem", usuario, mensagem, agora);
         }
 
         public async Task UsuarioDigitando(string codigoSala, string usuario)

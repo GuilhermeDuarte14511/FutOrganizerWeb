@@ -46,15 +46,13 @@ public class LobbyController : Controller
                         Jogadores = jogadores
                     };
 
-                    return View("VisualizarSala", viewModel); // já entrou antes, exibe sala
+                    return View("VisualizarSala", viewModel);
                 }
 
-                // ⚠️ Se não estiver mais na lista, remove o cookie
                 Response.Cookies.Delete($"JogadorLobby_{codigo}");
             }
             catch
             {
-                // Caso ocorra erro na deserialização, também remove o cookie
                 Response.Cookies.Delete($"JogadorLobby_{codigo}");
             }
         }
