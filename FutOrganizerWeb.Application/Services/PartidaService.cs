@@ -143,5 +143,19 @@ namespace FutOrganizerWeb.Application.Services
             };
         }
 
+        public async Task AtualizarUltimaAtividadeAsync(string codigo, string nomeJogador)
+        {
+            var partida = await _repository.ObterPorCodigoAsync(codigo);
+            if (partida == null) return;
+
+            var jogador = partida.JogadoresLobby.FirstOrDefault(j => j.Nome == nomeJogador);
+            if (jogador != null)
+            {
+                jogador.UltimaAtividade = DateTime.Now;
+                await _repository.SalvarAsync();
+            }
+        }
+
+
     }
 }

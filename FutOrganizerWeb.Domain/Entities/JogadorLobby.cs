@@ -1,20 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using FutOrganizerWeb.Domain.Entities;
 
-namespace FutOrganizerWeb.Domain.Entities
+public class JogadorLobby
 {
-    public class JogadorLobby
-    {
-        public Guid Id { get; set; } = Guid.NewGuid();
-        public string Nome { get; set; } = string.Empty;
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Nome { get; set; } = string.Empty;
 
-        public Guid PartidaId { get; set; }
-        public Partida? Partida { get; set; }
+    public Guid PartidaId { get; set; }
+    public Partida? Partida { get; set; }
 
-        public DateTime DataEntrada { get; set; } = DateTime.Now;
-    }
-
+    public DateTime DataEntrada { get; set; } = DateTime.Now;
+    public DateTime UltimaAtividade { get; set; } = DateTime.Now;
 }

@@ -1,6 +1,5 @@
 ﻿using FutOrganizerWeb.Application.DTOs;
 using FutOrganizerWeb.Application.Interfaces;
-using FutOrganizerWeb.Application.Services;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
@@ -96,11 +95,16 @@ public class LobbyController : Controller
 
         var jogadores = partida.JogadoresLobby
             .OrderBy(j => j.DataEntrada)
-            .Select(j => j.Nome)
+            .Select(j => new
+            {
+                Nome = j.Nome,
+                UltimaAtividade = j.UltimaAtividade
+            })
             .ToList();
 
         return Json(jogadores);
     }
+
 
     [HttpDelete("/Lobby/Sair")]
     public async Task<IActionResult> RemoverJogador([FromQuery] string codigo, [FromQuery] Guid jogadorId)

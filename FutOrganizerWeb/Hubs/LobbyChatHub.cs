@@ -10,19 +10,23 @@ namespace FutOrganizerWeb.Hubs
     public class LobbyChatHub : Hub
     {
         private readonly IChatService _chatService;
+        private readonly IPartidaService _partidaService;
 
         // ConnectionId => (codigoSala, nomeUsuario)
         public static readonly ConcurrentDictionary<string, (string Sala, string Nome)> UsuariosConectados = new();
 
-        public LobbyChatHub(IChatService chatService)
+        public LobbyChatHub(IChatService chatService, IPartidaService partidaService)
         {
             _chatService = chatService;
+            _partidaService = partidaService;
         }
 
         public async Task EnviarMensagem(string codigoSala, string usuario, string mensagem)
         {
             if (string.IsNullOrWhiteSpace(codigoSala) || string.IsNullOrWhiteSpace(usuario) || string.IsNullOrWhiteSpace(mensagem))
                 return;
+
+            await _partidaService.AtualizarUltimaAtividadeAsync(codigoSala, usuario);
 
             var mensagemSalva = await _chatService.SalvarMensagemAsync(codigoSala, usuario, mensagem);
             if (mensagemSalva == null) return;
@@ -36,6 +40,9 @@ namespace FutOrganizerWeb.Hubs
         {
             if (!string.IsNullOrWhiteSpace(codigoSala) && !string.IsNullOrWhiteSpace(usuario))
             {
+                // 🕓 Atualiza última atividade ao digitar
+                await _partidaService.AtualizarUltimaAtividadeAsync(codigoSala, usuario);
+
                 await Clients.Group(codigoSala).SendAsync("MostrarDigitando", usuario);
             }
         }
@@ -50,6 +57,8 @@ namespace FutOrganizerWeb.Hubs
             {
                 await Groups.AddToGroupAsync(Context.ConnectionId, codigoSala);
                 UsuariosConectados.TryAdd(Context.ConnectionId, (codigoSala, nomeUsuario));
+
+                await _partidaService.AtualizarUltimaAtividadeAsync(codigoSala, nomeUsuario);
 
                 await NotificarUsuariosOnline(codigoSala);
             }

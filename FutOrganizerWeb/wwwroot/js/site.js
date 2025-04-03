@@ -925,6 +925,21 @@
     }
 
 
+    window.reagir = function (elemento, emoji) {
+        const contador = elemento.querySelector("sup");
+        if (contador) {
+            let atual = parseInt(contador.innerText);
+            contador.innerText = atual + 1;
+        } else {
+            elemento.innerHTML += ` <sup class="text-muted">1</sup>`;
+        }
+    };
+
+    function formatarHora(dataIso) {
+        const data = new Date(dataIso);
+        return data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+    }
+
     var lobbyPublicoPage = document.getElementById('lobbyPublicoPage');
     if (lobbyPublicoPage) {
         const codigoLobby = document.getElementById('codigoSalaLobby').dataset.codigo;
@@ -936,7 +951,6 @@
         const btnEnviar = document.getElementById("btnEnviarMensagem");
         const typingStatus = document.getElementById("statusDigitando");
         const toggleSwitch = document.getElementById("toggleNotificacoes");
-
         const audioNotification = new Audio('/sounds/notification_message.mp3');
 
         let digitandoTimeouts = {};
@@ -954,10 +968,8 @@
 
         async function inicializarToggleNotificacoes() {
             if (!("Notification" in window) || !toggleSwitch) return;
-
             const permissao = Notification.permission;
             const localPref = localStorage.getItem("notificacaoPushAtiva");
-
             toggleSwitch.checked = (permissao === "granted" && localPref === "1");
 
             toggleSwitch.addEventListener("change", async () => {
@@ -998,16 +1010,14 @@
                 const res = await fetch(`/Lobby/Mensagens?codigo=${codigoLobby}`);
                 if (!res.ok) return;
                 const mensagens = await res.json();
-
                 if (mensagens.length > 0) {
                     const mensagemVazia = chatMensagens.querySelector(".text-muted.text-center");
                     if (mensagemVazia) mensagemVazia.remove();
                 }
 
                 mensagens.forEach(m => {
-                    const [_, time] = m.dataEnvio.split("T");
-                    const [horas, minutos] = time.split(":");
-                    adicionarMensagemNoChat(m.nomeUsuario, m.conteudo, `${horas}:${minutos}`);
+                    const hora = formatarHora(m.dataEnvio);
+                    adicionarMensagemNoChat(m.nomeUsuario, m.conteudo, hora);
                 });
             } catch (err) {
                 console.error("❌ Erro ao buscar histórico:", err);
@@ -1018,18 +1028,25 @@
             const novaMsg = document.createElement("div");
             novaMsg.className = "mb-2";
             novaMsg.innerHTML = `
-        <div class="bg-light p-2 rounded shadow-sm d-flex justify-content-between align-items-start">
-            <div>
-                <strong><i class="fas fa-user me-1"></i>${nome}</strong>
-                <p class="mb-0">${mensagem}</p>
+        <div class="bg-light p-2 rounded shadow-sm">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <strong><i class="fas fa-user me-1"></i>${nome}</strong>
+                    <p class="mb-0">${mensagem}</p>
+                </div>
+                <small class="text-muted ms-2">${horario}</small>
             </div>
-            <small class="text-muted ms-2">${horario}</small>
+            <div class="reacoes mt-2">
+                <span role="button" onclick="reagir(this, '👍')">👍</span>
+                <span role="button" onclick="reagir(this, '🔥')">🔥</span>
+                <span role="button" onclick="reagir(this, '😂')">😂</span>
+                <span role="button" onclick="reagir(this, '❤️')">❤️</span>
+            </div>
         </div>`;
             chatMensagens.appendChild(novaMsg);
             chatMensagens.scrollTop = chatMensagens.scrollHeight;
 
             const deveNotificar = estaNotificacaoAtiva() && nome !== jogadorAtualNome;
-
             if (document.hidden) {
                 mensagensNaoLidas++;
                 document.title = `(${mensagensNaoLidas}) Nova mensagem - ${tituloOriginal}`;
@@ -1056,11 +1073,20 @@
                 listaJogadores.innerHTML = "";
 
                 jogadores.forEach((j, i) => {
-                    const nomeId = `status-${j.replace(/\s/g, "-")}`;
+                    const nomeId = `status-${j.nome.replace(/\s/g, "-")}`;
+                    const hora = new Date(j.ultimaAtividade).toLocaleTimeString("pt-BR", {
+                        hour: "2-digit",
+                        minute: "2-digit"
+                    });
+
                     const li = document.createElement("li");
                     li.className = "list-group-item d-flex justify-content-between align-items-center";
                     li.innerHTML = `
-                <span><i class="fas fa-futbol me-2 text-secondary"></i><strong>${i + 1}.</strong> ${j}</span>
+                <span>
+                    <i class="fas fa-futbol me-2 text-secondary"></i>
+                    <strong>${i + 1}.</strong> ${j.nome}
+                    <small class="d-block text-muted">Visto por último às ${hora}</small>
+                </span>
                 <span class="badge rounded-pill" id="${nomeId}">
                     <i class="fas fa-circle" style="color: #dc3545;"></i>
                 </span>`;
@@ -1079,20 +1105,12 @@
                 if (!res.ok) return;
                 const usuariosOnline = await res.json();
 
-                const todosNomes = Array.from(listaJogadores.querySelectorAll("li span"))
-                    .map(span => span.innerText.split(". ")[1])
-                    .filter(Boolean);
-
-                todosNomes.forEach(nome => {
-                    const id = `status-${nome.replace(/\s/g, "-")}`;
-                    const badge = document.getElementById(id);
-                    if (badge) badge.innerHTML = `<i class="fas fa-circle" style="color: #dc3545;"></i>`;
-                });
-
                 usuariosOnline.forEach(nome => {
                     const id = `status-${nome.replace(/\s/g, "-")}`;
                     const badge = document.getElementById(id);
-                    if (badge) badge.innerHTML = `<i class="fas fa-circle" style="color: #28a745;"></i>`;
+                    if (badge) {
+                        badge.innerHTML = `<i class="fas fa-circle" style="color: #28a745;"></i>`;
+                    }
                 });
             } catch (err) {
                 console.error("❌ Erro ao verificar online:", err);
@@ -1196,18 +1214,6 @@
         carregarHistoricoMensagens();
         verificarSorteio();
     }
-
-
-
-
-
-
-
-
-
-
-
-
 
     // Função utilitária
     function getCookie(name) {
