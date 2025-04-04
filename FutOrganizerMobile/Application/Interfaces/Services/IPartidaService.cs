@@ -14,5 +14,7 @@ namespace FutOrganizerMobile.Application.Interfaces.Services
         Task<PartidaLobbyDto?> ObterPorCodigoAsync(string codigo);
         Task<string?> CriarSalaAsync(CriarSalaRequest request);
         Task<bool> CriarSorteioAsync(SorteioRequest request);
+        Task<List<SalaViewModel>> ObterSalasAsync(Guid usuarioId, int pagina = 1, int tamanhoPagina = 10);
+
     }
 }

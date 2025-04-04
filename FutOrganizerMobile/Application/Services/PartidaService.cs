@@ -1,4 +1,5 @@
 ﻿using System.Net.Http.Json;
+using System.Text.Json;
 using FutOrganizerMobile.Domain.DTOs;
 using FutOrganizerMobile.Application.Interfaces.Services;
 
@@ -75,6 +76,26 @@ namespace FutOrganizerMobile.Application.Services
             }
         }
 
+        public async Task<List<SalaViewModel>> ObterSalasAsync(Guid usuarioId, int pagina = 1, int tamanhoPagina = 10)
+        {
+            var url = $"{_baseUrl}/api/Sorteio/salas?usuarioId={usuarioId}&pagina={pagina}&tamanhoPagina={tamanhoPagina}";
 
+            try
+            {
+                var response = await _http.GetAsync(url);
+                if (!response.IsSuccessStatusCode)
+                    return new List<SalaViewModel>();
+
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<List<SalaViewModel>>(content, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                }) ?? new List<SalaViewModel>();
+            }
+            catch
+            {
+                return new List<SalaViewModel>();
+            }
+        }
     }
 }

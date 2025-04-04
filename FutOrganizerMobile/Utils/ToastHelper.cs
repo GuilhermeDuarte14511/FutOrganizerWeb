@@ -83,4 +83,43 @@ public static class ToastHelper
             });
         });
     }
+
+    public static async Task ShowToastAsync(AbsoluteLayout toastContainer, string mensagem, Color backgroundColor)
+    {
+        var toastLabel = new Label
+        {
+            Text = mensagem,
+            TextColor = Colors.White,
+            Padding = new Thickness(12, 6),
+            FontAttributes = FontAttributes.Bold,
+            FontSize = 13,
+            HorizontalTextAlignment = TextAlignment.Center
+        };
+
+        var border = new Border
+        {
+            BackgroundColor = backgroundColor,
+            StrokeThickness = 0,
+            StrokeShape = new RoundRectangle { CornerRadius = 10 },
+            Content = toastLabel,
+            Opacity = 0,
+            WidthRequest = 300
+        };
+
+        AbsoluteLayout.SetLayoutFlags(border, AbsoluteLayoutFlags.PositionProportional);
+        AbsoluteLayout.SetLayoutBounds(border, new Rect(0.5, 0, AbsoluteLayout.AutoSize, AbsoluteLayout.AutoSize));
+
+        toastContainer.Children.Add(border);
+        toastContainer.IsVisible = true;
+
+        await border.FadeTo(1, 400, Easing.CubicOut);
+        await Task.Delay(3000);
+        await border.FadeTo(0, 300);
+
+        MainThread.BeginInvokeOnMainThread(() =>
+        {
+            toastContainer.Children.Remove(border);
+            toastContainer.IsVisible = false;
+        });
+    }
 }

@@ -13,7 +13,7 @@ public partial class SorteioPage : ContentPage
     private readonly IPartidaService _partidaService;
     private string? _codigo;
 
-    public SorteioPage(bool isRapido = false)
+    public SorteioPage(bool isRapido = false, string? codigoSalaExistente = null)
     {
         InitializeComponent();
         _modoRapido = isRapido;
@@ -25,6 +25,12 @@ public partial class SorteioPage : ContentPage
 
         PlayerNamesEditor.TextChanged += (s, e) => AtualizarContagem();
         HasFixedGoalkeeperCheck.CheckedChanged += (s, e) => ToggleInputGoleiro();
+
+        // Se foi passado um código existente, já setamos ele
+        if (!string.IsNullOrEmpty(codigoSalaExistente))
+        {
+            _codigo = codigoSalaExistente;
+        }
     }
 
     protected override async void OnAppearing()
@@ -34,6 +40,12 @@ public partial class SorteioPage : ContentPage
         if (_modoRapido)
         {
             LinkBorder.IsVisible = false;
+        }
+        else if (!string.IsNullOrEmpty(_codigo))
+        {
+            LinkCompartilhavel.Text = $"https://seudominio.com/Lobby/{_codigo}";
+            LinkBorder.IsVisible = true;
+            await CarregarJogadoresLobby();
         }
         else
         {
@@ -74,6 +86,8 @@ public partial class SorteioPage : ContentPage
                 }
 
                 LinkCompartilhavel.Text = $"https://seudominio.com/Lobby/{_codigo}";
+                LinkBorder.IsVisible = true;
+
                 await CarregarJogadoresLobby();
             }
             catch (Exception ex)
