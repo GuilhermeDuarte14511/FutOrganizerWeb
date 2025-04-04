@@ -4,78 +4,97 @@
              x:Class="FutOrganizerMobile.Pages.LoginPage"
              BackgroundColor="#121212"
              Title="LoginPage">
-    <Grid RowDefinitions="*,Auto,*">
+
+    <Grid x:Name="MainLayout" RowDefinitions="*,Auto,*">
         <ScrollView Grid.Row="1">
             <VerticalStackLayout Padding="24"
                                  HorizontalOptions="Center"
                                  Spacing="20"
                                  WidthRequest="400">
 
+                <!-- Ícone -->
                 <Label Text="&#xf1e3;"
-                    FontFamily="FontAwesome"
-                       FontSize="48"
+                       FontFamily="FontAwesome"
+                       FontSize="60"
                        TextColor="#007bff"
-                       HorizontalOptions="Center" />
+                       HorizontalOptions="Center"
+                       Margin="0,40,0,0"/>
 
-                    <Label Text="FutOrganizer"
+                <!-- Título -->
+                <Label Text="FutOrganizer"
                        FontSize="28"
                        FontAttributes="Bold"
                        TextColor="White"
                        HorizontalOptions="Center" />
 
-                    <Label Text="Bem-vindo de volta!"
+                <Label Text="Bem-vindo de volta!"
                        FontSize="14"
                        TextColor="LightGray"
                        HorizontalOptions="Center" />
 
-                    <VerticalStackLayout>
-                        <Label Text="E-mail" TextColor="White" />
-                        <Border BackgroundColor="#2c2c3c"
+                <!-- E-mail -->
+                <VerticalStackLayout>
+                    <Label Text="E-mail" TextColor="White" />
+                    <Border BackgroundColor="#2c2c3c"
                             StrokeThickness="0"
                             StrokeShape="RoundRectangle 6">
-                            <Grid ColumnDefinitions="30, *" Padding="5">
-                                <Label Text="&#xf0e0;" FontFamily="FontAwesome" TextColor="LightGray" FontSize="16" />
-                                <Entry x:Name="EmailEntry"
+                        <Grid ColumnDefinitions="30, *" Padding="5">
+                            <Label Text="&#xf0e0;" FontFamily="FontAwesome" TextColor="LightGray" FontSize="16" />
+                            <Entry x:Name="EmailEntry"
                                    Grid.Column="1"
                                    Placeholder="nome@exemplo.com"
                                    TextColor="White"
-                                   PlaceholderColor="Gray" />
-                            </Grid>
-                        </Border>
-                    </VerticalStackLayout>
+                                   PlaceholderColor="Gray"
+                                   Keyboard="Email" />
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
 
-                    <VerticalStackLayout>
-                        <Label Text="Senha" TextColor="White" />
-                        <Border BackgroundColor="#2c2c3c"
+                <!-- Senha -->
+                <VerticalStackLayout>
+                    <Label Text="Senha" TextColor="White" />
+                    <Border BackgroundColor="#2c2c3c"
                             StrokeThickness="0"
                             StrokeShape="RoundRectangle 6">
-                            <Grid ColumnDefinitions="30, *, 40" Padding="5">
-                                <Label Text="&#xf023;" FontFamily="FontAwesome" TextColor="LightGray" FontSize="16" />
-                                <Entry x:Name="SenhaEntry"
+                        <Grid ColumnDefinitions="30, *, 40" Padding="5">
+                            <Label Text="&#xf023;" FontFamily="FontAwesome" TextColor="LightGray" FontSize="16" />
+                            <Entry x:Name="SenhaEntry"
                                    Grid.Column="1"
                                    IsPassword="True"
                                    Placeholder="Senha"
                                    TextColor="White"
                                    PlaceholderColor="Gray" />
-                                <Button x:Name="ToggleSenhaBtn"
+                            <Button x:Name="ToggleSenhaBtn"
                                     Grid.Column="2"
                                     Text="&#xf070;"
+                                    FontFamily="FontAwesome"
                                     BackgroundColor="Transparent"
                                     TextColor="LightGray"
                                     Clicked="OnToggleSenhaClicked" />
-                            </Grid>
-                        </Border>
-                    </VerticalStackLayout>
+                        </Grid>
+                    </Border>
+                </VerticalStackLayout>
 
+                <!-- Botão Entrar com Spinner -->
+                <Grid>
                     <Button x:Name="BtnEntrar"
-                        Text="Entrar"
-                        FontAttributes="Bold"
-                        BackgroundColor="#007bff"
-                        TextColor="White"
-                        CornerRadius="10"
-                        Clicked="OnEntrarClicked" />
+                            Text="Entrar"
+                            FontAttributes="Bold"
+                            BackgroundColor="#007bff"
+                            TextColor="White"
+                            CornerRadius="10"
+                            Clicked="OnEntrarClicked"
+                            HeightRequest="48" />
+                    <ActivityIndicator x:Name="SpinnerEntrar"
+                                       IsVisible="False"
+                                       IsRunning="False"
+                                       Color="White"
+                                       VerticalOptions="Center"
+                                       HorizontalOptions="Center" />
+                </Grid>
 
-                    <Label Text="Esqueceu sua senha?"
+                <!-- Esqueceu senha -->
+                <Label Text="Esqueceu sua senha?"
                        FontSize="12"
                        TextColor="LightGray"
                        HorizontalOptions="Center" />

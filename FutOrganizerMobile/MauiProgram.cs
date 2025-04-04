@@ -2,6 +2,7 @@
 using FutOrganizerMobile.Application.Config;
 using FutOrganizerMobile.Application.Interfaces.Services;
 using FutOrganizerMobile.Application.Services;
+using FutOrganizerMobile.Utils;
 using Microsoft.Extensions.Logging;
 using Plugin.Maui.Audio;
 
@@ -15,7 +16,7 @@ namespace FutOrganizerMobile
 
             builder
                 .UseMauiApp<App>()
-                .UseMauiCommunityToolkitMediaElement() 
+                .UseMauiCommunityToolkitMediaElement()
                 .ConfigureFonts(fonts =>
                 {
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
@@ -33,15 +34,26 @@ namespace FutOrganizerMobile
                 BaseUrl = "https://localhost:7159/api"
             });
 
+            // Serviços
             builder.Services.AddHttpClient<ILoginService, LoginService>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:7159/api");
             });
 
-            // Registro do plugin de áudio
+            builder.Services.AddHttpClient<IPartidaService, PartidaService>(client =>
+            {
+                client.BaseAddress = new Uri("https://localhost:7159/api");
+            });
+
+            // Plugin de áudio
             builder.Services.AddSingleton<IAudioManager, AudioManager>();
 
-            return builder.Build();
+            // Monta o app
+            var app = builder.Build();
+
+            ServiceHelper.Init(app.Services);
+
+            return app;
         }
     }
 }

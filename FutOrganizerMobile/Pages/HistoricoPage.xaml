@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FutOrganizerMobile.Pages.HistoricoPage"
+             BackgroundColor="#121212"
+             Title="Histórico de Partidas">
+
+    <ScrollView>
+        <VerticalStackLayout x:Name="MainLayout" Padding="20" Spacing="16">
+            <!-- Título -->
+            <Label Text="⚽ Histórico de Partidas"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   TextColor="White"
+                   HorizontalOptions="Center" />
+
+            <!-- Lista -->
+            <CollectionView x:Name="HistoricoCollection"
+                            SelectionMode="None">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Border Stroke="#333"
+                                Background="#1E1E2E"
+                                StrokeShape="RoundRectangle 12"
+                                Padding="16"
+                                Margin="0,0,0,12">
+                            <Grid RowDefinitions="Auto,Auto,Auto,200,Auto"
+                                  ColumnDefinitions="*"
+                                  RowSpacing="6">
+
+                                <Label Text="{Binding Nome}"
+                                       FontSize="16"
+                                       TextColor="White"
+                                       FontAttributes="Bold"
+                                       Grid.Row="0" />
+
+                                <Label Text="{Binding Data, StringFormat='{0:dd/MM/yyyy HH:mm}'}"
+                                       FontSize="13"
+                                       TextColor="LightGray"
+                                       Grid.Row="1" />
+
+                                <Label Text="{Binding Local}"
+                                       FontSize="13"
+                                       TextColor="LightGray"
+                                       Grid.Row="2" />
+
+                                <!-- Mapa embed -->
+                                <WebView Source="{Binding MapaUrl}"
+                                         Grid.Row="3"
+                                         HorizontalOptions="Fill"
+                                         VerticalOptions="Fill" />
+
+                                <Button Text="Ver Detalhes"
+                                        FontSize="13"
+                                        BackgroundColor="#007bff"
+                                        TextColor="White"
+                                        Clicked="OnVerDetalhesClicked"
+                                        CommandParameter="{Binding PartidaId}"
+                                        Grid.Row="4" />
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Mostrar mais -->
+            <Button Text="Mostrar Mais"
+                    x:Name="BtnMostrarMais"
+                    BackgroundColor="Transparent"
+                    TextColor="White"
+                    BorderColor="White"
+                    BorderWidth="1"
+                    Clicked="OnMostrarMaisClicked"
+                    Margin="0,10,0,0" />
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

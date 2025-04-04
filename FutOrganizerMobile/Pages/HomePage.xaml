@@ -32,7 +32,7 @@
                      Opacity="0.25"
                      HorizontalOptions="Center" />
 
-            <!-- Card central -->
+            <!-- Card -->
             <Border BackgroundColor="#2c2c3a"
                     Stroke="#444"
                     StrokeThickness="1"
@@ -49,65 +49,109 @@
 
                 <VerticalStackLayout Spacing="15">
 
-                    <!-- Criar Sala (estilo menor) -->
-                    <Button Text="&#xf067; Criar Sala"
-                            FontSize="16"
-                            FontFamily="OpenSansRegular"
-                            TextColor="White"
-                            CornerRadius="12"
-                            HeightRequest="44"
-                            BackgroundColor="#3d7fff"
-                            Clicked="OnCriarSalaClicked" />
+                    <!-- Botões com ícone + texto -->
+                    <!-- Criar Sala -->
+                    <Border BackgroundColor="#3d7fff"
+                            HeightRequest="48">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Grid Padding="0">
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCriarSalaClicked" />
+                            </Grid.GestureRecognizers>
+                            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
+                                <Label Text="&#xf067;" FontFamily="FontAwesome" FontSize="18" TextColor="White" />
+                                <Label Text="Criar Sala" FontFamily="OpenSansRegular" FontSize="16" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
 
                     <!-- Minhas Salas -->
-                    <Button Text="&#xf03a; Minhas Salas"
-                            FontSize="16"
-                            FontFamily="OpenSansRegular"
-                            TextColor="White"
-                            CornerRadius="12"
-                            HeightRequest="48"
-                            BackgroundColor="#3d7fff"
-                            Clicked="OnMinhasSalasClicked" />
+                    <Border BackgroundColor="#3d7fff"
+                            HeightRequest="48">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Grid>
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnMinhasSalasClicked" />
+                            </Grid.GestureRecognizers>
+                            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
+                                <Label Text="&#xf03a;" FontFamily="FontAwesome" FontSize="18" TextColor="White" />
+                                <Label Text="Minhas Salas" FontFamily="OpenSansRegular" FontSize="16" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
 
                     <!-- Sorteio Rápido -->
-                    <Button Text="&#xf074; Sorteio Rápido"
-                            FontSize="16"
-                            FontFamily="OpenSansRegular"
-                            TextColor="White"
-                            CornerRadius="12"
-                            HeightRequest="48"
-                            BackgroundColor="#3d7fff"
-                            Clicked="OnSorteioRapidoClicked" />
+                    <Border BackgroundColor="#3d7fff"
+                            HeightRequest="48">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Grid>
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnSorteioRapidoClicked" />
+                            </Grid.GestureRecognizers>
+                            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
+                                <Label Text="&#xf074;" FontFamily="FontAwesome" FontSize="18" TextColor="White" />
+                                <Label Text="Sorteio Rápido" FontFamily="OpenSansRegular" FontSize="16" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
 
-                    <!-- Histórico -->
-                    <Button Text="&#xf1da; Histórico de Partidas"
-                            FontSize="16"
-                            FontFamily="OpenSansRegular"
-                            TextColor="White"
-                            CornerRadius="12"
-                            HeightRequest="48"
-                            BackgroundColor="#3d7fff"
-                            Clicked="OnHistoricoClicked" />
+                    <!-- Histórico de Partidas -->
+                    <Border BackgroundColor="#3d7fff"
+                            HeightRequest="48">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Grid>
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnHistoricoClicked" />
+                            </Grid.GestureRecognizers>
+                            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
+                                <Label Text="&#xf1da;" FontFamily="FontAwesome" FontSize="18" TextColor="White" />
+                                <Label Text="Histórico de Partidas" FontFamily="OpenSansRegular" FontSize="16" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
 
                     <!-- Cronômetro -->
-                    <Button Text="&#xf017; Cronômetro"
-                            FontSize="16"
-                            FontFamily="OpenSansRegular"
-                            TextColor="White"
-                            CornerRadius="12"
-                            HeightRequest="48"
-                            BackgroundColor="#3d7fff"
-                            Clicked="OnCronometroClicked" />
+                    <Border BackgroundColor="#3d7fff"
+                            HeightRequest="48">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Grid>
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnCronometroClicked" />
+                            </Grid.GestureRecognizers>
+                            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
+                                <Label Text="&#xf017;" FontFamily="FontAwesome" FontSize="18" TextColor="White" />
+                                <Label Text="Cronômetro" FontFamily="OpenSansRegular" FontSize="16" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
 
                     <!-- Logout -->
-                    <Button Text="&#xf2f5; Logout"
-                            FontSize="16"
-                            FontFamily="OpenSansRegular"
-                            TextColor="White"
-                            CornerRadius="12"
-                            HeightRequest="48"
-                            BackgroundColor="#dc3545"
-                            Clicked="OnLogoutClicked" />
+                    <Border BackgroundColor="#dc3545"
+                            HeightRequest="48">
+                        <Border.StrokeShape>
+                            <RoundRectangle CornerRadius="12" />
+                        </Border.StrokeShape>
+                        <Grid>
+                            <Grid.GestureRecognizers>
+                                <TapGestureRecognizer Tapped="OnLogoutClicked" />
+                            </Grid.GestureRecognizers>
+                            <HorizontalStackLayout HorizontalOptions="Center" VerticalOptions="Center" Spacing="8">
+                                <Label Text="&#xf2f5;" FontFamily="FontAwesome" FontSize="18" TextColor="White" />
+                                <Label Text="Logout" FontFamily="OpenSansRegular" FontSize="16" TextColor="White" />
+                            </HorizontalStackLayout>
+                        </Grid>
+                    </Border>
+
                 </VerticalStackLayout>
             </Border>
         </VerticalStackLayout>

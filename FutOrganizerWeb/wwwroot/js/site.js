@@ -65,13 +65,14 @@
             btnText.textContent = "Entrando...";
             btnSpinner.classList.remove('d-none');
 
-            // ✅ CHAMADA CORRETA PARA A NOVA API
-            fetch('/api/login/logar', {
+            // CHAMADA PARA O MÉTODO MVC
+            const formData = new FormData();
+            formData.append('email', email);
+            formData.append('senha', senha);
+
+            fetch('/Login/Logar', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `email=${encodeURIComponent(email)}&senha=${encodeURIComponent(senha)}`
+                body: formData
             })
                 .then(res => res.json())
                 .then(data => {

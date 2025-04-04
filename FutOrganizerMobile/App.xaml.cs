@@ -3,7 +3,7 @@ using FutOrganizerMobile.Pages;
 
 namespace FutOrganizerMobile;
 
-public partial class App : IApplication
+public partial class App : IApplication // <-- alterado de IApplication para Application
 {
     public App(ILoginService loginService)
     {
@@ -11,8 +11,8 @@ public partial class App : IApplication
 
         MainPage = new NavigationPage(new LoginPage(loginService))
         {
-            BarBackgroundColor = Color.FromArgb("#121212"), // Fundo escuro
-            BarTextColor = Colors.White                    // Texto branco
+            BarBackgroundColor = Color.FromArgb("#121212"),
+            BarTextColor = Colors.White
         };
     }
 }

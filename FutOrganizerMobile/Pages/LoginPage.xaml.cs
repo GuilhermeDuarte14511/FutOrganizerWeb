@@ -1,4 +1,7 @@
 using FutOrganizerMobile.Application.Interfaces.Services;
+using FutOrganizerMobile.Utils;
+using System.Text.RegularExpressions;
+using Microsoft.Maui.Storage;
 
 namespace FutOrganizerMobile.Pages;
 
@@ -7,7 +10,6 @@ public partial class LoginPage : ContentPage
     private readonly ILoginService _loginService;
     private bool _senhaVisivel = false;
 
-    // Construtor com injeção de dependência
     public LoginPage(ILoginService loginService)
     {
         InitializeComponent();
@@ -18,16 +20,29 @@ public partial class LoginPage : ContentPage
     {
         _senhaVisivel = !_senhaVisivel;
         SenhaEntry.IsPassword = !_senhaVisivel;
+        ToggleSenhaBtn.Text = _senhaVisivel ? "\uf06e" : "\uf070"; // FontAwesome: eye/eye-slash
+        ToggleSenhaBtn.TextColor = _senhaVisivel ? Colors.White : Colors.LightGray;
     }
 
     private async void OnEntrarClicked(object sender, EventArgs e)
     {
-        string email = EmailEntry.Text;
+        BtnEntrar.IsEnabled = false;
+        BtnEntrar.Text = "Entrando...";
+
+        string email = EmailEntry.Text?.Trim();
         string senha = SenhaEntry.Text;
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
         {
-            await DisplayAlert("Erro", "Preencha todos os campos!", "OK");
+            ToastHelper.ShowToast(MainLayout, "Preencha todos os campos!", Colors.Red);
+            ResetarBotao();
+            return;
+        }
+
+        if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+        {
+            ToastHelper.ShowToast(MainLayout, "E-mail inválido!", Colors.OrangeRed);
+            ResetarBotao();
             return;
         }
 
@@ -35,15 +50,25 @@ public partial class LoginPage : ContentPage
 
         if (usuario != null)
         {
-            await DisplayAlert("Login", $"Bem-vindo {usuario.Nome} ({usuario.Id})", "OK");
+            Preferences.Set("UsuarioId", usuario.Id.ToString());
+            Preferences.Set("UsuarioNome", usuario.Nome);
 
-            await Navigation.PushAsync(new HomePage());
+            ToastHelper.ShowToast(MainLayout, $"Bem-vindo {usuario.Nome}", Colors.Green);
 
+            var partidaService = ServiceHelper.GetService<IPartidaService>();
+            await Navigation.PushAsync(new HomePage(partidaService));
         }
         else
         {
-            await DisplayAlert("Erro", "Email ou senha inválidos", "OK");
+            ToastHelper.ShowToast(MainLayout, "Email ou senha inválidos", Colors.Red);
         }
+
+        ResetarBotao();
     }
 
+    private void ResetarBotao()
+    {
+        BtnEntrar.IsEnabled = true;
+        BtnEntrar.Text = "Entrar";
+    }
 }

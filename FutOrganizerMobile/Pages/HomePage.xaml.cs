@@ -1,49 +1,57 @@
+using FutOrganizerMobile.Application.Interfaces.Services;
 using FutOrganizerMobile.Pages;
+using FutOrganizerMobile.Utils;
+using Microsoft.Maui.Controls;
+using System.Globalization;
 
-namespace FutOrganizerMobile.Pages
+namespace FutOrganizerMobile.Pages;
+
+public partial class HomePage : ContentPage
 {
-    public partial class HomePage : ContentPage
+    private readonly IPartidaService _partidaService;
+
+    public HomePage(IPartidaService partidaService)
     {
-        public HomePage()
-        {
-            InitializeComponent();
-        }
+        InitializeComponent();
+        _partidaService = partidaService;
+    }
 
-        private async void OnCriarSalaClicked(object sender, EventArgs e)
-        {
-            await DisplayAlert("Criar Sala", "Funcionalidade em construção.", "OK");
-            // Ex: await Navigation.PushAsync(new CriarSalaPage());
-        }
+    public HomePage() : this(ServiceHelper.GetService<IPartidaService>()) { }
 
-        private async void OnMinhasSalasClicked(object sender, EventArgs e)
-        {
-            await DisplayAlert("Minhas Salas", "Funcionalidade em construção.", "OK");
-        }
+    private async void OnCriarSalaClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new SorteioPage(isRapido: false));
+    }
 
-        private async void OnSorteioRapidoClicked(object sender, EventArgs e)
-        {
-            await DisplayAlert("Sorteio Rápido", "Funcionalidade em construção.", "OK");
-        }
+    private async void OnMinhasSalasClicked(object sender, EventArgs e)
+    {
+        await DisplayAlert("Minhas Salas", "Funcionalidade em construção.", "OK");
+    }
 
-        private async void OnHistoricoClicked(object sender, EventArgs e)
-        {
-            await DisplayAlert("Histórico", "Funcionalidade em construção.", "OK");
-        }
+    private async void OnSorteioRapidoClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new SorteioPage(isRapido: true));
+    }
 
-        private async void OnCronometroClicked(object sender, EventArgs e)
-        {
-            // Redireciona para a página de cronômetro
-            await Navigation.PushAsync(new CronometroPage());
-        }
+    private async void OnHistoricoClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new HistoricoPage(_partidaService));
+    }
 
-        private async void OnLogoutClicked(object sender, EventArgs e)
+    private async void OnCronometroClicked(object sender, EventArgs e)
+    {
+        await Navigation.PushAsync(new CronometroPage());
+    }
+
+    private async void OnLogoutClicked(object sender, EventArgs e)
+    {
+        bool confirm = await DisplayAlert("Sair", "Deseja realmente sair?", "Sim", "Cancelar");
+        if (confirm)
         {
-            bool confirm = await DisplayAlert("Sair", "Deseja realmente sair?", "Sim", "Cancelar");
-            if (confirm)
-            {
-                // Volta para tela de login
-                await Navigation.PopToRootAsync();
-            }
+            Preferences.Remove("UsuarioId");
+            Preferences.Remove("UsuarioNome");
+
+            await Navigation.PopToRootAsync();
         }
     }
 }
