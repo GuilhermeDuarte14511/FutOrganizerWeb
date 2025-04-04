@@ -2,6 +2,7 @@
 using System.Text.Json;
 using FutOrganizerMobile.Domain.DTOs;
 using FutOrganizerMobile.Application.Interfaces.Services;
+using FutOrganizerMobile.Utils;
 
 namespace FutOrganizerMobile.Application.Services
 {
@@ -87,10 +88,22 @@ namespace FutOrganizerMobile.Application.Services
                     return new List<SalaViewModel>();
 
                 var content = await response.Content.ReadAsStringAsync();
-                return JsonSerializer.Deserialize<List<SalaViewModel>>(content, new JsonSerializerOptions
+
+                var salas = JsonSerializer.Deserialize<List<SalaViewModel>>(content, new JsonSerializerOptions
                 {
                     PropertyNameCaseInsensitive = true
                 }) ?? new List<SalaViewModel>();
+
+                foreach (var sala in salas)
+                {
+                    if (sala.Local == "Não informado")
+                    {
+                        sala.Local = await AppHelper.ObterEnderecoPorCoordenadasAsync(sala.Latitude, sala.Longitude);
+                    }
+
+                }
+
+                return salas;
             }
             catch
             {

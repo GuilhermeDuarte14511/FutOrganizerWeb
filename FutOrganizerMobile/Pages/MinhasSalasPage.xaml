@@ -17,19 +17,18 @@
 
     <AbsoluteLayout>
 
-        <!-- Toast container centralizado no topo -->
+        <!-- Toast container -->
         <AbsoluteLayout x:Name="toastContainer"
                         IsVisible="False"
                         AbsoluteLayout.LayoutBounds="0.5,0,AutoSize,AutoSize"
                         AbsoluteLayout.LayoutFlags="PositionProportional"
                         ZIndex="99" />
 
-        <!-- Conteúdo principal -->
+        <!-- Conteúdo -->
         <ScrollView AbsoluteLayout.LayoutBounds="0,0,1,1"
                     AbsoluteLayout.LayoutFlags="All">
             <VerticalStackLayout Padding="20" Spacing="15">
 
-                <!-- Título -->
                 <Label Text="📋 Minhas Salas"
                        FontSize="26"
                        FontAttributes="Bold"
@@ -56,7 +55,7 @@
                            TextChanged="OnBuscaChanged" />
                 </HorizontalStackLayout>
 
-                <!-- Lista de salas -->
+                <!-- Lista -->
                 <CollectionView x:Name="SalasCollectionView"
                                 ItemsSource="{Binding Salas}"
                                 SelectionMode="None">
@@ -69,7 +68,7 @@
                                     Margin="5">
                                 <VerticalStackLayout Spacing="10">
 
-                                    <!-- Header com data e status -->
+                                    <!-- Header -->
                                     <Grid ColumnDefinitions="*,Auto">
                                         <Label Text="{Binding DataHora, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}"
                                                TextColor="White"
@@ -94,17 +93,22 @@
                                     <!-- Local -->
                                     <Label Text="{Binding Local}" TextColor="White" FontSize="14" />
 
-                                    <!-- Código na mesma linha -->
+                                    <!-- Código -->
                                     <HorizontalStackLayout Spacing="5">
                                         <Label Text="Código:" TextColor="White" FontSize="14" />
                                         <Label Text="{Binding Codigo}" TextColor="DodgerBlue" FontAttributes="Bold" />
                                     </HorizontalStackLayout>
 
                                     <!-- Mapa -->
-                                    <WebView HeightRequest="200"
-                                             Source="{Binding MapaUrl}" />
+                                    <Grid>
+                                        <WebView Source="{Binding MapaUrl}"
+                                         HeightRequest="200"
+                                         HorizontalOptions="Fill"
+                                         VerticalOptions="Start" />
+                                    </Grid>
 
-                                    <!-- Link + botão copiar -->
+
+                                    <!-- Link e copiar -->
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
                                         <Entry Text="{Binding Link}"
                                                IsReadOnly="True"
@@ -131,7 +135,7 @@
                     </CollectionView.ItemTemplate>
                 </CollectionView>
 
-                <!-- Carregar Mais -->
+                <!-- Botão carregar -->
                 <Button x:Name="btnCarregarMais"
                         Text="Carregar Mais"
                         BackgroundColor="#3d7fff"
