@@ -9,6 +9,10 @@ public partial class App : IApplication
     {
         InitializeComponent();
 
-        MainPage = new LoginPage(loginService);
+        MainPage = new NavigationPage(new LoginPage(loginService))
+        {
+            BarBackgroundColor = Color.FromArgb("#121212"), // Fundo escuro
+            BarTextColor = Colors.White                    // Texto branco
+        };
     }
 }

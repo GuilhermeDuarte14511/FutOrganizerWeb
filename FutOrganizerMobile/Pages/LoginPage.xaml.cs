@@ -31,18 +31,19 @@ public partial class LoginPage : ContentPage
             return;
         }
 
-        var resultado = await _loginService.LogarAsync(email, senha);
+        var usuario = await _loginService.LogarAsync(email, senha);
 
-        if (resultado.sucesso)
+        if (usuario != null)
         {
-            // Se o login for bem-sucedido
-            await DisplayAlert("Login", $"Bem-vindo {resultado.usuarioId}", "OK");
-            // Redirecionar para outra página ou realizar outra ação
+            await DisplayAlert("Login", $"Bem-vindo {usuario.Nome} ({usuario.Id})", "OK");
+
+            await Navigation.PushAsync(new HomePage());
+
         }
         else
         {
-            // Caso contrário, exibe a mensagem de erro
-            await DisplayAlert("Erro", resultado.mensagem, "OK");
+            await DisplayAlert("Erro", "Email ou senha inválidos", "OK");
         }
     }
+
 }

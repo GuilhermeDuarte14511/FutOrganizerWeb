@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FutOrganizerMobile.Pages.HomePage"
+             Title="HomePage"
+             BackgroundColor="#121212">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24"
+                             Spacing="20"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Start"
+                             Margin="0,100,0,40">
+
+            <!-- Ícone e título -->
+            <Label Text="&#xf1e3;" 
+                   FontFamily="FontAwesome" 
+                   FontSize="48" 
+                   TextColor="#3d7fff" 
+                   HorizontalOptions="Center" />
+
+            <Label Text="Bem-vindo ao FutOrganizer"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   FontFamily="OpenSansRegular"
+                   TextColor="White"
+                   HorizontalOptions="Center" />
+
+            <BoxView HeightRequest="1"
+                     WidthRequest="200"
+                     Color="Gray"
+                     Opacity="0.25"
+                     HorizontalOptions="Center" />
+
+            <!-- Card central -->
+            <Border BackgroundColor="#2c2c3a"
+                    Stroke="#444"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 16"
+                    Padding="24"
+                    WidthRequest="360"
+                    HorizontalOptions="Center">
+                <Border.Shadow>
+                    <Shadow Brush="Black"
+                            Offset="0,8"
+                            Opacity="0.4"
+                            Radius="10" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="15">
+
+                    <!-- Criar Sala (estilo menor) -->
+                    <Button Text="&#xf067; Criar Sala"
+                            FontSize="16"
+                            FontFamily="OpenSansRegular"
+                            TextColor="White"
+                            CornerRadius="12"
+                            HeightRequest="44"
+                            BackgroundColor="#3d7fff"
+                            Clicked="OnCriarSalaClicked" />
+
+                    <!-- Minhas Salas -->
+                    <Button Text="&#xf03a; Minhas Salas"
+                            FontSize="16"
+                            FontFamily="OpenSansRegular"
+                            TextColor="White"
+                            CornerRadius="12"
+                            HeightRequest="48"
+                            BackgroundColor="#3d7fff"
+                            Clicked="OnMinhasSalasClicked" />
+
+                    <!-- Sorteio Rápido -->
+                    <Button Text="&#xf074; Sorteio Rápido"
+                            FontSize="16"
+                            FontFamily="OpenSansRegular"
+                            TextColor="White"
+                            CornerRadius="12"
+                            HeightRequest="48"
+                            BackgroundColor="#3d7fff"
+                            Clicked="OnSorteioRapidoClicked" />
+
+                    <!-- Histórico -->
+                    <Button Text="&#xf1da; Histórico de Partidas"
+                            FontSize="16"
+                            FontFamily="OpenSansRegular"
+                            TextColor="White"
+                            CornerRadius="12"
+                            HeightRequest="48"
+                            BackgroundColor="#3d7fff"
+                            Clicked="OnHistoricoClicked" />
+
+                    <!-- Cronômetro -->
+                    <Button Text="&#xf017; Cronômetro"
+                            FontSize="16"
+                            FontFamily="OpenSansRegular"
+                            TextColor="White"
+                            CornerRadius="12"
+                            HeightRequest="48"
+                            BackgroundColor="#3d7fff"
+                            Clicked="OnCronometroClicked" />
+
+                    <!-- Logout -->
+                    <Button Text="&#xf2f5; Logout"
+                            FontSize="16"
+                            FontFamily="OpenSansRegular"
+                            TextColor="White"
+                            CornerRadius="12"
+                            HeightRequest="48"
+                            BackgroundColor="#dc3545"
+                            Clicked="OnLogoutClicked" />
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

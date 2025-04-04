@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FutOrganizerMobile.Pages.CronometroPage"
+             Title="Cronômetro"
+             BackgroundColor="#121212">
+
+    <ScrollView>
+        <VerticalStackLayout Padding="24"
+                             Spacing="20"
+                             Margin="0,100,0,40"
+                             HorizontalOptions="Center"
+                             VerticalOptions="Start"
+                             HeightRequest="900">
+
+            <!-- Ícone e título -->
+            <Label Text="&#xf2f2;" 
+                   FontFamily="FontAwesome"
+                   FontSize="48"
+                   TextColor="#3d7fff"
+                   HorizontalOptions="Center" />
+
+            <Label Text="Cronômetro"
+                   FontSize="22"
+                   FontAttributes="Bold"
+                   FontFamily="OpenSansRegular"
+                   TextColor="White"
+                   HorizontalOptions="Center" />
+
+            <BoxView HeightRequest="1"
+                     WidthRequest="200"
+                     Color="Gray"
+                     Opacity="0.25"
+                     HorizontalOptions="Center" />
+
+            <!-- Card -->
+            <Border BackgroundColor="#2c2c3a"
+                    Stroke="#444"
+                    StrokeThickness="1"
+                    StrokeShape="RoundRectangle 16"
+                    Padding="24"
+                    WidthRequest="360"
+                    HorizontalOptions="Center">
+                <Border.Shadow>
+                    <Shadow Brush="Black"
+                            Offset="0,8"
+                            Opacity="0.4"
+                            Radius="10" />
+                </Border.Shadow>
+
+                <VerticalStackLayout Spacing="20">
+
+                    <!-- Inputs -->
+                    <HorizontalStackLayout Spacing="10" HorizontalOptions="Center">
+                        <Entry x:Name="MinutosEntry"
+                               Placeholder="Minutos"
+                               WidthRequest="120"
+                               Keyboard="Numeric"
+                               FontSize="16"
+                               FontFamily="OpenSansRegular"
+                               TextColor="White"
+                               PlaceholderColor="#ccc"
+                               BackgroundColor="#1e1e2f" />
+                        <Entry x:Name="SegundosEntry"
+                               Placeholder="Segundos"
+                               WidthRequest="120"
+                               Keyboard="Numeric"
+                               FontSize="16"
+                               FontFamily="OpenSansRegular"
+                               TextColor="White"
+                               PlaceholderColor="#ccc"
+                               BackgroundColor="#1e1e2f" />
+                    </HorizontalStackLayout>
+
+                    <!-- Display Digital -->
+                    <Border x:Name="TempoDisplayBorder"
+                            BackgroundColor="#1e1e2f"
+                            Stroke="#3d7fff"
+                            StrokeThickness="2"
+                            StrokeShape="RoundRectangle 12"
+                            Padding="20"
+                            WidthRequest="240"
+                            HorizontalOptions="Center">
+                        <Label x:Name="TempoLabel"
+                               Text="00:00"
+                               FontSize="40"
+                               FontFamily="Courier New"
+                               TextColor="White"
+                               HorizontalTextAlignment="Center" />
+                    </Border>
+
+                    <!-- Botões -->
+                    <HorizontalStackLayout HorizontalOptions="Center" Spacing="10">
+                        <Button Text="Iniciar"
+                                BackgroundColor="Green"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                Clicked="OnIniciarClicked" />
+                        <Button Text="Parar"
+                                BackgroundColor="Red"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                Clicked="OnPararClicked" />
+                        <Button Text="Resetar"
+                                BackgroundColor="Gray"
+                                TextColor="White"
+                                FontAttributes="Bold"
+                                Clicked="OnResetarClicked" />
+                    </HorizontalStackLayout>
+
+                </VerticalStackLayout>
+            </Border>
+        </VerticalStackLayout>
+    </ScrollView>
+</ContentPage>

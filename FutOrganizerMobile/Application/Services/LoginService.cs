@@ -1,46 +1,42 @@
 ﻿using FutOrganizerMobile.Application.Interfaces.Services;
 using FutOrganizerMobile.Domain.DTOs;
 using System.Net.Http.Json;
+using System.Text;
+using System.Text.Json;
 
 namespace FutOrganizerMobile.Application.Services
 {
     public class LoginService : ILoginService
     {
         private readonly HttpClient _httpClient;
-
-        // Definindo o valor manualmente para a BaseUrl
-        private readonly string _baseUrl = "http://192.168.15.6:7159"; // Valor manualmente atribuído
+        private readonly string _baseUrl = "https://futorganizerapi-bxc4d0egepcuh3gx.brazilsouth-01.azurewebsites.net";
 
         public LoginService(HttpClient httpClient)
         {
             _httpClient = httpClient;
         }
 
-        public async Task<(bool sucesso, string mensagem, Guid? usuarioId)> LogarAsync(string email, string senha)
+        public async Task<UsuarioLogadoDto?> LogarAsync(string email, string senha)
         {
-            var content = new FormUrlEncodedContent(new[]
-            {
-                new KeyValuePair<string, string>("email", email),
-                new KeyValuePair<string, string>("senha", senha)
-            });
+            var payload = new { email, senha };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
 
             try
             {
-                // Usando o valor fixo da BaseUrl
                 var response = await _httpClient.PostAsync($"{_baseUrl}/api/login/logar", content);
                 if (!response.IsSuccessStatusCode)
-                    return (false, "Erro de autenticação", null);
+                    return null;
 
                 var result = await response.Content.ReadFromJsonAsync<LoginResponse>();
 
-                if (result != null && result.sucesso)
-                    return (true, result.mensagem ?? "", result.idUsuario);
+                if (result != null && result.Sucesso)
+                    return result.Data;
 
-                return (false, result?.mensagem ?? "Falha no login", null);
+                return null;
             }
-            catch (Exception ex)
+            catch
             {
-                return (false, $"Erro: {ex.Message}", null);
+                return null;
             }
         }
     }

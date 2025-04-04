@@ -47,6 +47,6 @@ app.MapHub<LobbyChatHub>("/hubs/lobbychat");
 
 app.MapControllerRoute(
     name: "default",
-    pattern: "{controller=Login}/{action=Logar}/{id?}");
+    pattern: "{controller=Login}/{action=Index}/{id?}");
 
 app.Run();
