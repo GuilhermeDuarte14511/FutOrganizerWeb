@@ -182,7 +182,12 @@ public partial class SorteioPage : ContentPage
                 LoadingTextLabel.Text = $"Gerando Time {i + 1}...";
                 await Task.Delay(300);
 
-                var jogadoresTime = jogadores.Skip(i * porTime).Take(porTime).ToList();
+                var jogadoresTime = jogadores
+                    .Skip(i * porTime)
+                    .Take(porTime)
+                    .Select((nome, index) => $"{index + 1} - {nome}")
+                    .ToList();
+
                 var cor = GerarCorHexAleatoria();
 
                 _times.Add(new TimeModel
@@ -209,12 +214,27 @@ public partial class SorteioPage : ContentPage
                 return;
             }
 
+            // ?? Obtem localização e endereço
+            var location = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Medium));
+            if (location == null)
+            {
+                ToastHelper.ShowToast(ToastContainer, "Não foi possível obter a localização.", Colors.Red);
+                return;
+            }
+
+            var latitude = location.Latitude;
+            var longitude = location.Longitude;
+            string endereco = await AppHelper.ObterEnderecoPorCoordenadasAsync(latitude, longitude);
+
             LoadingTextLabel.Text = "Salvando sorteio...";
             await Task.Delay(500);
 
             var request = new SorteioRequest
             {
                 NomeSorteio = $"Sorteio - {DateTime.Now:HH:mm:ss}",
+                Latitude = latitude,
+                Longitude = longitude,
+                Local = endereco,
                 CodigoLobby = _codigo ?? "",
                 UsuarioCriadorId = usuarioGuid,
                 Times = timesRequest

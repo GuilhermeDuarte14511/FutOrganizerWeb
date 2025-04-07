@@ -1,7 +1,9 @@
 using FutOrganizerMobile.Application.Interfaces.Services;
 using FutOrganizerMobile.Domain.DTOs;
+using FutOrganizerMobile.Utils;
 using Microsoft.Maui.Controls;
 using System.Collections.ObjectModel;
+using System.Globalization;
 
 namespace FutOrganizerMobile.Pages;
 
@@ -9,7 +11,7 @@ public partial class MinhasSalasPage : ContentPage
 {
     private readonly IPartidaService _partidaService;
     private ObservableCollection<SalaViewModel> _salas;
-    private List<SalaViewModel> _todasSalas; // lista completa para aplicar filtros
+    private List<SalaViewModel> _todasSalas;
     private int _paginaAtual = 1;
     private const int TamanhoPagina = 10;
 
@@ -48,27 +50,47 @@ public partial class MinhasSalasPage : ContentPage
         var usuarioId = Preferences.Get("UsuarioId", "");
         if (Guid.TryParse(usuarioId, out Guid usuarioGuid))
         {
+            // Ativa loading
+            LoadingOverlay.IsVisible = true;
             btnCarregarMais.Text = "Carregando...";
             btnCarregarMais.IsEnabled = false;
 
-            var novasSalas = await _partidaService.ObterSalasAsync(usuarioGuid, _paginaAtual, TamanhoPagina);
-
-            if (novasSalas.Any())
+            try
             {
-                foreach (var sala in novasSalas)
-                    _todasSalas.Add(sala);
+                var novasSalas = await _partidaService.ObterSalasAsync(usuarioGuid, _paginaAtual, TamanhoPagina);
 
-                _paginaAtual++;
-                btnCarregarMais.IsVisible = novasSalas.Count == TamanhoPagina;
+                if (novasSalas.Any())
+                {
+                    foreach (var sala in novasSalas)
+                    {
+                        if (string.IsNullOrWhiteSpace(sala.Local))
+                        {
+                            sala.Local = await AppHelper.ObterEnderecoPorCoordenadasAsync(sala.Latitude, sala.Longitude);
+                        }
+
+                        _todasSalas.Add(sala);
+                    }
+
+                    _paginaAtual++;
+                    btnCarregarMais.IsVisible = novasSalas.Count == TamanhoPagina;
+                }
+                else
+                {
+                    btnCarregarMais.IsVisible = false;
+                }
+
+                AplicarFiltro();
             }
-            else
+            catch (Exception ex)
             {
-                btnCarregarMais.IsVisible = false;
+                ToastHelper.ShowToast(toastContainer, $"Erro: {ex.Message}", Colors.Red);
             }
-
-            AplicarFiltro(); // renderiza na tela com base no status atual
-            btnCarregarMais.Text = "Carregar Mais";
-            btnCarregarMais.IsEnabled = true;
+            finally
+            {
+                btnCarregarMais.Text = "Carregar Mais";
+                btnCarregarMais.IsEnabled = true;
+                LoadingOverlay.IsVisible = false; // Desativa loading
+            }
         }
     }
 
@@ -123,7 +145,6 @@ public partial class MinhasSalasPage : ContentPage
         }
     }
 
-
     private async void OnDetalhesClicked(object sender, EventArgs e)
     {
         if (sender is Button botao &&
@@ -132,7 +153,6 @@ public partial class MinhasSalasPage : ContentPage
         {
             if (sala.Finalizada)
             {
-                // Sala já possui sorteio — futura tela de detalhes
                 await ToastHelper.ShowToastAsync(toastContainer, "Funcionalidade de visualizar sorteio em breve!", Colors.Orange);
             }
             else
@@ -145,5 +165,4 @@ public partial class MinhasSalasPage : ContentPage
             await ToastHelper.ShowToastAsync(toastContainer, "Erro ao acessar sala.", Colors.Red);
         }
     }
-
 }

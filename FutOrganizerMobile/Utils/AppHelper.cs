@@ -98,39 +98,39 @@ namespace FutOrganizerMobile.Utils
             return "https://www.openstreetmap.org/";
         }
 
-        public static async Task<string> ObterEnderecoPorCoordenadasAsync(double latitude, double longitude)
-        {
-            try
+            public static async Task<string> ObterEnderecoPorCoordenadasAsync(double latitude, double longitude)
             {
-                var latStr = latitude.ToString(CultureInfo.InvariantCulture);
-                var lonStr = longitude.ToString(CultureInfo.InvariantCulture);
+                try
+                {
+                    var latStr = latitude.ToString(CultureInfo.InvariantCulture);
+                    var lonStr = longitude.ToString(CultureInfo.InvariantCulture);
 
-                using var httpClient = new HttpClient();
-                string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={latStr}&lon={lonStr}&zoom=18&addressdetails=1";
+                    using var httpClient = new HttpClient();
+                    string url = $"https://nominatim.openstreetmap.org/reverse?format=json&lat={latStr}&lon={lonStr}&zoom=18&addressdetails=1";
 
-                httpClient.DefaultRequestHeaders.Add("User-Agent", "FutOrganizerMobile/1.0");
+                    httpClient.DefaultRequestHeaders.Add("User-Agent", "FutOrganizerMobile/1.0");
 
-                var response = await httpClient.GetAsync(url);
-                if (!response.IsSuccessStatusCode)
-                    return "Endereço não encontrado";
+                    var response = await httpClient.GetAsync(url);
+                    if (!response.IsSuccessStatusCode)
+                        return "Endereço não encontrado";
 
-                var content = await response.Content.ReadAsStringAsync();
-                var json = JsonDocument.Parse(content);
+                    var content = await response.Content.ReadAsStringAsync();
+                    var json = JsonDocument.Parse(content);
 
-                if (!json.RootElement.TryGetProperty("address", out var address))
-                    return "Endereço não disponível";
+                    if (!json.RootElement.TryGetProperty("address", out var address))
+                        return "Endereço não disponível";
 
-                string rua = address.TryGetProperty("road", out var roadProp) ? roadProp.GetString() ?? "" : "";
-                string cidade = address.TryGetProperty("city", out var cityProp) ? cityProp.GetString() ?? "" : "";
-                string estado = address.TryGetProperty("state", out var stateProp) ? stateProp.GetString() ?? "" : "";
+                    string rua = address.TryGetProperty("road", out var roadProp) ? roadProp.GetString() ?? "" : "";
+                    string cidade = address.TryGetProperty("city", out var cityProp) ? cityProp.GetString() ?? "" : "";
+                    string estado = address.TryGetProperty("state", out var stateProp) ? stateProp.GetString() ?? "" : "";
 
-                string enderecoFinal = $"{rua}, {cidade} - {estado}".Trim(' ', ',');
-                return string.IsNullOrWhiteSpace(enderecoFinal) ? "Endereço não disponível" : enderecoFinal;
+                    string enderecoFinal = $"{rua}, {cidade} - {estado}".Trim(' ', ',');
+                    return string.IsNullOrWhiteSpace(enderecoFinal) ? "Endereço não disponível" : enderecoFinal;
+                }
+                catch (Exception ex)
+                {
+                    return $"Erro ao buscar endereço: {ex.Message}";
+                }
             }
-            catch (Exception ex)
-            {
-                return $"Erro ao buscar endereço: {ex.Message}";
-            }
-        }
     }
 }

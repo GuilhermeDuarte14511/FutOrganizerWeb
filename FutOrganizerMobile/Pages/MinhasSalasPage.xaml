@@ -24,6 +24,25 @@
                         AbsoluteLayout.LayoutFlags="PositionProportional"
                         ZIndex="99" />
 
+        <!-- Loading Spinner + Texto -->
+        <VerticalStackLayout x:Name="LoadingOverlay"
+                             IsVisible="False"
+                             AbsoluteLayout.LayoutBounds="0.5,0.4,AutoSize,AutoSize"
+                             AbsoluteLayout.LayoutFlags="PositionProportional"
+                             HorizontalOptions="Center"
+                             ZIndex="10"
+                             Spacing="10"
+                             Padding="10">
+            <ActivityIndicator IsRunning="True"
+                               Color="White"
+                               WidthRequest="40"
+                               HeightRequest="40" />
+            <Label Text="Carregando..."
+                   TextColor="White"
+                   FontSize="14"
+                   HorizontalOptions="Center" />
+        </VerticalStackLayout>
+
         <!-- Conteúdo -->
         <ScrollView AbsoluteLayout.LayoutBounds="0,0,1,1"
                     AbsoluteLayout.LayoutFlags="All">
@@ -102,11 +121,10 @@
                                     <!-- Mapa -->
                                     <Grid>
                                         <WebView Source="{Binding MapaUrl}"
-                                         HeightRequest="200"
-                                         HorizontalOptions="Fill"
-                                         VerticalOptions="Start" />
+                                                 HeightRequest="200"
+                                                 HorizontalOptions="Fill"
+                                                 VerticalOptions="Start" />
                                     </Grid>
-
 
                                     <!-- Link e copiar -->
                                     <Grid ColumnDefinitions="*,Auto" ColumnSpacing="5">
