@@ -100,7 +100,6 @@ namespace FutOrganizerMobile.Application.Services
                     {
                         sala.Local = await AppHelper.ObterEnderecoPorCoordenadasAsync(sala.Latitude, sala.Longitude);
                     }
-
                 }
 
                 return salas;
@@ -110,5 +109,120 @@ namespace FutOrganizerMobile.Application.Services
                 return new List<SalaViewModel>();
             }
         }
+
+        public async Task<JogadorDTO?> EntrarNaSalaComoLogadoAsync(string codigo, JogadorDTO jogador)
+        {
+            try
+            {
+                var url = $"{_baseUrl}/api/lobby/entrar";
+                var request = new
+                {
+                    Codigo = codigo,
+                    Nome = jogador.Nome,
+                    Email = jogador.Email,
+                    UsuarioId = jogador.UsuarioId
+                };
+
+                var response = await _http.PostAsJsonAsync(url, request);
+
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                var responseString = await response.Content.ReadAsStringAsync();
+                return JsonSerializer.Deserialize<JogadorDTO>(responseString, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+
+        public async Task<List<MensagemChatDTO>> ObterMensagensChatAsync(string codigo)
+        {
+            try
+            {
+                var url = $"{_baseUrl}/api/lobby/{codigo}/mensagens";
+                return await _http.GetFromJsonAsync<List<MensagemChatDTO>>(url) ?? new();
+            }
+            catch
+            {
+                return new();
+            }
+        }
+
+        public async Task<MensagemChatDTO?> EnviarMensagemChatAsync(string codigo, string nome, string conteudo)
+        {
+            try
+            {
+                var url = $"{_baseUrl}/api/lobby/{codigo}/mensagem";
+
+                var request = new
+                {
+                    NomeUsuario = nome,
+                    Conteudo = conteudo
+                };
+
+                var response = await _http.PostAsJsonAsync(url, request);
+
+                if (!response.IsSuccessStatusCode)
+                    return null;
+
+                return await response.Content.ReadFromJsonAsync<MensagemChatDTO>();
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task AtualizarAtividadeAsync(string codigo, string nomeJogador)
+        {
+            try
+            {
+                var url = $"{_baseUrl}/api/lobby/{codigo}/atualizar-atividade";
+
+                var request = new
+                {
+                    NomeJogador = nomeJogador
+                };
+
+                await _http.PostAsJsonAsync(url, request);
+            }
+            catch
+            {
+                // Silenciosamente ignorar
+            }
+        }
+
+        public async Task<List<JogadorDTO>> ObterJogadoresAsync(string codigo)
+        {
+            try
+            {
+                var url = $"{_baseUrl}/api/lobby/{codigo}/jogadores";
+                return await _http.GetFromJsonAsync<List<JogadorDTO>>(url) ?? new();
+            }
+            catch
+            {
+                return new();
+            }
+        }
+
+        public async Task<List<string>> ObterUsuariosOnlineAsync(string codigo)
+        {
+            try
+            {
+                var url = $"{_baseUrl}/api/lobby/{codigo}/online";
+                return await _http.GetFromJsonAsync<List<string>>(url) ?? new();
+            }
+            catch
+            {
+                return new();
+            }
+        }
+
     }
 }

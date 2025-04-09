@@ -17,7 +17,7 @@ namespace FutOrganizerMobile.Domain.DTOs
         public Guid UsuarioCriadorId { get; set; }
         public string NomeCriador { get; set; } = string.Empty;
 
-        public List<JogadorLobbyDto> JogadoresLobby { get; set; } = new();
+        public List<JogadorLobby> JogadoresLobby { get; set; } = new();
     }
 
 

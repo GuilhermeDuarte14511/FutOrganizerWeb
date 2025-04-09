@@ -27,12 +27,10 @@ public class LobbyController : Controller
         {
             try
             {
-                // Desserializa o cookie usando System.Text.Json
                 var jogador = JsonSerializer.Deserialize<JogadorDTO>(jogadorIdCookie);
 
                 if (jogador != null)
                 {
-                    // Verifica se o jogador ainda está na lista da partida
                     var jogadorExiste = partida.JogadoresLobby.Any(j => j.Id == jogador.Id);
                     if (jogadorExiste)
                     {
@@ -51,7 +49,6 @@ public class LobbyController : Controller
                     }
                 }
 
-                // Se não conseguir desserializar ou jogador não existe mais
                 Response.Cookies.Delete($"JogadorLobby_{codigo}");
             }
             catch (JsonException)
@@ -60,7 +57,6 @@ public class LobbyController : Controller
             }
         }
 
-        // Redireciona para a tela de entrada novamente
         var vm = new SorteioLobbyViewModel
         {
             Codigo = codigo,
@@ -77,7 +73,16 @@ public class LobbyController : Controller
     [HttpPost]
     public async Task<IActionResult> Entrar([FromBody] EntrarLobbyRequest request)
     {
-        var jogador = await _partidaService.AdicionarJogadorAoLobbyAsync(request.Codigo, request.Nome);
+        // Validação básica do email
+        if (string.IsNullOrWhiteSpace(request.Email))
+            return BadRequest("Email é obrigatório.");
+
+        var jogador = await _partidaService.AdicionarJogadorAoLobbyAsync(
+            request.Codigo,
+            request.Nome,
+            request.Email,
+            request.UsuarioId
+        );
 
         var cookieValue = JsonSerializer.Serialize(jogador);
         Response.Cookies.Append($"JogadorLobby_{request.Codigo}", cookieValue, new CookieOptions
@@ -88,6 +93,7 @@ public class LobbyController : Controller
 
         return Ok(jogador);
     }
+
 
 
     [HttpGet("/Lobby/Jogadores")]

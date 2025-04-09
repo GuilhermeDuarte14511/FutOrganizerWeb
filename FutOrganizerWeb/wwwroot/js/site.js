@@ -871,6 +871,7 @@
 
         const codigoInput = document.getElementById('codigoSala');
         const nomeInput = document.getElementById('nomeJogador');
+        const emailInput = document.getElementById('emailJogador');
         const btnEntrar = document.getElementById('btnEntrarLobby');
         const codigo = codigoInput.value.trim();
         const cookieKey = `JogadorLobby_${codigo}`;
@@ -883,15 +884,28 @@
 
         btnEntrar.addEventListener('click', async function () {
             const nome = nomeInput.value.trim();
+            const email = emailInput.value.trim();
 
             if (!nome) {
-                alert("Por favor, informe seu nome.");
+                mostrarToast("Por favor, informe seu nome.", false);
+                return;
+            }
+
+            if (!email) {
+                mostrarToast("Por favor, informe seu e-mail.", false);
+                return;
+            }
+
+            if (!validarEmail(email)) {
+                mostrarToast("E-mail inválido. Verifique e tente novamente.", false);
                 return;
             }
 
             const payload = {
                 Codigo: codigo,
-                Nome: nome
+                Nome: nome,
+                Email: email,
+                UsuarioId: null
             };
 
             try {
@@ -907,16 +921,23 @@
                     setCookie(`JogadorLobbyId_${codigo}`, jogador.id, 2);
                     setCookie(`JogadorLobbyNome_${codigo}`, jogador.nome, 2);
 
-                    window.location.href = `/Lobby/${codigo}`;
+                    mostrarToast("🎉 Você entrou na sala!", true);
+                    setTimeout(() => {
+                        window.location.href = `/Lobby/${codigo}`;
+                    }, 1000);
                 } else {
-                    alert("Erro ao entrar na sala.");
+                    mostrarToast("Erro ao entrar na sala. Tente novamente.", false);
                 }
 
-
             } catch (err) {
-                alert("Erro inesperado. Tente novamente.");
+                mostrarToast("Erro inesperado. Verifique sua conexão.", false);
             }
         });
+
+        function validarEmail(email) {
+            const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return regex.test(email);
+        }
 
         function setCookie(name, value, days) {
             const expires = new Date(Date.now() + days * 86400000).toUTCString();

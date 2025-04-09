@@ -4,6 +4,7 @@ using FutOrganizerMobile.Application.Interfaces.Services;
 using FutOrganizerMobile.Application.Services;
 using FutOrganizerMobile.Utils;
 using Microsoft.Extensions.Logging;
+using Plugin.LocalNotification;
 using Plugin.Maui.Audio;
 
 namespace FutOrganizerMobile
@@ -16,6 +17,7 @@ namespace FutOrganizerMobile
 
             builder
                 .UseMauiApp<App>()
+                .UseLocalNotification()
                 .UseMauiCommunityToolkitMediaElement()
                 .ConfigureFonts(fonts =>
                 {
@@ -29,20 +31,26 @@ namespace FutOrganizerMobile
 #endif
 
             // Configuração da URL da API
+            var baseApiUrl = "https://futorganizerapi-bxc4d0egepcuh3gx.brazilsouth-01.azurewebsites.net/api";
             builder.Services.AddSingleton(new ApiConfig
             {
-                BaseUrl = "https://localhost:7159/api"
+                BaseUrl = baseApiUrl
             });
 
-            // Serviços
+            // Serviços HTTP
             builder.Services.AddHttpClient<ILoginService, LoginService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7159/api");
+                client.BaseAddress = new Uri(baseApiUrl);
             });
 
             builder.Services.AddHttpClient<IPartidaService, PartidaService>(client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7159/api");
+                client.BaseAddress = new Uri(baseApiUrl);
+            });
+
+            builder.Services.AddHttpClient<IUsuarioService, UsuarioService>(client =>
+            {
+                client.BaseAddress = new Uri(baseApiUrl);
             });
 
             // Plugin de áudio

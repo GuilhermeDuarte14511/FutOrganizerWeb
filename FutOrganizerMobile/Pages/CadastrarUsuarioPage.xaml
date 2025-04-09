@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             x:Class="FutOrganizerMobile.Pages.CadastrarUsuarioPage"
+             Title="Criar Conta"
+             BackgroundColor="#0f172a">
+
+    <Grid>
+        <!-- Toast container -->
+        <AbsoluteLayout x:Name="ToastContainer"
+                        IsVisible="False"
+                        VerticalOptions="Start"
+                        HeightRequest="50" />
+
+        <ScrollView>
+            <VerticalStackLayout Padding="20" Spacing="20">
+
+                <Label Text="Criar Conta"
+                       FontSize="32"
+                       TextColor="White"
+                       FontAttributes="Bold"
+                       HorizontalOptions="Center" />
+
+                <!-- Nome -->
+                <Border BackgroundColor="#1e293b"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10">
+                    <Entry x:Name="NomeEntry"
+                           Placeholder="Nome completo"
+                           PlaceholderColor="#94a3b8"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           HeightRequest="50" />
+                </Border>
+
+                <!-- Email -->
+                <Border BackgroundColor="#1e293b"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10">
+                    <Entry x:Name="EmailEntry"
+                           Placeholder="Email"
+                           Keyboard="Email"
+                           PlaceholderColor="#94a3b8"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           HeightRequest="50" />
+                </Border>
+
+                <!-- Senha -->
+                <Border BackgroundColor="#1e293b"
+                        StrokeThickness="0"
+                        StrokeShape="RoundRectangle 10">
+                    <Entry x:Name="SenhaEntry"
+                           Placeholder="Senha"
+                           IsPassword="True"
+                           PlaceholderColor="#94a3b8"
+                           TextColor="White"
+                           BackgroundColor="Transparent"
+                           HeightRequest="50"
+                           TextChanged="SenhaEntry_TextChanged" />
+                </Border>
+
+                <!-- Validador visual -->
+                <VerticalStackLayout x:Name="SenhaRequisitos" Spacing="5" Padding="0">
+                    <Label x:Name="RegraMinCaracteres" Text="• Mínimo 8 caracteres" TextColor="Red" FontSize="13"/>
+                    <Label x:Name="RegraNumero" Text="• Pelo menos 1 número" TextColor="Red" FontSize="13"/>
+                    <Label x:Name="RegraLetra" Text="• Pelo menos 1 letra" TextColor="Red" FontSize="13"/>
+                    <Label x:Name="RegraEspecial" Text="• Pelo menos 1 caractere especial" TextColor="Red" FontSize="13"/>
+                </VerticalStackLayout>
+
+                <!-- Loading -->
+                <ActivityIndicator x:Name="LoadingIndicator"
+                                   IsVisible="False"
+                                   IsRunning="False"
+                                   Color="White"
+                                   HeightRequest="40" />
+
+                <!-- Botão -->
+                <Button Text="Cadastrar"
+                        Clicked="OnCadastrarClicked"
+                        BackgroundColor="#3b82f6"
+                        TextColor="White"
+                        CornerRadius="10"
+                        HeightRequest="50" />
+            </VerticalStackLayout>
+        </ScrollView>
+    </Grid>
+</ContentPage>

@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 
 namespace FutOrganizerMobile.Domain.DTOs
 {
-    public class UsuarioLogadoDto
+    public class ApiResponse
     {
-        public Guid Id { get; set; }
-        public string Nome { get; set; }
-        public string Email { get; set; }
+        public bool Sucesso { get; set; }
+        public string Mensagem { get; set; }
     }
 }

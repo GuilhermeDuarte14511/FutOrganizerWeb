@@ -1,19 +1,21 @@
 using FutOrganizerMobile.Application.Interfaces.Services;
 using FutOrganizerMobile.Utils;
-using System.Text.RegularExpressions;
 using Microsoft.Maui.Storage;
+using System.Text.RegularExpressions;
 
 namespace FutOrganizerMobile.Pages;
 
 public partial class LoginPage : ContentPage
 {
     private readonly ILoginService _loginService;
+    private readonly string? _codigoSalaPendente;
     private bool _senhaVisivel = false;
 
-    public LoginPage(ILoginService loginService)
+    public LoginPage(ILoginService loginService, string? codigoSalaPendente = null)
     {
         InitializeComponent();
         _loginService = loginService;
+        _codigoSalaPendente = codigoSalaPendente;
     }
 
     private void OnToggleSenhaClicked(object sender, EventArgs e)
@@ -52,11 +54,20 @@ public partial class LoginPage : ContentPage
         {
             Preferences.Set("UsuarioId", usuario.Id.ToString());
             Preferences.Set("UsuarioNome", usuario.Nome);
+            Preferences.Set("UsuarioEmail", usuario.Email);
 
             ToastHelper.ShowToast(MainLayout, $"Bem-vindo {usuario.Nome}", Colors.Green);
 
             var partidaService = ServiceHelper.GetService<IPartidaService>();
-            await Navigation.PushAsync(new HomePage(partidaService));
+
+            if (!string.IsNullOrWhiteSpace(_codigoSalaPendente))
+            {
+                await Navigation.PushAsync(new SorteioPage(false, _codigoSalaPendente));
+            }
+            else
+            {
+                await Navigation.PushAsync(new HomePage(partidaService));
+            }
         }
         else
         {
@@ -65,7 +76,6 @@ public partial class LoginPage : ContentPage
 
         ResetarBotao();
     }
-
     private void ResetarBotao()
     {
         BtnEntrar.IsEnabled = true;

@@ -15,6 +15,12 @@ namespace FutOrganizerMobile.Application.Interfaces.Services
         Task<string?> CriarSalaAsync(CriarSalaRequest request);
         Task<bool> CriarSorteioAsync(SorteioRequest request);
         Task<List<SalaViewModel>> ObterSalasAsync(Guid usuarioId, int pagina = 1, int tamanhoPagina = 10);
+        Task<JogadorDTO?> EntrarNaSalaComoLogadoAsync(string codigo, JogadorDTO jogador);
+        Task<List<MensagemChatDTO>> ObterMensagensChatAsync(string codigo);
+        Task<MensagemChatDTO?> EnviarMensagemChatAsync(string codigo, string nome, string conteudo);
+        Task AtualizarAtividadeAsync(string codigo, string nomeJogador);
+        Task<List<JogadorDTO>> ObterJogadoresAsync(string codigo);
+        Task<List<string>> ObterUsuariosOnlineAsync(string codigo);
 
     }
 }

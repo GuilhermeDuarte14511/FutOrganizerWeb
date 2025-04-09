@@ -65,28 +65,48 @@ namespace FutOrganizerWeb.Application.Services
             return await _repository.ObterPorCodigoAsync(codigo);
         }
 
-        public async Task<JogadorDTO> AdicionarJogadorAoLobbyAsync(string codigo, string nomeJogador)
+        public async Task<JogadorDTO> AdicionarJogadorAoLobbyAsync(string codigo, string nomeJogador, string? email = null, Guid? usuarioId = null)
         {
             var partida = await _repository.ObterPorCodigoAsync(codigo);
             if (partida == null)
                 throw new Exception("Partida não encontrada");
 
-            var jogadorExistente = partida.JogadoresLobby
-                .FirstOrDefault(j => j.Nome.Equals(nomeJogador, StringComparison.OrdinalIgnoreCase));
+            JogadorLobby? jogadorExistente = null;
+
+            // Verifica por e-mail se estiver preenchido
+            if (!string.IsNullOrWhiteSpace(email))
+            {
+                jogadorExistente = partida.JogadoresLobby
+                    .FirstOrDefault(j => j.Email != null && j.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
+            }
+
+            // Se não encontrou por e-mail, tenta por nome (fallback)
+            if (jogadorExistente == null)
+            {
+                jogadorExistente = partida.JogadoresLobby
+                    .FirstOrDefault(j => j.Nome.Equals(nomeJogador, StringComparison.OrdinalIgnoreCase));
+            }
 
             if (jogadorExistente != null)
             {
                 return new JogadorDTO
                 {
                     Id = jogadorExistente.Id,
-                    Nome = jogadorExistente.Nome
+                    Nome = jogadorExistente.Nome,
+                    Email = jogadorExistente.Email,
+                    UsuarioId = jogadorExistente.UsuarioId,
+                    UltimaAtividade = jogadorExistente.UltimaAtividade
                 };
             }
 
+            // Novo jogador
             var novoJogador = new JogadorLobby
             {
                 Nome = nomeJogador,
+                Email = email,
+                UsuarioId = usuarioId ?? Guid.NewGuid(),
                 DataEntrada = DateTime.Now,
+                UltimaAtividade = DateTime.Now,
                 PartidaId = partida.Id
             };
 
@@ -95,9 +115,13 @@ namespace FutOrganizerWeb.Application.Services
             return new JogadorDTO
             {
                 Id = novoJogador.Id,
-                Nome = novoJogador.Nome
+                Nome = novoJogador.Nome,
+                Email = novoJogador.Email,
+                UsuarioId = novoJogador.UsuarioId,
+                UltimaAtividade = novoJogador.UltimaAtividade
             };
         }
+
 
 
         public async Task RemoverJogadorAsync(string codigo, Guid jogadorId)

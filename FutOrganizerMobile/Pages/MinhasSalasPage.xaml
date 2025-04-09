@@ -147,11 +147,34 @@
                                             BackgroundColor="{Binding Finalizada, Converter={StaticResource FinalizadaParaCorBotaoConverter}}"
                                             TextColor="White"
                                             CornerRadius="10" />
+
                                 </VerticalStackLayout>
                             </Border>
                         </DataTemplate>
                     </CollectionView.ItemTemplate>
                 </CollectionView>
+
+                <!-- Entrar na sala pelo código -->
+                <Label Text="🔍 Entrar em uma Sala com Código"
+                       FontSize="18"
+                       FontAttributes="Bold"
+                       TextColor="White"
+                       Margin="0,20,0,5" />
+
+                <HorizontalStackLayout Spacing="10">
+                    <Entry x:Name="codigoSalaEntry"
+                           Placeholder="Digite o código da sala"
+                           TextColor="White"
+                           PlaceholderColor="Gray"
+                           BackgroundColor="#2c2c2c"
+                           WidthRequest="200" />
+
+                    <Button Text="Entrar"
+                            Clicked="OnEntrarSalaPorCodigoClicked"
+                            BackgroundColor="#198754"
+                            TextColor="White"
+                            CornerRadius="10" />
+                </HorizontalStackLayout>
 
                 <!-- Botão carregar -->
                 <Button x:Name="btnCarregarMais"
