@@ -64,6 +64,7 @@ public partial class App : IApplication
     {
         try
         {
+            // Permissão de notificação
             var status = await Permissions.CheckStatusAsync<Permissions.PostNotifications>();
 
             if (status != PermissionStatus.Granted)
@@ -96,12 +97,30 @@ public partial class App : IApplication
 #endif
                 }
             }
+
+            // Solicitar vibração separadamente
+            await SolicitarPermissaoVibracao();
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"❌ Erro ao solicitar permissão de notificação: {ex.Message}");
+            Console.WriteLine($"❌ Erro ao solicitar permissões: {ex.Message}");
         }
     }
+
+    private async Task SolicitarPermissaoVibracao()
+    {
+        if (!Preferences.ContainsKey("VibracaoAtivada"))
+        {
+            bool ativarVibracao = await MainPage.DisplayAlert(
+                "Deseja ativar vibração?",
+                "Ao receber notificações do lobby/chat, o celular poderá vibrar.",
+                "Ativar vibração",
+                "Não vibrar");
+
+            Preferences.Set("VibracaoAtivada", ativarVibracao);
+        }
+    }
+
 
     private async void OnNotificationActionTapped(NotificationActionEventArgs e)
     {

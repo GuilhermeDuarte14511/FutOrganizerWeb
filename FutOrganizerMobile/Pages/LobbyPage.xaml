@@ -1,98 +1,126 @@
-<?xml version="1.0" encoding="utf-8" ?>
 <ContentPage xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
+             xmlns:models="clr-namespace:FutOrganizerMobile.ViewModels"
              x:Class="FutOrganizerMobile.Pages.LobbyPage"
              Title="Lobby da Sala"
              BackgroundColor="#121212">
 
-    <VerticalStackLayout Padding="20" Spacing="15">
+    <ScrollView>
+        <VerticalStackLayout Padding="20" Spacing="15">
 
-        <!-- Título -->
-        <Label Text="💬 Lobby da Sala"
-               FontSize="26"
-               FontAttributes="Bold"
-               HorizontalOptions="Center"
-               TextColor="White" />
+            <!-- Título -->
+            <Label Text="💬 Lobby da Sala"
+                   FontSize="26"
+                   FontAttributes="Bold"
+                   HorizontalOptions="Center"
+                   TextColor="White" />
 
-        <!-- Código da Sala -->
-        <Label x:Name="lblCodigoLobby"
-               Text="Código da Sala:"
-               TextColor="Gray"
-               FontSize="14"
-               HorizontalOptions="Center" />
+            <!-- Código da Sala -->
+            <Label x:Name="lblCodigoLobby"
+                   Text="Código da Sala:"
+                   TextColor="Gray"
+                   FontSize="14"
+                   HorizontalOptions="Center" />
 
-        <!-- Lista de Jogadores -->
-        <CollectionView x:Name="JogadoresCollection"
-                        BackgroundColor="#1E1E1E"
-                        ItemsLayout="VerticalList"
-                        VerticalOptions="FillAndExpand"
-                        HeightRequest="250">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Grid Padding="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto" />
-                            <ColumnDefinition Width="*" />
-                        </Grid.ColumnDefinitions>
-
-                        <Label Text="●"
-                               FontSize="18"
-                               VerticalOptions="Center"
-                               TextColor="{Binding CorStatus}" />
-
-                        <VerticalStackLayout Grid.Column="1" Padding="10,0">
-                            <Label Text="{Binding Nome}" 
+            <!-- Lista de Jogadores com Agrupamento -->
+            <CollectionView x:Name="JogadoresCollection"
+                            BackgroundColor="#1E1E1E"
+                            ItemsLayout="VerticalList"
+                            IsGrouped="True"
+                            HeightRequest="250">
+                <CollectionView.GroupHeaderTemplate>
+                    <DataTemplate>
+                        <Grid BackgroundColor="#2A2A2A" Padding="10,5" Margin="0,10,0,0">
+                            <Label Text="{Binding NomeGrupo}"
+                                   FontAttributes="Bold"
                                    FontSize="14"
-                                   TextColor="White"
-                                   FontAttributes="Bold"/>
-                            <Label Text="{Binding UltimaAtividadeFormatada}" 
-                                   FontSize="12"
-                                   TextColor="Gray" />
-                        </VerticalStackLayout>
-                    </Grid>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                                   TextColor="White" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.GroupHeaderTemplate>
 
-        <!-- Status digitando -->
-        <Label x:Name="LblDigitando"
-               FontSize="12"
-               TextColor="LightGray"
-               HorizontalOptions="Start" />
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Grid Padding="10">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="Auto" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
 
-        <!-- Lista de mensagens -->
-        <CollectionView x:Name="MensagensListView"
-                        BackgroundColor="#1E1E1E"
-                        Margin="0,10"
-                        HeightRequest="200"
-                        ItemsLayout="VerticalList"
-                        VerticalOptions="FillAndExpand">
-            <CollectionView.ItemTemplate>
-                <DataTemplate>
-                    <Label Text="{Binding .}"
-                           TextColor="White"
-                           FontSize="14"
-                           Padding="10,5"/>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
+                            <Label Text="●"
+                                   FontSize="18"
+                                   VerticalOptions="Center"
+                                   TextColor="{Binding CorStatus}" />
 
-        <!-- Campo e botão de envio -->
-        <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
-            <Entry x:Name="MensagemEntry"
-                   Placeholder="Digite sua mensagem..."
-                   TextColor="White"
-                   BackgroundColor="#2c2c2c"
-                   PlaceholderColor="Gray"
-                   TextChanged="OnMensagemDigitada"
-                   Grid.Column="0" />
+                            <VerticalStackLayout Grid.Column="1" Padding="10,0">
+                                <Label Text="{Binding Nome}" 
+                                       FontSize="14"
+                                       TextColor="White"
+                                       FontAttributes="Bold"/>
+                                <Label Text="{Binding UltimaAtividadeFormatada}" 
+                                       FontSize="12"
+                                       TextColor="Gray" />
+                            </VerticalStackLayout>
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
 
-            <Button Text="Enviar"
-                    BackgroundColor="DodgerBlue"
+            <!-- Status digitando -->
+            <Label x:Name="LblDigitando"
+                   FontSize="12"
+                   TextColor="LightGray"
+                   HorizontalOptions="Start" />
+
+            <!-- Lista de mensagens -->
+            <CollectionView x:Name="MensagensListView"
+                            BackgroundColor="#1E1E1E"
+                            Margin="0,10"
+                            ItemsLayout="VerticalList">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate>
+                        <Label Text="{Binding .}"
+                               TextColor="White"
+                               FontSize="14"
+                               Padding="10,5"/>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+
+            <!-- Campo e botão de envio -->
+            <Grid ColumnDefinitions="*,Auto" ColumnSpacing="10">
+                <Entry x:Name="MensagemEntry"
+                       Placeholder="Digite sua mensagem..."
+                       TextColor="White"
+                       BackgroundColor="#2c2c2c"
+                       PlaceholderColor="Gray"
+                       TextChanged="OnMensagemDigitada"
+                       Grid.Column="0" />
+
+                <Button Text="Enviar"
+                        BackgroundColor="DodgerBlue"
+                        TextColor="White"
+                        Clicked="OnEnviarMensagemClicked"
+                        Grid.Column="1" />
+            </Grid>
+
+            <!-- Times Sorteados -->
+            <VerticalStackLayout x:Name="TimesSorteadosLayout"
+                                 Spacing="10"
+                                 IsVisible="False">
+                <Label Text="🏆 Times Sorteados"
+                       FontSize="20"
+                       TextColor="White"
+                       HorizontalOptions="Center"/>
+            </VerticalStackLayout>
+
+            <!-- Botão Sair da Sala -->
+            <Button x:Name="BtnSairSala"
+                    Text="Sair da Sala"
+                    BackgroundColor="Crimson"
                     TextColor="White"
-                    Clicked="OnEnviarMensagemClicked"
-                    Grid.Column="1" />
-        </Grid>
-
-    </VerticalStackLayout>
+                    Clicked="OnSairSalaClicked"
+                    Margin="0,20,0,0"/>
+        </VerticalStackLayout>
+    </ScrollView>
 </ContentPage>

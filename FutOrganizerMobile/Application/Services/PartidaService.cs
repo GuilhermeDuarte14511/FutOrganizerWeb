@@ -224,5 +224,37 @@ namespace FutOrganizerMobile.Application.Services
             }
         }
 
+        public async Task<(bool Sucesso, SorteioDTO? Sorteio)> VerificarSorteioAsync(string codigo)
+        {
+            try
+            {
+                var url = $"{_baseUrl}/api/lobby/{codigo}/verificar-sorteio";
+                var response = await _http.GetAsync(url);
+
+                if (!response.IsSuccessStatusCode)
+                    return (false, null);
+
+                var content = await response.Content.ReadAsStringAsync();
+                using var doc = JsonDocument.Parse(content);
+
+                var sorteioRealizado = doc.RootElement.GetProperty("sorteioRealizado").GetBoolean();
+                if (!sorteioRealizado)
+                    return (false, null);
+
+                var sorteioJson = doc.RootElement.GetProperty("sorteio").GetRawText();
+                var sorteio = JsonSerializer.Deserialize<SorteioDTO>(sorteioJson, new JsonSerializerOptions
+                {
+                    PropertyNameCaseInsensitive = true
+                });
+
+                return (true, sorteio);
+            }
+            catch
+            {
+                return (false, null);
+            }
+        }
+
+
     }
 }

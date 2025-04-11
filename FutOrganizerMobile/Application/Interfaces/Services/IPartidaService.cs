@@ -1,5 +1,4 @@
 ﻿using FutOrganizerMobile.Domain.DTOs;
-using FutOrganizerWeb.Domain.Entities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +20,7 @@ namespace FutOrganizerMobile.Application.Interfaces.Services
         Task AtualizarAtividadeAsync(string codigo, string nomeJogador);
         Task<List<JogadorDTO>> ObterJogadoresAsync(string codigo);
         Task<List<string>> ObterUsuariosOnlineAsync(string codigo);
+        Task<(bool Sucesso, SorteioDTO? Sorteio)> VerificarSorteioAsync(string codigo);
 
     }
 }

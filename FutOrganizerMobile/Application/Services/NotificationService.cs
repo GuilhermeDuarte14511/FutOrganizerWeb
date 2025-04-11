@@ -33,7 +33,9 @@ namespace FutOrganizerMobile.Application.Services
                     Priority = AndroidPriority.High,
                     VisibilityType = AndroidVisibilityType.Public,
                     AutoCancel = true,
-                    IconSmallName = new AndroidIcon("ic_launcher")
+                    IconSmallName = new AndroidIcon("ic_launcher"),
+                    VibrationPattern = Preferences.Get("VibracaoAtivada", false)
+                     ? new long[] { 0, 300, 200, 300 } : null
                 }
             };
 
