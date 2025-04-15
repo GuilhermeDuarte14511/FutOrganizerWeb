@@ -34,13 +34,22 @@ namespace FutOrganizerWeb.Hubs
             var partida = await _partidaService.ObterPorCodigoAsync(codigoSala);
             if (partida == null) return;
 
-            // 🔍 Primeiro tenta achar o jogador no lobby
+            Guid.TryParse(identificador, out var guidIdentificador);
+
+            // 🔍 Primeiro tenta achar como usuário autenticado
             var jogador = partida.JogadoresLobby
-                .FirstOrDefault(j => LobbyHelper.ObterIdentificadorJogador(j.UsuarioAutenticadoId, j.Nome) == identificador);
+                .FirstOrDefault(j => j.UsuarioAutenticadoId == guidIdentificador);
+
+            // 🔁 Se não encontrar como autenticado, tenta como convidado (pelo Id padrão da tabela)
+            if (jogador == null)
+            {
+                jogador = partida.JogadoresLobby
+                    .FirstOrDefault(j => j.Id == guidIdentificador);
+            }
 
             string nomeJogador = jogador?.Nome;
 
-            // ⚠️ Se não achou, verifica se é o criador da sala (admin)
+            // ⚠️ Se não achou, verifica se é o criador da sala
             if (string.IsNullOrWhiteSpace(nomeJogador) && partida.UsuarioCriadorId.HasValue)
             {
                 var usuario = _usuarioService.ObterPorId(partida.UsuarioCriadorId.Value);
@@ -58,6 +67,8 @@ namespace FutOrganizerWeb.Hubs
 
             await Clients.Group(codigoSala).SendAsync("ReceberMensagem", nomeJogador, mensagem, horaEnvio);
         }
+
+
 
         public async Task UsuarioDigitando(string codigoSala, string identificador)
         {
