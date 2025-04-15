@@ -52,7 +52,7 @@ public partial class SorteioPage : ContentPage
             var usuarioIdStr = Preferences.Get("UsuarioId", "");
             if (!Guid.TryParse(usuarioIdStr, out Guid usuarioId))
             {
-                ToastHelper.ShowToast(ToastContainer, "Usuário não autenticado.", Colors.Red);
+                ToastHelper.mostrarToast(ToastContainer, "Usuário não autenticado.", Colors.Red);
                 return;
             }
 
@@ -61,7 +61,7 @@ public partial class SorteioPage : ContentPage
                 var location = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Medium));
                 if (location == null)
                 {
-                    ToastHelper.ShowToast(ToastContainer, "Não foi possível obter a localização.", Colors.Red);
+                    ToastHelper.mostrarToast(ToastContainer, "Não foi possível obter a localização.", Colors.Red);
                     return;
                 }
 
@@ -81,7 +81,7 @@ public partial class SorteioPage : ContentPage
 
                 if (_codigo == null)
                 {
-                    ToastHelper.ShowToast(ToastContainer, "Erro ao criar sala.", Colors.Red);
+                    ToastHelper.mostrarToast(ToastContainer, "Erro ao criar sala.", Colors.Red);
                     return;
                 }
 
@@ -92,7 +92,7 @@ public partial class SorteioPage : ContentPage
             }
             catch (Exception ex)
             {
-                ToastHelper.ShowToast(ToastContainer, $"Erro ao obter localização: {ex.Message}", Colors.Red);
+                ToastHelper.mostrarToast(ToastContainer, $"Erro ao obter localização: {ex.Message}", Colors.Red);
             }
         }
     }
@@ -110,7 +110,7 @@ public partial class SorteioPage : ContentPage
         }
         catch
         {
-            ToastHelper.ShowToast(ToastContainer, "Erro ao buscar jogadores do lobby.", Colors.Red);
+            ToastHelper.mostrarToast(ToastContainer, "Erro ao buscar jogadores do lobby.", Colors.Red);
         }
     }
 
@@ -140,27 +140,27 @@ public partial class SorteioPage : ContentPage
         if (!string.IsNullOrWhiteSpace(LinkCompartilhavel.Text))
         {
             Clipboard.SetTextAsync(LinkCompartilhavel.Text);
-            ToastHelper.ShowToast(ToastContainer, "Link copiado com sucesso!", Colors.Green);
+            ToastHelper.mostrarToast(ToastContainer, "Link copiado com sucesso!", Colors.Green);
         }
     }
 
     private void OnSortearGoleirosClicked(object sender, EventArgs e)
     {
-        ToastHelper.ShowToast(ToastContainer, "Função ainda em construção", Colors.Orange);
+        ToastHelper.mostrarToast(ToastContainer, "Função ainda em construção", Colors.Orange);
     }
 
     private async void OnGerarTimesClicked(object sender, EventArgs e)
     {
         if (!int.TryParse(PlayersPerTeamEntry.Text, out int porTime) || porTime <= 0)
         {
-            ToastHelper.ShowToast(ToastContainer, "Informe um número válido de jogadores por time.", Colors.Orange);
+            ToastHelper.mostrarToast(ToastContainer, "Informe um número válido de jogadores por time.", Colors.Orange);
             return;
         }
 
         var jogadores = ObterJogadores();
         if (jogadores.Count == 0)
         {
-            ToastHelper.ShowToast(ToastContainer, "Adicione jogadores antes de gerar os times!", Colors.Orange);
+            ToastHelper.mostrarToast(ToastContainer, "Adicione jogadores antes de gerar os times!", Colors.Orange);
             return;
         }
 
@@ -210,7 +210,7 @@ public partial class SorteioPage : ContentPage
             var usuarioId = Preferences.Get("UsuarioId", "");
             if (!Guid.TryParse(usuarioId, out Guid usuarioGuid))
             {
-                ToastHelper.ShowToast(ToastContainer, "Usuário não autenticado.", Colors.Red);
+                ToastHelper.mostrarToast(ToastContainer, "Usuário não autenticado.", Colors.Red);
                 return;
             }
 
@@ -218,7 +218,7 @@ public partial class SorteioPage : ContentPage
             var location = await Geolocation.GetLocationAsync(new GeolocationRequest(GeolocationAccuracy.Medium));
             if (location == null)
             {
-                ToastHelper.ShowToast(ToastContainer, "Não foi possível obter a localização.", Colors.Red);
+                ToastHelper.mostrarToast(ToastContainer, "Não foi possível obter a localização.", Colors.Red);
                 return;
             }
 
@@ -243,13 +243,13 @@ public partial class SorteioPage : ContentPage
             var sucesso = await _partidaService.CriarSorteioAsync(request);
 
             if (sucesso)
-                ToastHelper.ShowToast(ToastContainer, "Sorteio salvo com sucesso!", Colors.Green);
+                ToastHelper.mostrarToast(ToastContainer, "Sorteio salvo com sucesso!", Colors.Green);
             else
-                ToastHelper.ShowToast(ToastContainer, "Erro ao salvar o sorteio!", Colors.Red);
+                ToastHelper.mostrarToast(ToastContainer, "Erro ao salvar o sorteio!", Colors.Red);
         }
         catch (Exception ex)
         {
-            ToastHelper.ShowToast(ToastContainer, $"Erro: {ex.Message}", Colors.Red);
+            ToastHelper.mostrarToast(ToastContainer, $"Erro: {ex.Message}", Colors.Red);
         }
         finally
         {

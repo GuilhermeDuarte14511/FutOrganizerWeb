@@ -109,7 +109,7 @@
 
         function salvarLocalizacaoCookie(lat, long) {
             document.cookie = `localizacao=${lat},${long}; path=/; max-age=86400`;
-            showToast(`Localização salva: ${lat}, ${long}`, 'success');
+            mostrarToast(`Localização salva: ${lat}, ${long}`, 'success');
         }
 
         function solicitarLocalizacao() {
@@ -120,18 +120,18 @@
                         salvarLocalizacaoCookie(latitude, longitude);
                     },
                     (err) => {
-                        showToast('Não foi possível obter a localização.', 'danger');
+                        mostrarToast('Não foi possível obter a localização.', 'danger');
                         console.error(err);
                     }
                 );
             } else {
-                showToast('Geolocalização não é suportada neste navegador.', 'warning');
+                mostrarToast('Geolocalização não é suportada neste navegador.', 'warning');
             }
         }
 
         solicitarLocalizacao();
 
-        function showToast(message, type = 'info') {
+        function mostrarToast(message, type = 'info') {
             const toastContainer = document.getElementById('toastContainer');
             const toast = document.createElement('div');
             toast.className = `toast align-items-center text-bg-${type} border-0 show`;
@@ -175,17 +175,17 @@
                 .filter(name => name);
 
             if (!playersPerTeam || playersPerTeam <= 0) {
-                showToast('Informe a quantidade de jogadores por time.', 'warning');
+                mostrarToast('Informe a quantidade de jogadores por time.', 'warning');
                 return;
             }
 
             if (playerNames.length === 0) {
-                showToast('Adicione jogadores antes de gerar os times!', 'warning');
+                mostrarToast('Adicione jogadores antes de gerar os times!', 'warning');
                 return;
             }
 
             if (hasFixedGoalkeeper && goalkeeperNames.length === 0) {
-                showToast('Informe pelo menos um goleiro fixo antes de gerar os times!', 'warning');
+                mostrarToast('Informe pelo menos um goleiro fixo antes de gerar os times!', 'warning');
                 return;
             }
 
@@ -241,17 +241,17 @@
                     .then(res => res.json())
                     .then(res => {
                         if (res.sucesso) {
-                            showToast('Sorteio salvo com sucesso!', 'success');
+                            mostrarToast('Sorteio salvo com sucesso!', 'success');
                         } else {
-                            showToast('Erro ao salvar o sorteio!', 'danger');
+                            mostrarToast('Erro ao salvar o sorteio!', 'danger');
                         }
                     })
-                    .catch(() => showToast('Erro ao se comunicar com o servidor.', 'danger'));
+                    .catch(() => mostrarToast('Erro ao se comunicar com o servidor.', 'danger'));
             }
 
             renderTeams();
             document.getElementById("btnResortear").style.display = "block";
-            showToast('Times gerados automaticamente!', 'success');
+            mostrarToast('Times gerados automaticamente!', 'success');
         }
 
         function renderTeams() {
@@ -285,9 +285,9 @@
                         </li>
                     </ul>` : '';
 
-                                const linePlayersHTML = team.players.map((player, playerIndex) => {
-                                    console.log(`👤 Jogador: ${player} (Team ${teamIndex}, Index ${playerIndex})`);
-                                    return `
+                const linePlayersHTML = team.players.map((player, playerIndex) => {
+                    console.log(`👤 Jogador: ${player} (Team ${teamIndex}, Index ${playerIndex})`);
+                    return `
                         <li class="list-group-item d-flex justify-content-between align-items-center">
                             <span>${playerIndex + 1} - ${renderPlayerName(player, teamIndex, playerIndex)}</span>
                             <div class="btn-group">
@@ -295,9 +295,9 @@
                                 <button class="btn btn-sm btn-warning edit-btn" data-team="${teamIndex}" data-player="${playerIndex}">Editar</button>
                             </div>
                         </li>`;
-                                }).join('');
+                }).join('');
 
-                                const cardHTML = `
+                const cardHTML = `
                 <div class="col-md-4" data-aos="fade-up">
                     <div class="${cardClass}" style="border-color: ${team.color}; background-color: ${team.color};">
                         <div class="card-header" style="color: white;">
@@ -313,10 +313,10 @@
                     </div>
                 </div>`;
 
-                                container.innerHTML += cardHTML;
-                                console.log(`🧩 HTML gerado para ${team.name}:
+                container.innerHTML += cardHTML;
+                console.log(`🧩 HTML gerado para ${team.name}:
                 `, cardHTML);
-                            });
+            });
 
             // 🔗 Reanexa eventos
             console.log("🔗 Reanexando eventos de edição e transferência...");
@@ -356,9 +356,9 @@
         function updatePlayerName(teamIndex, playerIndex, newName) {
             if (newName.trim()) {
                 teams[teamIndex].players[playerIndex] = newName.trim();
-                showToast('Nome do jogador atualizado com sucesso!', 'success');
+                mostrarToast('Nome do jogador atualizado com sucesso!', 'success');
             } else {
-                showToast('Nome inválido! A edição foi cancelada.', 'warning');
+                mostrarToast('Nome inválido! A edição foi cancelada.', 'warning');
             }
             editablePlayer = null;
             renderTeams();
@@ -418,7 +418,7 @@
             playerToTransfer = null;
             renderTeams();
             bootstrap.Modal.getInstance(document.getElementById('transferModal')).hide();
-            showToast('Jogadores trocados com sucesso!', 'success');
+            mostrarToast('Jogadores trocados com sucesso!', 'success');
         }
 
         function updatePlayerCount() {
@@ -500,7 +500,7 @@
                     // ✅ Toast + adiciona os novos
                     novos.forEach(nome => {
                         if (nome) {
-                            showToast(`🎉 ${nome} entrou no lobby!`, 'success');
+                            mostrarToast(`🎉 ${nome} entrou no lobby!`, 'success');
                             jogadoresAtuais.push(nome);
                         }
                     });
@@ -508,7 +508,7 @@
                     // ✅ Toast + remove os que saíram
                     sairam.forEach(nome => {
                         if (nome) {
-                            showToast(`👋 ${nome} saiu do lobby.`, 'warning');
+                            mostrarToast(`👋 ${nome} saiu do lobby.`, 'warning');
                             jogadoresAtuais = jogadoresAtuais.filter(j => j !== nome);
                         }
                     });
@@ -966,12 +966,14 @@
         return data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
     }
 
-    var lobbyPublicoPage = document.getElementById('lobbyPublicoPage');
+    const lobbyPublicoPage = document.getElementById('lobbyPublicoPage');
     if (lobbyPublicoPage) {
+        let mapaIdentificadores = {};
         const codigoLobby = document.getElementById('codigoSalaLobby').dataset.codigo;
         const listaJogadores = document.getElementById("listaJogadores");
-        const jogadorAtualId = getCookie(`JogadorLobbyId_${codigoLobby}`);
-        const jogadorAtualNome = getCookie(`JogadorLobbyNome_${codigoLobby}`);
+        const dadosJogador = document.getElementById("dadosJogador");
+        const jogadorAtualId = dadosJogador.dataset.id;
+        const jogadorAtualNome = dadosJogador.dataset.nome;
         const chatMensagens = document.getElementById("chatMensagens");
         const inputMensagem = document.getElementById("inputMensagem");
         const btnEnviar = document.getElementById("btnEnviarMensagem");
@@ -1097,9 +1099,10 @@
                 if (!res.ok) return;
                 const jogadores = await res.json();
                 listaJogadores.innerHTML = "";
+                mapaIdentificadores = {};
 
                 jogadores.forEach((j, i) => {
-                    const nomeId = `status-${j.nome.replace(/\s/g, "-")}`;
+                    const idInterno = `status-${(j.identificador || j.nome).replace(/\s/g, "-")}`;
                     const hora = new Date(j.ultimaAtividade).toLocaleTimeString("pt-BR", {
                         hour: "2-digit",
                         minute: "2-digit"
@@ -1108,15 +1111,17 @@
                     const li = document.createElement("li");
                     li.className = "list-group-item d-flex justify-content-between align-items-center";
                     li.innerHTML = `
-                <span>
-                    <i class="fas fa-futbol me-2 text-secondary"></i>
-                    <strong>${i + 1}.</strong> ${j.nome}
-                    <small class="d-block text-muted">Visto por último às ${hora}</small>
-                </span>
-                <span class="badge rounded-pill" id="${nomeId}">
-                    <i class="fas fa-circle" style="color: #dc3545;"></i>
-                </span>`;
+        <span>
+            <i class="fas fa-futbol me-2 text-secondary"></i>
+            <strong>${i + 1}.</strong> ${j.nome}
+            <small class="d-block text-muted">Visto por último às ${hora}</small>
+        </span>
+        <span class="badge rounded-pill" id="${idInterno}">
+            <i class="fas fa-circle" style="color: #dc3545;"></i>
+        </span>`;
+
                     listaJogadores.appendChild(li);
+                    mapaIdentificadores[j.identificador] = idInterno;
                 });
 
                 atualizarStatusUsuariosOnline();
@@ -1129,10 +1134,12 @@
             try {
                 const res = await fetch(`/Lobby/UsuariosOnline?codigo=${codigoLobby}`);
                 if (!res.ok) return;
-                const usuariosOnline = await res.json();
 
-                usuariosOnline.forEach(nome => {
-                    const id = `status-${nome.replace(/\s/g, "-")}`;
+                const usuariosOnline = await res.json();
+                usuariosOnline.forEach(identificador => {
+                    const id = mapaIdentificadores[identificador];
+                    if (!id) return;
+
                     const badge = document.getElementById(id);
                     if (badge) {
                         badge.innerHTML = `<i class="fas fa-circle" style="color: #28a745;"></i>`;
@@ -1164,10 +1171,10 @@
                     card.className = `card shadow-sm mb-3 time-card ${contemJogadorAtual ? "destaque-time-jogador" : ""}`;
                     const jogadoresHTML = time.jogadores.map(j => {
                         const isJogadorAtual = j.id === jogadorAtualId;
-                        return `<li class="list-group-item ${isJogadorAtual ? "fw-bold text-success" : ""}">${j.nome}</li>`;
+                        return `<li class="list-group-item ${isJogadorAtual ? " fw-bold text-success" : ""}">${j.nome}</li>`;
                     }).join("");
                     card.innerHTML = `
-                <div class="card-header bg-dark text-white">${time.nome}</div>
+            < div class="card-header bg-dark text-white" > ${time.nome}</div >
                 <ul class="list-group list-group-flush">${jogadoresHTML}</ul>`;
                     container.appendChild(card);
                 });
@@ -1179,9 +1186,9 @@
         const btnSair = document.getElementById("btnSairLobby");
         if (btnSair) {
             btnSair.addEventListener("click", async () => {
-                const res = await fetch(`/Lobby/Sair?codigo=${codigoLobby}&jogadorId=${jogadorAtualId}`, { method: "DELETE" });
+                const res = await fetch(`/ Lobby / Sair ? codigo = ${codigoLobby}& jogadorId=${jogadorAtualId} `, { method: "DELETE" });
                 if (res.ok) {
-                    document.cookie = `JogadorLobbyId_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+                    document.cookie = `JogadorLobbyId_${codigoLobby}=; expires = Thu, 01 Jan 1970 00:00:00 UTC; path = /;`;
                     document.cookie = `JogadorLobbyNome_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                     window.location.reload();
                 }
@@ -1189,7 +1196,7 @@
         }
 
         const connection = new signalR.HubConnectionBuilder()
-            .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}&nome=${jogadorAtualNome}`)
+            .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}&jogadorId=${jogadorAtualId}&nome=${jogadorAtualNome}`)
             .withAutomaticReconnect()
             .configureLogging(signalR.LogLevel.Information)
             .build();
@@ -1197,12 +1204,12 @@
         btnEnviar.addEventListener("click", async () => {
             const mensagem = inputMensagem.value.trim();
             if (!mensagem) return;
-            await connection.invoke("EnviarMensagem", codigoLobby, jogadorAtualNome, mensagem);
+            await connection.invoke("EnviarMensagem", codigoLobby, jogadorAtualId, mensagem);
             inputMensagem.value = "";
         });
 
         inputMensagem.addEventListener("input", () => {
-            connection.invoke("UsuarioDigitando", codigoLobby, jogadorAtualNome);
+            connection.invoke("UsuarioDigitando", codigoLobby, jogadorAtualId);
         });
 
         connection.on("MostrarDigitando", (nome) => {
@@ -1228,18 +1235,20 @@
 
         connection.on("AtualizarUsuariosOnline", atualizarStatusUsuariosOnline);
 
-        connection.start()
-            .then(() => {
-                console.log("🟢 Conectado ao chat via SignalR");
+        connection.start().then(() => {
+            console.log("🟢 Conectado ao chat via SignalR");
+            setTimeout(() => {
                 atualizarLista();
-            })
-            .catch(err => console.error("❌ Erro ao conectar:", err));
+            }, 500);
+        });
 
         setInterval(atualizarLista, 10000);
         setInterval(verificarSorteio, 5000);
         carregarHistoricoMensagens();
         verificarSorteio();
     }
+
+
 
     // Função utilitária
     function getCookie(name) {
@@ -1283,7 +1292,7 @@
                     if (paginaAtual === 1) {
                         container.innerHTML = '<div class="alert alert-info text-center">Nenhuma sala encontrada.</div>';
                     } else {
-                        showToast('Nenhuma sala adicional encontrada.', 'info');
+                        mostrarToast('Nenhuma sala adicional encontrada.', 'info');
                     }
                     if (btn) btn.classList.add('d-none');
                     return;
@@ -1354,7 +1363,7 @@
 
                 if (data.length < tamanhoPagina) {
                     if (btn) btn.classList.add('d-none');
-                    if (paginaAtual > 1) showToast('Nenhuma sala adicional encontrada.', 'info');
+                    if (paginaAtual > 1) mostrarToast('Nenhuma sala adicional encontrada.', 'info');
                 } else {
                     if (btn) {
                         btn.classList.remove('d-none');
@@ -1404,6 +1413,125 @@
         document.getElementById('btnCarregarMais').addEventListener('click', carregarSalas);
 
         carregarSalas();
+    }
+
+
+
+    var salasParticipadasPage = document.getElementById('salasParticipadasPage');
+    if (salasParticipadasPage) {
+
+        // AOS
+        if (typeof AOS !== 'undefined') {
+            AOS.init({
+                duration: 800,
+                easing: 'ease-in-out',
+                once: true
+            });
+        }
+
+        // Som de entrada
+        const audio = new Audio('/sounds/notification_message.mp3');
+
+        // Botão "Sorteio Rápido"
+        const btnSorteio = salasParticipadasPage.querySelector('a[href="/Sorteio"]');
+        if (btnSorteio) {
+            btnSorteio.addEventListener('click', () => {
+                console.log('➡️ Indo para o sorteio rápido...');
+            });
+        }
+
+        // Hover nos cards
+        const cards = salasParticipadasPage.querySelectorAll('.card');
+        cards.forEach((card, index) => {
+            card.addEventListener('mouseenter', () => {
+                console.log(`🃏 Card ${index + 1} focado`);
+            });
+        });
+
+        // Clique em "Entrar na Sala"
+        const botoesEntrar = salasParticipadasPage.querySelectorAll('.btn-outline-light');
+        botoesEntrar.forEach(botao => {
+            botao.addEventListener('click', (e) => {
+                e.preventDefault();
+
+                // Toast + Som
+                mostrarToast('Boa sorte no jogo! ⚽');
+                if (audio) audio.play().catch(() => { });
+
+                // Blur no conteúdo
+                salasParticipadasPage.classList.add('blur-background');
+
+                // Spinner no botão
+                botao.classList.add('btn-loading');
+
+                // Delay antes de redirecionar (ex: 1.5s)
+                setTimeout(() => {
+                    window.location.href = botao.getAttribute('href');
+                }, 1500);
+            });
+        });
+    }
+
+    var cadastrarUsuarioPage = document.getElementById('cadastrarUsuarioPage');
+
+    if (cadastrarUsuarioPage) {
+        const form = document.getElementById("formCadastrar");
+        const btn = document.getElementById("btnCadastrar");
+        const btnText = document.getElementById("btnTextCadastro");
+        const btnSpinner = document.getElementById("btnSpinnerCadastro");
+
+        form.addEventListener("submit", async (e) => {
+            e.preventDefault();
+
+            // Inicia loading
+            btn.disabled = true;
+            btnText.classList.add("d-none");
+            btnSpinner.classList.remove("d-none");
+
+            const nome = document.getElementById("nome").value.trim();
+            const email = document.getElementById("emailCadastro").value.trim();
+            const senha = document.getElementById("senhaCadastro").value;
+
+            try {
+                const response = await fetch("/Login/CriarUsuario", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ nome, email, senha })
+                });
+
+                const resultado = await response.json();
+
+                if (resultado.sucesso) {
+                    mostrarToast(resultado.mensagem || "Usuário criado com sucesso!", true);
+
+                    // Redireciona após breve delay
+                    setTimeout(() => {
+                        window.location.href = "/Login";
+                    }, 1500);
+                } else {
+                    mostrarToast(resultado.mensagem || "Erro ao cadastrar usuário.", false);
+                }
+
+            } catch (err) {
+                mostrarToast("Erro ao comunicar com o servidor: " + err.message, false);
+            } finally {
+                // Finaliza loading
+                btn.disabled = false;
+                btnText.classList.remove("d-none");
+                btnSpinner.classList.add("d-none");
+            }
+        });
+
+        document.getElementById("toggleSenhaCadastro").addEventListener("click", () => {
+            const input = document.getElementById("senhaCadastro");
+            const icone = document.getElementById("iconeOlhoCadastro");
+            const mostrar = input.type === "password";
+            input.type = mostrar ? "text" : "password";
+            icone.classList.toggle("fa-eye", !mostrar);
+            icone.classList.toggle("fa-eye-slash", mostrar);
+        });
     }
 
 

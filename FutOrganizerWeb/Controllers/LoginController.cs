@@ -35,8 +35,8 @@ namespace FutOrganizerWeb.Controllers
                 return Json(new
                 {
                     sucesso = true,
-                    idUsuario = usuario.Id,
-                    nome = usuario.Nome,
+                        idUsuario = usuario.Id,
+                        nome = usuario.Nome,
                     mensagem = "Login realizado com sucesso!"
                 });
             }
@@ -44,6 +44,10 @@ namespace FutOrganizerWeb.Controllers
             return Json(new { sucesso = false, mensagem = "Email ou senha inválidos." });
         }
 
+        public IActionResult CadastrarUsuario()
+        {
+            return View();
+        }
 
         [HttpPost]
         public IActionResult CriarUsuario([FromBody] RequestUsuarioCreate request)

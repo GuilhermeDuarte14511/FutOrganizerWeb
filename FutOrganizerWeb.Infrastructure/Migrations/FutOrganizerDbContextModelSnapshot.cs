@@ -271,6 +271,9 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Property<DateTime>("DataEntrada")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -281,9 +284,19 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Property<DateTime>("UltimaAtividade")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid?>("UsuarioAutenticadoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UsuarioId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("PartidaId");
+
+                    b.HasIndex("UsuarioAutenticadoId");
+
+                    b.HasIndex("UsuarioId");
 
                     b.ToTable("JogadoresLobby");
                 });
@@ -395,7 +408,18 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Usuario", "UsuarioAutenticado")
+                        .WithMany()
+                        .HasForeignKey("UsuarioAutenticadoId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Usuario", null)
+                        .WithMany("JogadoresAutenticadosLobby")
+                        .HasForeignKey("UsuarioId");
+
                     b.Navigation("Partida");
+
+                    b.Navigation("UsuarioAutenticado");
                 });
 
             modelBuilder.Entity("Sorteio", b =>
@@ -433,6 +457,8 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
             modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Usuario", b =>
                 {
                     b.Navigation("EventosCriados");
+
+                    b.Navigation("JogadoresAutenticadosLobby");
 
                     b.Navigation("PartidasCriadas");
                 });

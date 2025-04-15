@@ -82,7 +82,7 @@ public partial class MinhasSalasPage : ContentPage
             }
             catch (Exception ex)
             {
-                ToastHelper.ShowToast(toastContainer, $"Erro: {ex.Message}", Colors.Red);
+                ToastHelper.mostrarToast(toastContainer, $"Erro: {ex.Message}", Colors.Red);
             }
             finally
             {
@@ -135,11 +135,11 @@ public partial class MinhasSalasPage : ContentPage
             if (entry != null && !string.IsNullOrWhiteSpace(entry.Text))
             {
                 await Clipboard.SetTextAsync(entry.Text);
-                ToastHelper.ShowToast(toastContainer, "Link copiado com sucesso!", Colors.Green);
+                ToastHelper.mostrarToast(toastContainer, "Link copiado com sucesso!", Colors.Green);
             }
             else
             {
-                ToastHelper.ShowToast(toastContainer, "Link inválido!", Colors.DarkRed);
+                ToastHelper.mostrarToast(toastContainer, "Link inválido!", Colors.DarkRed);
             }
         }
     }
@@ -152,7 +152,7 @@ public partial class MinhasSalasPage : ContentPage
         {
             if (sala.Finalizada)
             {
-                await ToastHelper.ShowToastAsync(toastContainer, "Funcionalidade de visualizar sorteio em breve!", Colors.Orange);
+                await ToastHelper.mostrarToastAsync(toastContainer, "Funcionalidade de visualizar sorteio em breve!", Colors.Orange);
             }
             else
             {
@@ -161,7 +161,7 @@ public partial class MinhasSalasPage : ContentPage
         }
         else
         {
-            await ToastHelper.ShowToastAsync(toastContainer, "Erro ao acessar sala.", Colors.Red);
+            await ToastHelper.mostrarToastAsync(toastContainer, "Erro ao acessar sala.", Colors.Red);
         }
     }
 
@@ -180,7 +180,7 @@ public partial class MinhasSalasPage : ContentPage
         var codigo = codigoSalaEntry.Text?.Trim();
         if (string.IsNullOrWhiteSpace(codigo))
         {
-            await ToastHelper.ShowToastAsync(toastContainer, "Digite um código válido.", Colors.Orange);
+            await ToastHelper.mostrarToastAsync(toastContainer, "Digite um código válido.", Colors.Orange);
             return;
         }
 
@@ -195,13 +195,13 @@ public partial class MinhasSalasPage : ContentPage
 
         if (string.IsNullOrEmpty(usuarioIdStr) || string.IsNullOrEmpty(usuarioNome) || string.IsNullOrEmpty(usuarioEmail))
         {
-            await ToastHelper.ShowToastAsync(toastContainer, "Usuário não autenticado ou dados incompletos.", Colors.Red);
+            await ToastHelper.mostrarToastAsync(toastContainer, "Usuário não autenticado ou dados incompletos.", Colors.Red);
             return;
         }
 
         if (!Guid.TryParse(usuarioIdStr, out Guid usuarioId))
         {
-            await ToastHelper.ShowToastAsync(toastContainer, "ID do jogador inválido.", Colors.Red);
+            await ToastHelper.mostrarToastAsync(toastContainer, "ID do jogador inválido.", Colors.Red);
             return;
         }
 
@@ -219,7 +219,7 @@ public partial class MinhasSalasPage : ContentPage
 
         if (jogadorRegistrado == null)
         {
-            await ToastHelper.ShowToastAsync(toastContainer, "Erro ao entrar na sala. Verifique o código.", Colors.Red);
+            await ToastHelper.mostrarToastAsync(toastContainer, "Erro ao entrar na sala. Verifique o código.", Colors.Red);
             return;
         }
 

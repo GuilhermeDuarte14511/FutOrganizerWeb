@@ -22,19 +22,19 @@ public partial class CadastrarUsuarioPage : ContentPage
 
         if (string.IsNullOrWhiteSpace(nome) || string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
         {
-            ToastHelper.ShowToast(ToastContainer, "Preencha todos os campos.", Colors.OrangeRed);
+            ToastHelper.mostrarToast(ToastContainer, "Preencha todos os campos.", Colors.OrangeRed);
             return;
         }
 
         if (!IsValidEmail(email))
         {
-            ToastHelper.ShowToast(ToastContainer, "Email inválido.", Colors.OrangeRed);
+            ToastHelper.mostrarToast(ToastContainer, "Email inválido.", Colors.OrangeRed);
             return;
         }
 
         if (!IsValidPassword(senha))
         {
-            ToastHelper.ShowToast(ToastContainer, "Senha fraca. Use mínimo 8 caracteres, 1 número, 1 letra e 1 símbolo.", Colors.OrangeRed);
+            ToastHelper.mostrarToast(ToastContainer, "Senha fraca. Use mínimo 8 caracteres, 1 número, 1 letra e 1 símbolo.", Colors.OrangeRed);
             return;
         }
 
@@ -53,7 +53,7 @@ public partial class CadastrarUsuarioPage : ContentPage
         LoadingIndicator.IsVisible = false;
         LoadingIndicator.IsRunning = false;
 
-        ToastHelper.ShowToast(ToastContainer, response.Mensagem,
+        ToastHelper.mostrarToast(ToastContainer, response.Mensagem,
             response.Sucesso ? Colors.ForestGreen : Colors.OrangeRed);
 
         if (response.Sucesso)

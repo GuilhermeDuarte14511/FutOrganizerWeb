@@ -11,5 +11,7 @@
         // Relacionamentos
         public List<Partida> PartidasCriadas { get; set; } = new();
         public List<Evento> EventosCriados { get; set; } = new();
+        public ICollection<JogadorLobby> JogadoresAutenticadosLobby { get; set; } = new List<JogadorLobby>();
+
     }
 }

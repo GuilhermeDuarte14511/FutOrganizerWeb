@@ -1,0 +1,71 @@
+﻿@model List<FutOrganizerWeb.Domain.Entities.Partida>
+
+@{
+    ViewData["Title"] = "Meus Lobbys";
+}
+
+<div id="salasParticipadasPage" class="container py-5 text-light">
+    <!-- Botão de voltar -->
+    <div class="mb-4">
+        <a href="/Home" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-2"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div class="text-center mb-5">
+        <h2 class="fw-bold animate__animated animate__fadeInDown">
+            <i class="fas fa-door-open me-2 text-primary"></i>Meus Lobbys
+        </h2>
+        <p class="text-light">Salas onde você entrou como jogador convidado</p>
+        <hr class="border-light opacity-25" style="width: 200px; margin: auto;">
+    </div>
+
+    <!-- Corpo -->
+    <div class="rounded-4 p-4" style="background-color: #111; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 25px rgba(255, 255, 255, 0.05); transition: all 0.3s ease;">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="text-center animate__animated animate__fadeIn">
+                <i class="fas fa-frown fa-3x mb-3 text-light"></i>
+                <h5 class="text-light">Você ainda não entrou em nenhuma sala 😕</h5>
+                <p class="text-light">Quando alguém compartilhar um link de sala e você entrar, ela aparecerá aqui.</p>
+                <a href="/Sorteio" class="btn btn-primary mt-3">
+                    <i class="fas fa-random me-1"></i> Ir para Sorteio Rápido
+                </a>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 animate__animated animate__fadeInUp">
+                @foreach (var partida in Model)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-lg bg-dark border border-primary rounded-4">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title text-white">
+                                        <i class="fas fa-futbol text-primary me-2"></i>Sala: <strong>@partida.CodigoLobby</strong>
+                                    </h5>
+                                    <p class="card-text text-light small mb-2">
+                                        <i class="fas fa-calendar-alt me-1 text-light"></i>
+                                        Criada em: @partida.DataHora.ToString("dd/MM/yyyy HH:mm")
+                                    </p>
+                                    <p class="card-text text-light small">
+                                        <i class="fas fa-map-marker-alt me-1 text-light"></i>
+                                        Local: <strong>@partida.Local</strong>
+                                    </p>
+                                </div>
+
+                                <div class="mt-3 d-grid">
+                                    <a href="/Lobby/@partida.CodigoLobby" class="btn btn-outline-light">
+                                        <i class="fas fa-sign-in-alt me-1"></i> Entrar na Sala
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

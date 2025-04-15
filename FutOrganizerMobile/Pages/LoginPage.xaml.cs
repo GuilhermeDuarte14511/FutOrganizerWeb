@@ -36,14 +36,14 @@ public partial class LoginPage : ContentPage
 
         if (string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(senha))
         {
-            ToastHelper.ShowToast(MainLayout, "Preencha todos os campos!", Colors.Red);
+            ToastHelper.mostrarToast(MainLayout, "Preencha todos os campos!", Colors.Red);
             ResetarBotao();
             return;
         }
 
         if (!Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
         {
-            ToastHelper.ShowToast(MainLayout, "E-mail inválido!", Colors.OrangeRed);
+            ToastHelper.mostrarToast(MainLayout, "E-mail inválido!", Colors.OrangeRed);
             ResetarBotao();
             return;
         }
@@ -56,7 +56,7 @@ public partial class LoginPage : ContentPage
             Preferences.Set("UsuarioNome", usuario.Nome);
             Preferences.Set("UsuarioEmail", usuario.Email);
 
-            ToastHelper.ShowToast(MainLayout, $"Bem-vindo {usuario.Nome}", Colors.Green);
+            ToastHelper.mostrarToast(MainLayout, $"Bem-vindo {usuario.Nome}", Colors.Green);
 
             var partidaService = ServiceHelper.GetService<IPartidaService>();
 
@@ -71,7 +71,7 @@ public partial class LoginPage : ContentPage
         }
         else
         {
-            ToastHelper.ShowToast(MainLayout, "Email ou senha inválidos", Colors.Red);
+            ToastHelper.mostrarToast(MainLayout, "Email ou senha inválidos", Colors.Red);
         }
 
         ResetarBotao();

@@ -92,5 +92,24 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
                 await _context.SaveChangesAsync();
             }
         }
+
+        public async Task<List<Partida>> ObterSalasOndeUsuarioParticipouAsync(Guid usuarioId)
+        {
+            return await _context.Set<JogadorLobby>()
+                .Include(j => j.Partida)
+                .Where(j => j.UsuarioAutenticadoId == usuarioId && j.Partida != null && j.Partida.UsuarioCriadorId != usuarioId)
+                .Select(j => j.Partida!)
+                .Distinct()
+                .ToListAsync();
+        }
+
+        public async Task<Partida?> ObterPorIdAsync(Guid partidaId)
+        {
+            return await _context.Partidas
+                .Include(p => p.JogadoresLobby)
+                .FirstOrDefaultAsync(p => p.Id == partidaId);
+        }
+
+
     }
 }

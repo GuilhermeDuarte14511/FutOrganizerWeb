@@ -38,7 +38,9 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
             modelBuilder.Entity<Goleiro>().HasKey(g => g.Id);
             modelBuilder.Entity<JogadorLobby>().HasKey(j => j.Id);
             modelBuilder.Entity<UsuarioTemporario>().HasKey(u => u.Id);
+            modelBuilder.Entity<MensagemChat>().HasKey(m => m.Id);
 
+            // Relacionamentos
             modelBuilder.Entity<Evento>()
                 .HasOne(e => e.UsuarioCriador)
                 .WithMany(u => u.EventosCriados)
@@ -75,14 +77,18 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
                 .HasForeignKey(j => j.PartidaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<MensagemChat>().HasKey(m => m.Id);
+            // Novo relacionamento: UsuarioAutenticado
+            modelBuilder.Entity<JogadorLobby>()
+                .HasOne(j => j.UsuarioAutenticado)
+                .WithMany()
+                .HasForeignKey(j => j.UsuarioAutenticadoId)
+                .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<MensagemChat>()
                 .HasOne(m => m.Partida)
                 .WithMany(p => p.MensagensChat)
                 .HasForeignKey(m => m.PartidaId)
                 .OnDelete(DeleteBehavior.Cascade);
-
 
             modelBuilder.Entity<ConfiguracaoPelada>().HasNoKey();
         }

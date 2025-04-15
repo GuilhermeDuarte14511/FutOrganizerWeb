@@ -12,6 +12,8 @@ namespace FutOrganizerWeb.Domain.Interfaces_Repositories
         Task AdicionarJogadorAsync(JogadorLobby jogador);
         Task RemoverJogadorAsync(string codigo, Guid jogadorId);
         Task<List<Partida>> ObterPartidasPaginadasPorUsuarioAsync(Guid usuarioId, int page, int pageSize);
+        Task<List<Partida>> ObterSalasOndeUsuarioParticipouAsync(Guid usuarioId);
+        Task<Partida?> ObterPorIdAsync(Guid partidaId);
 
     }
 }

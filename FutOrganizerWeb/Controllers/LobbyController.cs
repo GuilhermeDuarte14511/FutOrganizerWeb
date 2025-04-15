@@ -1,9 +1,11 @@
 ﻿using FutOrganizerWeb.Application.DTOs;
 using FutOrganizerWeb.Application.Interfaces;
+using FutOrganizerWeb.Controllers;
+using FutOrganizerWeb.Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json;
 
-public class LobbyController : Controller
+public class LobbyController : BaseController
 {
     private readonly IPartidaService _partidaService;
     private readonly IChatService _chatService;
@@ -21,53 +23,105 @@ public class LobbyController : Controller
         if (partida == null)
             return NotFound();
 
-        var jogadorIdCookie = Request.Cookies[$"JogadorLobby_{codigo}"];
+        var usuarioId = ObterUsuarioLogado();
 
-        if (!string.IsNullOrEmpty(jogadorIdCookie))
+        // ✅ Redireciona se o usuário for o criador da partida
+        if (usuarioId != Guid.Empty && partida.UsuarioCriadorId == usuarioId)
         {
-            try
-            {
-                var jogador = JsonSerializer.Deserialize<JogadorDTO>(jogadorIdCookie);
-
-                if (jogador != null)
-                {
-                    var jogadorExiste = partida.JogadoresLobby.Any(j => j.Id == jogador.Id);
-                    if (jogadorExiste)
-                    {
-                        var jogadores = partida.JogadoresLobby
-                            .OrderBy(j => j.DataEntrada)
-                            .Select(j => j.Nome)
-                            .ToList();
-
-                        var viewModel = new SorteioLobbyViewModel
-                        {
-                            Codigo = codigo,
-                            Jogadores = jogadores
-                        };
-
-                        return View("VisualizarSala", viewModel);
-                    }
-                }
-
-                Response.Cookies.Delete($"JogadorLobby_{codigo}");
-            }
-            catch (JsonException)
-            {
-                Response.Cookies.Delete($"JogadorLobby_{codigo}");
-            }
+            return RedirectToAction("Index", "Sorteio", new { codigo });
         }
 
-        var vm = new SorteioLobbyViewModel
+        try
+        {
+            var usuarioNome = HttpContext.Session.GetString("UsuarioNome") ?? "Jogador";
+            var jogadorExistente = partida.JogadoresLobby.FirstOrDefault(j => j.UsuarioAutenticadoId == usuarioId);
+            JogadorDTO jogadorDTO;
+
+            if (jogadorExistente != null)
+            {
+                jogadorDTO = new JogadorDTO
+                {
+                    Id = jogadorExistente.Id,
+                    Nome = jogadorExistente.Nome
+                };
+            }
+            else
+            {
+                var novoJogador = new JogadorLobby
+                {
+                    Nome = usuarioNome,
+                    UsuarioAutenticadoId = usuarioId,
+                    PartidaId = partida.Id,
+                    DataEntrada = DateTime.UtcNow.AddHours(-3),
+                    UltimaAtividade = DateTime.UtcNow.AddHours(-3)
+                };
+
+                await _partidaService.AdicionarJogadorAoLobbyAsync(codigo, usuarioNome, null, usuarioId);
+
+                jogadorDTO = new JogadorDTO
+                {
+                    Id = novoJogador.Id,
+                    Nome = novoJogador.Nome
+                };
+            }
+
+            // 🍪 Salva ID e Nome em cookies
+            Response.Cookies.Append($"JogadorLobbyId_{codigo}", jogadorDTO.Id.ToString(), new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
+                IsEssential = true
+            });
+
+            Response.Cookies.Append($"JogadorLobbyNome_{codigo}", jogadorDTO.Nome, new CookieOptions
+            {
+                Expires = DateTimeOffset.UtcNow.AddDays(30),
+                IsEssential = true
+            });
+
+            return View("VisualizarSala", new SorteioLobbyViewModel
+            {
+                Codigo = codigo,
+                Jogadores = partida.JogadoresLobby.OrderBy(j => j.DataEntrada).Select(j => j.Nome).ToList(),
+                NomeDoJogador = jogadorDTO.Nome,
+                JogadorId = jogadorDTO.Id,
+                UsuarioAutenticadoId = usuarioId != Guid.Empty ? usuarioId : null
+            });
+        }
+        catch
+        {
+            // continua como convidado
+        }
+
+        var jogadorIdCookie = Request.Cookies[$"JogadorLobbyId_{codigo}"];
+        var jogadorNomeCookie = Request.Cookies[$"JogadorLobbyNome_{codigo}"];
+
+        if (!string.IsNullOrEmpty(jogadorIdCookie) && Guid.TryParse(jogadorIdCookie, out Guid jogadorId))
+        {
+            var jogador = partida.JogadoresLobby.FirstOrDefault(j => j.Id == jogadorId);
+            if (jogador != null)
+            {
+                return View("VisualizarSala", new SorteioLobbyViewModel
+                {
+                    Codigo = codigo,
+                    Jogadores = partida.JogadoresLobby.OrderBy(j => j.DataEntrada).Select(j => j.Nome).ToList(),
+                    NomeDoJogador = jogador.Nome,
+                    JogadorId = jogador.Id,
+                    UsuarioAutenticadoId = jogador.UsuarioAutenticadoId
+                });
+            }
+
+            Response.Cookies.Delete($"JogadorLobbyId_{codigo}");
+            Response.Cookies.Delete($"JogadorLobbyNome_{codigo}");
+        }
+
+        return View("EntrarConvidado", new SorteioLobbyViewModel
         {
             Codigo = codigo,
-            Jogadores = partida.JogadoresLobby
-                .OrderBy(j => j.DataEntrada)
-                .Select(j => j.Nome)
-                .ToList()
-        };
-
-        return View("EntrarConvidado", vm);
+            Jogadores = partida.JogadoresLobby.OrderBy(j => j.DataEntrada).Select(j => j.Nome).ToList()
+        });
     }
+
+
 
 
     [HttpPost]
@@ -108,12 +162,18 @@ public class LobbyController : Controller
             .Select(j => new
             {
                 Nome = j.Nome,
-                UltimaAtividade = j.UltimaAtividade
+                UltimaAtividade = j.UltimaAtividade,
+                Identificador = j.UsuarioAutenticadoId.HasValue && j.UsuarioAutenticadoId != Guid.Empty
+                    ? j.UsuarioAutenticadoId.ToString()
+                    : j.Id.ToString()
             })
             .ToList();
 
         return Json(jogadores);
     }
+
+
+
 
 
     [HttpDelete("/Lobby/Sair")]
@@ -155,12 +215,10 @@ public class LobbyController : Controller
     {
         var usuariosOnline = FutOrganizerWeb.Hubs.LobbyChatHub.UsuariosConectados
             .Where(kvp => kvp.Value.Sala == codigo)
-            .Select(kvp => kvp.Value.Nome)
+            .Select(kvp => kvp.Value.Identificador)
             .Distinct()
             .ToList();
 
         return Ok(usuariosOnline);
     }
-
-
 }

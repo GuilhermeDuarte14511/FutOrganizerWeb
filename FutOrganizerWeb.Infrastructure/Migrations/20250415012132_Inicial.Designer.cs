@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FutOrganizerWeb.Infrastructure.Migrations
 {
     [DbContext(typeof(FutOrganizerDbContext))]
-    [Migration("20250331214329_AddLobby")]
-    partial class AddLobby
+    [Migration("20250415012132_Inicial")]
+    partial class Inicial
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -123,16 +123,20 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.ToTable("Jogadores");
                 });
 
-            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.JogadorLobby", b =>
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.MensagemChat", b =>
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("DataEntrada")
+                    b.Property<string>("Conteudo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("DataHoraEnvio")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("Nome")
+                    b.Property<string>("NomeJogador")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
@@ -143,7 +147,7 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
 
                     b.HasIndex("PartidaId");
 
-                    b.ToTable("JogadoresLobby");
+                    b.ToTable("MensagensChat");
                 });
 
             modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Partida", b =>
@@ -174,11 +178,16 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Property<Guid?>("UsuarioCriadorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("UsuarioTemporarioId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EventoId");
 
                     b.HasIndex("UsuarioCriadorId");
+
+                    b.HasIndex("UsuarioTemporarioId");
 
                     b.ToTable("Partidas");
                 });
@@ -238,6 +247,63 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.ToTable("Usuarios");
                 });
 
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.UsuarioTemporario", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DataCriacao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("UsuariosTemporarios");
+                });
+
+            modelBuilder.Entity("JogadorLobby", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DataEntrada")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Nome")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("PartidaId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UltimaAtividade")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UsuarioAutenticadoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("UsuarioId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PartidaId");
+
+                    b.HasIndex("UsuarioAutenticadoId");
+
+                    b.HasIndex("UsuarioId");
+
+                    b.ToTable("JogadoresLobby");
+                });
+
             modelBuilder.Entity("Sorteio", b =>
                 {
                     b.Property<Guid>("Id")
@@ -292,10 +358,10 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         .HasForeignKey("TimeId");
                 });
 
-            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.JogadorLobby", b =>
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.MensagemChat", b =>
                 {
                     b.HasOne("FutOrganizerWeb.Domain.Entities.Partida", "Partida")
-                        .WithMany("JogadoresLobby")
+                        .WithMany("MensagensChat")
                         .HasForeignKey("PartidaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -315,6 +381,10 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         .HasForeignKey("UsuarioCriadorId")
                         .OnDelete(DeleteBehavior.Restrict);
 
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.UsuarioTemporario", null)
+                        .WithMany("Partidas")
+                        .HasForeignKey("UsuarioTemporarioId");
+
                     b.Navigation("Evento");
 
                     b.Navigation("UsuarioCriador");
@@ -331,6 +401,28 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         .HasForeignKey("SorteioId");
 
                     b.Navigation("Goleiro");
+                });
+
+            modelBuilder.Entity("JogadorLobby", b =>
+                {
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Partida", "Partida")
+                        .WithMany("JogadoresLobby")
+                        .HasForeignKey("PartidaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Usuario", "UsuarioAutenticado")
+                        .WithMany()
+                        .HasForeignKey("UsuarioAutenticadoId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Usuario", null)
+                        .WithMany("JogadoresAutenticadosLobby")
+                        .HasForeignKey("UsuarioId");
+
+                    b.Navigation("Partida");
+
+                    b.Navigation("UsuarioAutenticado");
                 });
 
             modelBuilder.Entity("Sorteio", b =>
@@ -355,6 +447,8 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                 {
                     b.Navigation("JogadoresLobby");
 
+                    b.Navigation("MensagensChat");
+
                     b.Navigation("Sorteios");
                 });
 
@@ -367,7 +461,14 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                 {
                     b.Navigation("EventosCriados");
 
+                    b.Navigation("JogadoresAutenticadosLobby");
+
                     b.Navigation("PartidasCriadas");
+                });
+
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.UsuarioTemporario", b =>
+                {
+                    b.Navigation("Partidas");
                 });
 
             modelBuilder.Entity("Sorteio", b =>

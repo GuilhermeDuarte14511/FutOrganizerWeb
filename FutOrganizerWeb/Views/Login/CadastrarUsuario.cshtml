@@ -1,0 +1,51 @@
+﻿<div id="cadastrarUsuarioPage" class="d-flex justify-content-center align-items-center min-vh-100 bg-dark text-light px-3" data-aos="fade-in">
+    <div class="card p-4 shadow-lg border-0 w-100" style="max-width: 400px; background-color: var(--card-bg); border: 1px solid var(--border-color); box-shadow: var(--card-shadow); animation: fadeInUp 0.8s ease;">
+        <div class="text-center mb-4">
+            <i class="fas fa-user-plus fa-3x text-primary mb-3"></i>
+            <h2 class="fw-bold text-white">Cadastrar</h2>
+            <p class="text-light">Crie sua conta para organizar suas partidas!</p>
+        </div>
+
+        <form id="formCadastrar">
+            <!-- Nome -->
+            <div class="mb-3 position-relative">
+                <label for="nome" class="form-label text-light">Nome</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-light"><i class="fas fa-user"></i></span>
+                    <input type="text" class="form-control bg-dark text-light border-secondary" id="nome" placeholder="Seu nome" required />
+                </div>
+            </div>
+
+            <!-- Email -->
+            <div class="mb-3 position-relative">
+                <label for="emailCadastro" class="form-label text-light">E-mail</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-light"><i class="fas fa-envelope"></i></span>
+                    <input type="email" class="form-control bg-dark text-light border-secondary" id="emailCadastro" placeholder="nome@exemplo.com" required />
+                </div>
+            </div>
+
+            <!-- Senha -->
+            <div class="mb-3 position-relative">
+                <label for="senhaCadastro" class="form-label text-light">Senha</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-light"><i class="fas fa-lock"></i></span>
+                    <input type="password" class="form-control bg-dark text-light border-secondary" id="senhaCadastro" placeholder="Senha" required />
+                    <button type="button" id="toggleSenhaCadastro" class="btn btn-outline-secondary text-light border-secondary" tabindex="-1">
+                        <i id="iconeOlhoCadastro" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <button id="btnCadastrar" type="submit" class="btn btn-success w-100 fw-bold d-flex justify-content-center align-items-center gap-2">
+                <span id="btnIconCadastro"><i class="fas fa-user-plus"></i></span>
+                <span id="btnTextCadastro">Cadastrar</span>
+                <div id="btnSpinnerCadastro" class="spinner-border spinner-border-sm text-light d-none" role="status" aria-hidden="true"></div>
+            </button>
+
+            <div class="text-center mt-3">
+                <a href="/Login" class="text-secondary small">Já tem conta? Entrar</a>
+            </div>
+        </form>
+    </div>
+</div>

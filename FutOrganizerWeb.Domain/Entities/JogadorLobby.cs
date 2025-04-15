@@ -5,9 +5,14 @@ public class JogadorLobby
     public Guid Id { get; set; } = Guid.NewGuid();
     public string Nome { get; set; } = string.Empty;
 
-    public Guid? UsuarioId { get; set; }
+    // Novo relacionamento com o usuário autenticado
+    public Guid? UsuarioAutenticadoId { get; set; }
+    public Usuario? UsuarioAutenticado { get; set; }
+
+    // E-mail opcional (para convidados, por exemplo)
     public string? Email { get; set; }
 
+    // Relacionamento com a Partida
     public Guid PartidaId { get; set; }
     public Partida? Partida { get; set; }
 

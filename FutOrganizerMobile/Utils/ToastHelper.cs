@@ -3,7 +3,7 @@ using Microsoft.Maui.Layouts;
 
 public static class ToastHelper
 {
-    public static void ShowToast(Layout layout, string mensagem, Color backgroundColor)
+    public static void mostrarToast(Layout layout, string mensagem, Color backgroundColor)
     {
         var toastLabel = new Label
         {
@@ -42,7 +42,7 @@ public static class ToastHelper
         });
     }
 
-    public static void ShowToast(AbsoluteLayout toastContainer, string mensagem, Color backgroundColor)
+    public static void mostrarToast(AbsoluteLayout toastContainer, string mensagem, Color backgroundColor)
     {
         var toastLabel = new Label
         {
@@ -84,7 +84,7 @@ public static class ToastHelper
         });
     }
 
-    public static async Task ShowToastAsync(AbsoluteLayout toastContainer, string mensagem, Color backgroundColor)
+    public static async Task mostrarToastAsync(AbsoluteLayout toastContainer, string mensagem, Color backgroundColor)
     {
         var toastLabel = new Label
         {

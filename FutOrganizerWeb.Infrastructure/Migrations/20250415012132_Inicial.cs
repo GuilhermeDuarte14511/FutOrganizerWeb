@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace FutOrganizerWeb.Infrastructure.Migrations
 {
     /// <inheritdoc />
-    public partial class AddTimeComId : Migration
+    public partial class Inicial : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -23,19 +23,6 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Eventos",
-                columns: table => new
-                {
-                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
-                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Data = table.Column<DateTime>(type: "datetime2", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Eventos", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "Goleiros",
                 columns: table => new
                 {
@@ -45,6 +32,54 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Goleiros", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Usuarios",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    SenhaHash = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    CriadoEm = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Usuarios", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "UsuariosTemporarios",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DataCriacao = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_UsuariosTemporarios", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Eventos",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Data = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UsuarioCriadorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Eventos", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Eventos_Usuarios_UsuarioCriadorId",
+                        column: x => x.UsuarioCriadorId,
+                        principalTable: "Usuarios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -78,7 +113,10 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     Latitude = table.Column<double>(type: "float", nullable: true),
                     Longitude = table.Column<double>(type: "float", nullable: true),
                     Local = table.Column<string>(type: "nvarchar(max)", nullable: true),
-                    EventoId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                    EventoId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    UsuarioCriadorId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    CodigoLobby = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UsuarioTemporarioId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -87,6 +125,73 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         name: "FK_Partidas_Eventos_EventoId",
                         column: x => x.EventoId,
                         principalTable: "Eventos",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Partidas_UsuariosTemporarios_UsuarioTemporarioId",
+                        column: x => x.UsuarioTemporarioId,
+                        principalTable: "UsuariosTemporarios",
+                        principalColumn: "Id");
+                    table.ForeignKey(
+                        name: "FK_Partidas_Usuarios_UsuarioCriadorId",
+                        column: x => x.UsuarioCriadorId,
+                        principalTable: "Usuarios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "JogadoresLobby",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    UsuarioAutenticadoId = table.Column<Guid>(type: "uniqueidentifier", nullable: true),
+                    Email = table.Column<string>(type: "nvarchar(max)", nullable: true),
+                    PartidaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DataEntrada = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UltimaAtividade = table.Column<DateTime>(type: "datetime2", nullable: false),
+                    UsuarioId = table.Column<Guid>(type: "uniqueidentifier", nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_JogadoresLobby", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_JogadoresLobby_Partidas_PartidaId",
+                        column: x => x.PartidaId,
+                        principalTable: "Partidas",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_JogadoresLobby_Usuarios_UsuarioAutenticadoId",
+                        column: x => x.UsuarioAutenticadoId,
+                        principalTable: "Usuarios",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.SetNull);
+                    table.ForeignKey(
+                        name: "FK_JogadoresLobby_Usuarios_UsuarioId",
+                        column: x => x.UsuarioId,
+                        principalTable: "Usuarios",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
+                name: "MensagensChat",
+                columns: table => new
+                {
+                    Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    PartidaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    NomeJogador = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Conteudo = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    DataHoraEnvio = table.Column<DateTime>(type: "datetime2", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MensagensChat", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MensagensChat_Partidas_PartidaId",
+                        column: x => x.PartidaId,
+                        principalTable: "Partidas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -98,7 +203,8 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     Id = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Nome = table.Column<string>(type: "nvarchar(max)", nullable: false),
                     Data = table.Column<DateTime>(type: "datetime2", nullable: false),
-                    PartidaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false)
+                    PartidaId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    DataAtualizacao = table.Column<DateTime>(type: "datetime2", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -160,14 +266,49 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                 column: "EventoId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Eventos_UsuarioCriadorId",
+                table: "Eventos",
+                column: "UsuarioCriadorId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Jogadores_TimeId",
                 table: "Jogadores",
                 column: "TimeId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_JogadoresLobby_PartidaId",
+                table: "JogadoresLobby",
+                column: "PartidaId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JogadoresLobby_UsuarioAutenticadoId",
+                table: "JogadoresLobby",
+                column: "UsuarioAutenticadoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_JogadoresLobby_UsuarioId",
+                table: "JogadoresLobby",
+                column: "UsuarioId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MensagensChat_PartidaId",
+                table: "MensagensChat",
+                column: "PartidaId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Partidas_EventoId",
                 table: "Partidas",
                 column: "EventoId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Partidas_UsuarioCriadorId",
+                table: "Partidas",
+                column: "UsuarioCriadorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Partidas_UsuarioTemporarioId",
+                table: "Partidas",
+                column: "UsuarioTemporarioId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Sorteios_PartidaId",
@@ -198,6 +339,12 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                 name: "Jogadores");
 
             migrationBuilder.DropTable(
+                name: "JogadoresLobby");
+
+            migrationBuilder.DropTable(
+                name: "MensagensChat");
+
+            migrationBuilder.DropTable(
                 name: "Times");
 
             migrationBuilder.DropTable(
@@ -211,6 +358,12 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
 
             migrationBuilder.DropTable(
                 name: "Eventos");
+
+            migrationBuilder.DropTable(
+                name: "UsuariosTemporarios");
+
+            migrationBuilder.DropTable(
+                name: "Usuarios");
         }
     }
 }

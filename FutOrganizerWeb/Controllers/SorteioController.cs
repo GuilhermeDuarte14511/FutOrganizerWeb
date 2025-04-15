@@ -1,12 +1,13 @@
 ﻿using FutOrganizerWeb.Application.DTOs;
 using FutOrganizerWeb.Application.Interfaces;
 using FutOrganizerWeb.Domain.Entities;
+using FutOrganizerWeb.Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 
 namespace FutOrganizerWeb.Controllers
 {
-    public class SorteioController : Controller
+    public class SorteioController : BaseController
     {
         private readonly ISorteioService _sorteioService;
         private readonly IPartidaService _partidaService;
@@ -17,8 +18,10 @@ namespace FutOrganizerWeb.Controllers
             _partidaService = partidaService;
         }
 
+        [HttpGet]
+        [Route("Sorteio")]
         public async Task<IActionResult> Index(string? codigo = null)
-        {   
+        {
             if (string.IsNullOrEmpty(codigo))
                 return View(); // fluxo normal (sem lobby)
 
@@ -35,7 +38,6 @@ namespace FutOrganizerWeb.Controllers
 
             return View(viewModel);
         }
-
 
         [HttpPost]
         public async Task<IActionResult> Criar([FromBody] SorteioRequest request)
@@ -140,6 +142,26 @@ namespace FutOrganizerWeb.Controllers
 
             return Json(salas);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> MinhasParticipacoes()
+        {
+            var usuarioId = ObterUsuarioLogado(); // método já existente
+            var salas = await _partidaService.ObterSalasOndeParticipeiAsync(usuarioId);
+
+            foreach (var partida in salas)
+            {
+                if (string.IsNullOrWhiteSpace(partida.Local) &&
+                    partida.Latitude.HasValue && partida.Longitude.HasValue)
+                {
+                    var endereco = await AppHelper.ObterEnderecoPorCoordenadasAsync(partida.Latitude.Value, partida.Longitude.Value);
+                    partida.Local = endereco;
+                }
+            }
+
+            return View(salas);
+        }
+
 
 
     }

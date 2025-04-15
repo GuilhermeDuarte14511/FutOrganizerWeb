@@ -65,7 +65,7 @@ namespace FutOrganizerWeb.Application.Services
             return await _repository.ObterPorCodigoAsync(codigo);
         }
 
-        public async Task<JogadorDTO> AdicionarJogadorAoLobbyAsync(string codigo, string nomeJogador, string? email = null, Guid? usuarioId = null)
+        public async Task<JogadorDTO> AdicionarJogadorAoLobbyAsync(string codigo, string nomeJogador, string? email = null, Guid? usuarioAutenticadoId = null)
         {
             var partida = await _repository.ObterPorCodigoAsync(codigo);
             if (partida == null)
@@ -73,15 +73,17 @@ namespace FutOrganizerWeb.Application.Services
 
             JogadorLobby? jogadorExistente = null;
 
-            // Verifica por e-mail se estiver preenchido
-            if (!string.IsNullOrWhiteSpace(email))
+            if (usuarioAutenticadoId.HasValue)
+            {
+                jogadorExistente = partida.JogadoresLobby
+                    .FirstOrDefault(j => j.UsuarioAutenticadoId == usuarioAutenticadoId);
+            }
+            else if (!string.IsNullOrWhiteSpace(email))
             {
                 jogadorExistente = partida.JogadoresLobby
                     .FirstOrDefault(j => j.Email != null && j.Email.Equals(email, StringComparison.OrdinalIgnoreCase));
             }
-
-            // Se não encontrou por e-mail, tenta por nome (fallback)
-            if (jogadorExistente == null)
+            else
             {
                 jogadorExistente = partida.JogadoresLobby
                     .FirstOrDefault(j => j.Nome.Equals(nomeJogador, StringComparison.OrdinalIgnoreCase));
@@ -94,20 +96,19 @@ namespace FutOrganizerWeb.Application.Services
                     Id = jogadorExistente.Id,
                     Nome = jogadorExistente.Nome,
                     Email = jogadorExistente.Email,
-                    UsuarioId = jogadorExistente.UsuarioId,
+                    UsuarioId = jogadorExistente.UsuarioAutenticadoId,
                     UltimaAtividade = jogadorExistente.UltimaAtividade
                 };
             }
 
-            // Novo jogador
             var novoJogador = new JogadorLobby
             {
                 Nome = nomeJogador,
                 Email = email,
-                UsuarioId = usuarioId ?? Guid.NewGuid(),
+                UsuarioAutenticadoId = usuarioAutenticadoId,
+                PartidaId = partida.Id,
                 DataEntrada = DateTime.Now,
-                UltimaAtividade = DateTime.Now,
-                PartidaId = partida.Id
+                UltimaAtividade = DateTime.Now
             };
 
             await _repository.AdicionarJogadorAsync(novoJogador);
@@ -117,10 +118,11 @@ namespace FutOrganizerWeb.Application.Services
                 Id = novoJogador.Id,
                 Nome = novoJogador.Nome,
                 Email = novoJogador.Email,
-                UsuarioId = novoJogador.UsuarioId,
+                UsuarioId = novoJogador.UsuarioAutenticadoId,
                 UltimaAtividade = novoJogador.UltimaAtividade
             };
         }
+
 
 
 
@@ -182,6 +184,44 @@ namespace FutOrganizerWeb.Application.Services
             }
         }
 
+        public Task<List<Partida>> ObterSalasOndeParticipeiAsync(Guid usuarioId)
+        {
+            return _repository.ObterSalasOndeUsuarioParticipouAsync(usuarioId);
+        }
+
+        public async Task<JogadorDTO> AdicionarJogadorAoLobbyAsync(JogadorLobby jogador)
+        {
+            var partida = await _repository.ObterPorIdAsync(jogador.PartidaId);
+            if (partida == null)
+                throw new Exception("Partida não encontrada");
+
+            var jogadorExistente = partida.JogadoresLobby.FirstOrDefault(j =>
+                (!string.IsNullOrWhiteSpace(j.Email) && j.Email == jogador.Email) ||
+                (!string.IsNullOrWhiteSpace(j.Nome) && j.Nome == jogador.Nome && j.UsuarioAutenticadoId == jogador.UsuarioAutenticadoId));
+
+            if (jogadorExistente != null)
+            {
+                return new JogadorDTO
+                {
+                    Id = jogadorExistente.Id,
+                    Nome = jogadorExistente.Nome,
+                    Email = jogadorExistente.Email,
+                    UsuarioId = jogadorExistente.UsuarioAutenticadoId,
+                    UltimaAtividade = jogadorExistente.UltimaAtividade
+                };
+            }
+
+            await _repository.AdicionarJogadorAsync(jogador);
+
+            return new JogadorDTO
+            {
+                Id = jogador.Id,
+                Nome = jogador.Nome,
+                Email = jogador.Email,
+                UsuarioId = jogador.UsuarioAutenticadoId,
+                UltimaAtividade = jogador.UltimaAtividade
+            };
+        }
 
 
     }

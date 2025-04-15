@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace FutOrganizerWeb.Application.DTOs
 {
@@ -10,6 +7,8 @@ namespace FutOrganizerWeb.Application.DTOs
     {
         public string Codigo { get; set; } = string.Empty;
         public List<string> Jogadores { get; set; } = new();
+        public string NomeDoJogador { get; set; } = string.Empty;
+        public Guid JogadorId { get; set; } // agora é Guid
+        public Guid? UsuarioAutenticadoId { get; set; } // novo campo para saber se é autenticado
     }
-
 }
