@@ -32,5 +32,22 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
         {
             return _context.Usuarios.Any(u => u.Email == email);
         }
+
+        public void Atualizar(Usuario usuario)
+        {
+            _context.Usuarios.Update(usuario);
+            _context.SaveChanges();
+        }
+
+        public Usuario? ObterPorToken(string token)
+        {
+            return _context.Usuarios.FirstOrDefault(u => u.TokenRecuperacaoSenha == token);
+        }
+
+        public Usuario ObterPorId(Guid id)
+        {
+            return _context.Usuarios.FirstOrDefault(u => u.Id == id);
+        }
+
     }
 }

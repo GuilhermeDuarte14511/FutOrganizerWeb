@@ -1,6 +1,7 @@
 ﻿using FutOrganizerWeb.Application.DTOs;
 using FutOrganizerWeb.Application.Interfaces;
 using FutOrganizerWeb.Domain.Helpers;
+using FutOrganizerWeb.Domain.Interfaces;
 using Microsoft.AspNetCore.SignalR;
 using System.Collections.Concurrent;
 
@@ -10,14 +11,19 @@ namespace FutOrganizerWeb.Hubs
     {
         private readonly IChatService _chatService;
         private readonly IPartidaService _partidaService;
+        private readonly IUsuarioService _usuarioService;
 
         // ConnectionId => (codigoSala, identificador único)
         public static readonly ConcurrentDictionary<string, (string Sala, string Identificador)> UsuariosConectados = new();
 
-        public LobbyChatHub(IChatService chatService, IPartidaService partidaService)
+        public LobbyChatHub(
+            IChatService chatService,
+            IPartidaService partidaService,
+            IUsuarioService usuarioService)
         {
             _chatService = chatService;
             _partidaService = partidaService;
+            _usuarioService = usuarioService;
         }
 
         public async Task EnviarMensagem(string codigoSala, string identificador, string mensagem)
@@ -25,10 +31,23 @@ namespace FutOrganizerWeb.Hubs
             if (string.IsNullOrWhiteSpace(codigoSala) || string.IsNullOrWhiteSpace(identificador) || string.IsNullOrWhiteSpace(mensagem))
                 return;
 
-            // Tenta obter o nome do jogador pela partida
             var partida = await _partidaService.ObterPorCodigoAsync(codigoSala);
-            var nomeJogador = partida?.JogadoresLobby
-                .FirstOrDefault(j => LobbyHelper.ObterIdentificadorJogador(j.UsuarioAutenticadoId, j.Nome) == identificador)?.Nome ?? "Desconhecido";
+            if (partida == null) return;
+
+            // 🔍 Primeiro tenta achar o jogador no lobby
+            var jogador = partida.JogadoresLobby
+                .FirstOrDefault(j => LobbyHelper.ObterIdentificadorJogador(j.UsuarioAutenticadoId, j.Nome) == identificador);
+
+            string nomeJogador = jogador?.Nome;
+
+            // ⚠️ Se não achou, verifica se é o criador da sala (admin)
+            if (string.IsNullOrWhiteSpace(nomeJogador) && partida.UsuarioCriadorId.HasValue)
+            {
+                var usuario = _usuarioService.ObterPorId(partida.UsuarioCriadorId.Value);
+                nomeJogador = usuario?.Nome ?? "Administrador";
+            }
+
+            nomeJogador ??= "Desconhecido";
 
             await _partidaService.AtualizarUltimaAtividadeAsync(codigoSala, nomeJogador);
 
@@ -97,10 +116,7 @@ namespace FutOrganizerWeb.Hubs
                 .ToHashSet();
 
             var jogadoresOnline = partida.JogadoresLobby
-                .Where(j =>
-                    conexoes.Contains(
-                        LobbyHelper.ObterIdentificadorJogador(j.UsuarioAutenticadoId, j.Nome)
-                    ))
+                .Where(j => conexoes.Contains(LobbyHelper.ObterIdentificadorJogador(j.UsuarioAutenticadoId, j.Nome)))
                 .Select(j => j.Nome)
                 .Distinct()
                 .ToList();

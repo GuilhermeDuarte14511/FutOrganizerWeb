@@ -3,7 +3,19 @@
 
 @{
     var isLobby = !string.IsNullOrEmpty(Model?.Codigo);
+    var identificador = Model.UsuarioAutenticadoId?.ToString() ?? Model.JogadorId.ToString();
+    var nomeJogador = Model.NomeDoJogador ?? "Admin";
 }
+
+<!-- Dados para SignalR -->
+@if (isLobby)
+{
+    <span id="dadosJogador"
+          data-id="@identificador"
+          data-nome="@nomeJogador"
+          class="d-none"></span>
+}
+
 <div id="sorteioPage" class="container">
     <div class="container">
 
@@ -85,7 +97,6 @@
         <div id="teamsContainer" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3" data-aos="fade-up">
             <!-- Times renderizados via JS aqui -->
         </div>
-
     </div>
 </div>
 
@@ -112,3 +123,14 @@
 
 <!-- Toast Container -->
 <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+
+<!-- ✅ Botão flutuante do Chat -->
+@if (isLobby)
+{
+    <button id="btnAbrirChatAdmin"
+            class="btn btn-primary rounded-circle shadow-lg position-fixed"
+            style="bottom: 20px; right: 20px; width: 56px; height: 56px; z-index: 9999;"
+            title="Abrir Chat da Sala">
+        <i class="fas fa-comments"></i>
+    </button>
+}

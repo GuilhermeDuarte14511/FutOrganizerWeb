@@ -3,6 +3,7 @@ using FutOrganizerWeb.Application.Interfaces.Repositories;
 using FutOrganizerWeb.Application.Services;
 using FutOrganizerWeb.Domain.Interfaces;
 using FutOrganizerWeb.Domain.Interfaces_Repositories;
+using FutOrganizerWeb.Infrastructure.Persistence.Repositories;
 using FutOrganizerWeb.Infrastructure.Repositories;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -18,12 +19,14 @@ namespace FutOrganizerWeb.Infrastructure.Config
             services.AddScoped<ISorteioService, SorteioService>();
             services.AddScoped<IPartidaService, PartidaService>();
             services.AddScoped<IChatService, ChatService>();
+            services.AddScoped<IEmailService, EmailService>();
 
             // Repositories
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
             services.AddScoped<ISorteioRepository, SorteioRepository>();
             services.AddScoped<IPartidaRepository, PartidaRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
+            services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
 
             return services;
         }

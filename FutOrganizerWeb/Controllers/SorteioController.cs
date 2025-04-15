@@ -2,6 +2,7 @@
 using FutOrganizerWeb.Application.Interfaces;
 using FutOrganizerWeb.Domain.Entities;
 using FutOrganizerWeb.Domain.Helpers;
+using FutOrganizerWeb.Domain.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Globalization;
 
@@ -11,11 +12,16 @@ namespace FutOrganizerWeb.Controllers
     {
         private readonly ISorteioService _sorteioService;
         private readonly IPartidaService _partidaService;
+        private readonly IUsuarioService _usuarioService;
 
-        public SorteioController(ISorteioService sorteioService, IPartidaService partidaService)
+        public SorteioController(
+            ISorteioService sorteioService,
+            IPartidaService partidaService,
+            IUsuarioService usuarioService)
         {
             _sorteioService = sorteioService;
             _partidaService = partidaService;
+            _usuarioService = usuarioService;
         }
 
         [HttpGet]
@@ -30,10 +36,15 @@ namespace FutOrganizerWeb.Controllers
 
             var jogadores = partida.JogadoresLobby.Select(j => j.Nome).ToList();
 
+            var usuarioId = ObterUsuarioLogado();
+            var usuario = _usuarioService.ObterPorId(usuarioId);
+
             var viewModel = new SorteioLobbyViewModel
             {
                 Codigo = codigo,
-                Jogadores = jogadores
+                Jogadores = jogadores,
+                UsuarioAutenticadoId = usuarioId,
+                NomeDoJogador = usuario?.Nome ?? "Admin"
             };
 
             return View(viewModel);
@@ -55,8 +66,10 @@ namespace FutOrganizerWeb.Controllers
 
             if (!string.IsNullOrWhiteSpace(request.CodigoLobby))
             {
-                // Criação do sorteio em uma partida já existente (modo lobby)
                 sorteioId = await _sorteioService.CriarSorteioParaLobbyAsync(request.CodigoLobby, request);
+
+                var nomeAdmin = HttpContext.Session.GetString("UsuarioNome") ?? "Administrador";
+                await _partidaService.AdicionarJogadorAoLobbyAsync(request.CodigoLobby, nomeAdmin, null, usuarioId);
             }
             else
             {
@@ -115,8 +128,13 @@ namespace FutOrganizerWeb.Controllers
 
             await _partidaService.CriarPartidaAsync(novaPartida);
 
+            // ✅ Insere o criador como jogador no lobby
+            var nomeAdmin = HttpContext.Session.GetString("UsuarioNome") ?? "Administrador";
+            await _partidaService.AdicionarJogadorAoLobbyAsync(codigoLobby, nomeAdmin, null, usuarioId);
+
             return Redirect($"/Sorteio?codigo={codigoLobby}");
         }
+
 
         [HttpGet]
         [Route("Sorteio/ObterSalas")]
@@ -146,7 +164,7 @@ namespace FutOrganizerWeb.Controllers
         [HttpGet]
         public async Task<IActionResult> MinhasParticipacoes()
         {
-            var usuarioId = ObterUsuarioLogado(); // método já existente
+            var usuarioId = ObterUsuarioLogado();
             var salas = await _partidaService.ObterSalasOndeParticipeiAsync(usuarioId);
 
             foreach (var partida in salas)
@@ -161,8 +179,5 @@ namespace FutOrganizerWeb.Controllers
 
             return View(salas);
         }
-
-
-
     }
 }

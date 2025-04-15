@@ -1,0 +1,52 @@
+﻿@{
+    ViewData["Title"] = "Nova Senha";
+}
+
+<div id="novaSenhaPage" class="d-flex justify-content-center align-items-center min-vh-100 bg-dark text-light px-3" data-aos="fade-in">
+    <div class="card p-4 shadow-lg border-0 w-100"
+         style="max-width: 400px; background-color: var(--card-bg); border: 1px solid var(--border-color);
+                box-shadow: var(--card-shadow); animation: fadeInUp 0.8s ease;">
+
+        <div class="text-center mb-4">
+            <i class="fas fa-unlock-alt fa-3x text-primary mb-3 animate__animated animate__fadeInDown"></i>
+            <h2 class="fw-bold text-white animate__animated animate__fadeInUp">Redefinir Senha</h2>
+            <p class="text-light animate__animated animate__fadeInUp animate__delay-1s">Crie uma nova senha para sua conta.</p>
+        </div>
+
+        <form id="formNovaSenha" class="animate__animated animate__fadeInUp animate__delay-2s">
+            <input type="hidden" id="token" value="@ViewBag.Token" />
+
+            <!-- Nova Senha -->
+            <div class="mb-3 position-relative">
+                <label for="novaSenha" class="form-label text-light">Nova Senha</label>
+                <div class="input-group">
+                    <span class="input-group-text bg-transparent border-secondary text-light">
+                        <i class="fas fa-lock"></i>
+                    </span>
+                    <input type="password"
+                           class="form-control bg-dark text-light border-secondary"
+                           id="novaSenha"
+                           placeholder="Nova senha"
+                           required />
+                    <button type="button" id="toggleNovaSenha" class="btn btn-outline-secondary text-light border-secondary" tabindex="-1">
+                        <i id="iconeOlhoNovaSenha" class="fas fa-eye"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Botão -->
+            <button id="btnNovaSenha" type="submit"
+                    class="btn btn-success w-100 fw-bold d-flex justify-content-center align-items-center gap-2">
+                <span id="btnIconNovaSenha"><i class="fas fa-check-circle"></i></span>
+                <span id="btnTextNovaSenha">Redefinir Senha</span>
+                <div id="btnSpinnerNovaSenha"
+                     class="spinner-border spinner-border-sm text-light d-none"
+                     role="status" aria-hidden="true"></div>
+            </button>
+
+            <div class="text-center mt-3">
+                <a href="/Login" class="text-secondary small">Voltar para o login</a>
+            </div>
+        </form>
+    </div>
+</div>

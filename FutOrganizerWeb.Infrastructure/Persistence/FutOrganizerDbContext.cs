@@ -23,6 +23,9 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
         public DbSet<UsuarioTemporario> UsuariosTemporarios { get; set; }
         public DbSet<MensagemChat> MensagensChat { get; set; }
 
+        // ✅ Novo DbSet para templates de e-mail
+        public DbSet<EmailTemplate> EmailTemplates { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
@@ -39,6 +42,7 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
             modelBuilder.Entity<JogadorLobby>().HasKey(j => j.Id);
             modelBuilder.Entity<UsuarioTemporario>().HasKey(u => u.Id);
             modelBuilder.Entity<MensagemChat>().HasKey(m => m.Id);
+            modelBuilder.Entity<EmailTemplate>().HasKey(e => e.Id);
 
             // Relacionamentos
             modelBuilder.Entity<Evento>()
@@ -77,7 +81,6 @@ namespace FutOrganizerWeb.Infrastructure.Persistence
                 .HasForeignKey(j => j.PartidaId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Novo relacionamento: UsuarioAutenticado
             modelBuilder.Entity<JogadorLobby>()
                 .HasOne(j => j.UsuarioAutenticado)
                 .WithMany()

@@ -1,0 +1,18 @@
+﻿@{
+    ViewData["Title"] = "Link Expirado";
+}
+
+<div id="linkExpiradoPage" class="d-flex justify-content-center align-items-center min-vh-100 bg-dark text-light px-3">
+    <div class="card p-4 shadow-lg border-0 w-100 animate__animated animate__fadeInUp"
+         style="max-width: 400px; background-color: var(--card-bg); border: 1px solid var(--border-color);">
+        <div class="text-center">
+            <i class="fas fa-clock fa-3x text-warning mb-3 animate__animated animate__fadeInDown"></i>
+            <h2 class="fw-bold text-white">Link expirado</h2>
+            <p class="text-light">O link para redefinir sua senha não é mais válido.</p>
+            <p class="text-light">Isso pode acontecer se ele já foi utilizado ou passou do prazo de 1 hora.</p>
+            <a href="/Login/EsqueciSenha" class="btn btn-primary mt-3 w-100 fw-bold">
+                🔁 Solicitar novo link
+            </a>
+        </div>
+    </div>
+</div>

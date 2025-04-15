@@ -8,6 +8,7 @@ namespace FutOrganizerWeb.Domain.Interfaces
         string GerarHash(string senha);
         bool VerificarHash(string senhaDigitada, string hashArmazenado);
         void SalvarUsuarioNaSessao(HttpContext context, Usuario usuario);
-
+        void RemoverUsuarioDaSessao(HttpContext context);
     }
+
 }

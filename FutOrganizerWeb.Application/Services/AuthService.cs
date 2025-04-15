@@ -38,6 +38,12 @@ namespace FutOrganizerWeb.Application.Services
             context.Session.SetString("UsuarioNome", usuario.Nome);
             context.Session.SetString("UsuarioEmail", usuario.Email);
         }
+        public void RemoverUsuarioDaSessao(HttpContext context)
+        {
+            context.Session.Remove("UsuarioId");
+            context.Session.Remove("UsuarioNome");
+            context.Session.Remove("UsuarioEmail");
+        }
 
     }
 }

@@ -4,13 +4,12 @@ namespace FutOrganizerWeb.Domain.Interfaces_Repositories
 {
     public interface IUsuarioRepository
     {
-        // Obter o usuário por email
         Usuario? ObterPorEmail(string email);
-
-        // Adicionar um novo usuário
         void Adicionar(Usuario usuario);
-
-        // Verificar se o email já existe
         bool EmailExiste(string email);
+        void Atualizar(Usuario usuario);
+        Usuario? ObterPorToken(string token);
+        Usuario ObterPorId(Guid id);
     }
+
 }

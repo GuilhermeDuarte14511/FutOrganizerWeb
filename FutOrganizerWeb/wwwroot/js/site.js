@@ -98,6 +98,13 @@
                 btnSpinner.classList.add('d-none');
             }
         });
+
+        const sucesso = getUrlParameter('sucesso');
+        if (sucesso === 'senha') {
+            mostrarToast('Senha redefinida com sucesso! Faça o login.', 'success');
+            // limpa a query string para não repetir ao atualizar a página
+            window.history.replaceState({}, document.title, window.location.pathname);
+        }
     }
 
 
@@ -573,6 +580,241 @@
                 }
             });
         }
+
+        const btnAbrirChatAdmin = document.getElementById("btnAbrirChatAdmin");
+        const chatMensagens = document.createElement("div");
+        const chatInputContainer = document.createElement("div");
+        const listaOnline = document.createElement("ul");
+        const codigoLobby = new URLSearchParams(window.location.search).get("codigo");
+
+        const dadosJogador = document.getElementById("dadosJogador");
+        const jogadorId = dadosJogador?.dataset.id || "admin";
+        const jogadorNome = dadosJogador?.dataset.nome || "Admin";
+
+        let chatAtivo = false;
+        let jogadoresAtividade = {};
+
+        if (btnAbrirChatAdmin) {
+            chatMensagens.id = "chatMensagensAdmin";
+            chatMensagens.className = "bg-light text-dark rounded p-2 mb-2 small";
+            chatMensagens.style.height = "250px";
+            chatMensagens.style.overflowY = "auto";
+
+            listaOnline.id = "listaJogadoresOnline";
+            listaOnline.className = "list-group mb-3 small";
+            listaOnline.style.maxHeight = "150px";
+            listaOnline.style.overflowY = "auto";
+
+            chatInputContainer.className = "d-flex";
+            chatInputContainer.innerHTML = `
+        <input type="text" id="inputMensagemAdmin" class="form-control me-2" placeholder="Digite..." />
+        <button id="btnEnviarMensagemAdmin" class="btn btn-success">
+            <i class="fas fa-paper-plane"></i>
+        </button>
+    `;
+
+            const chatBox = document.createElement("div");
+            chatBox.id = "chatAdminContainer";
+            chatBox.className = "position-fixed end-0 bottom-0 bg-dark text-white p-3 shadow-lg rounded-start animate__animated";
+            chatBox.style.width = "320px";
+            chatBox.style.maxHeight = "90vh";
+            chatBox.style.display = "none";
+            chatBox.style.zIndex = 10000;
+            chatBox.style.borderLeft = "4px solid #3d7fff";
+
+            chatBox.innerHTML = `
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <strong><i class="fas fa-comment-dots me-2"></i>Chat da Sala</strong>
+            <button id="btnFecharChatAdmin" class="btn btn-sm btn-outline-light">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="mb-2">
+            <strong class="text-white small"><i class="fas fa-circle text-success me-1"></i>Jogadores Online</strong>
+        </div>
+    `;
+            chatBox.appendChild(listaOnline);
+            chatBox.appendChild(chatMensagens);
+            chatBox.appendChild(chatInputContainer);
+            document.body.appendChild(chatBox);
+
+            const btnEnviar = chatInputContainer.querySelector("#btnEnviarMensagemAdmin");
+            const inputMensagem = chatInputContainer.querySelector("#inputMensagemAdmin");
+
+            function adicionarMensagem(nome, mensagem, hora) {
+                if (chatMensagens.querySelector("p.text-muted")) chatMensagens.innerHTML = '';
+                const div = document.createElement("div");
+                div.className = "mb-2";
+                div.innerHTML = `
+            <div class="bg-light p-2 rounded shadow-sm">
+                <div class="d-flex justify-content-between align-items-start">
+                    <div>
+                        <strong><i class="fas fa-user me-1"></i>${nome}</strong>
+                        <p class="mb-0">${mensagem}</p>
+                    </div>
+                    <small class="text-muted ms-2">${hora}</small>
+                </div>
+            </div>
+        `;
+                chatMensagens.appendChild(div);
+                chatMensagens.scrollTop = chatMensagens.scrollHeight;
+            }
+
+            function atualizarListaOnline(nomes) {
+                listaOnline.innerHTML = "";
+                nomes.forEach(nome => {
+                    const li = document.createElement("li");
+                    const ultimaAtividade = jogadoresAtividade[nome];
+                    const inativoMin = ultimaAtividade ? getMinutosInativo(ultimaAtividade) : 0;
+
+                    const status = inativoMin < 3
+                        ? `<span class="badge bg-success">🟢 Ativo</span>`
+                        : `<span class="badge bg-secondary">${inativoMin} min</span>`;
+
+                    li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white border-0 px-2 py-1";
+                    li.innerHTML = `<span><i class="fas fa-user me-2"></i>${nome}</span>${status}`;
+                    listaOnline.appendChild(li);
+                });
+            }
+
+            function getMinutosInativo(dataIso) {
+                const ultimo = new Date(dataIso);
+                const agora = new Date();
+                return Math.floor((agora - ultimo) / 60000);
+            }
+
+            function formatarHora(dataIso) {
+                const data = new Date(dataIso);
+                return data.toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+            }
+
+            const connection = new signalR.HubConnectionBuilder()
+                .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}&jogadorId=${jogadorId}&nome=${jogadorNome}`)
+                .withAutomaticReconnect()
+                .configureLogging(signalR.LogLevel.Information)
+                .build();
+
+            connection.on("ReceberMensagem", (nome, mensagem, hora) => {
+                adicionarMensagem(nome, mensagem, hora);
+            });
+
+            connection.on("AtualizarUsuariosOnline", async (identificadoresOnline) => {
+                try {
+                    const res = await fetch(`/Lobby/Jogadores?codigo=${codigoLobby}`);
+                    if (!res.ok) return;
+
+                    const jogadores = await res.json();
+
+                    // Mapeamento identificador → nome e últimaAtividade
+                    const mapaNomes = {};
+                    jogadoresAtividade = {};
+
+                    jogadores.forEach(j => {
+                        const identificador = j.identificador || j.nome;
+                        mapaNomes[identificador] = j.nome;
+                        jogadoresAtividade[j.nome] = j.ultimaAtividade;
+                    });
+
+                    // Traduz identificadoresOnline para nomes
+                    const nomes = identificadoresOnline
+                        .map(id => mapaNomes[id])
+                        .filter(nome => !!nome); // remove nulos
+
+                    atualizarListaOnline(nomes);
+                } catch (e) {
+                    console.warn("Erro ao buscar jogadores para mapear nomes:", e);
+                }
+            });
+
+
+
+            connection.start().then(async () => {
+                try {
+                    const resMensagens = await fetch(`/Lobby/Mensagens?codigo=${codigoLobby}`);
+                    const mensagens = await resMensagens.json();
+                    mensagens.forEach(m => adicionarMensagem(m.nomeUsuario, m.conteudo, formatarHora(m.dataEnvio)));
+
+                    const resJogadores = await fetch(`/Lobby/Jogadores?codigo=${codigoLobby}`);
+                    const jogadores = await resJogadores.json();
+                    jogadoresAtividade = {};
+                    jogadores.forEach(j => {
+                        jogadoresAtividade[j.nome] = j.ultimaAtividade;
+                    });
+
+                    const resOnline = await fetch(`/Lobby/UsuariosOnline?codigo=${codigoLobby}`);
+                    const online = await resOnline.json();
+                    atualizarListaOnline(online);
+                } catch {
+                    adicionarMensagem("Sistema", "Erro ao carregar dados", "⚠️");
+                }
+            });
+
+            setInterval(async () => {
+                try {
+                    // Atualiza jogadores e o mapa de nomes
+                    const res = await fetch(`/Lobby/Jogadores?codigo=${codigoLobby}`);
+                    const jogadores = await res.json();
+
+                    jogadoresAtividade = {};
+                    mapaNomes = {};
+
+                    jogadores.forEach(j => {
+                        const identificador = j.identificador || j.nome;
+                        mapaNomes[identificador] = j.nome;
+                        jogadoresAtividade[j.nome] = j.ultimaAtividade;
+                    });
+
+                    // Agora pega quem está online e converte ID → Nome
+                    const resOnline = await fetch(`/Lobby/UsuariosOnline?codigo=${codigoLobby}`);
+                    const online = await resOnline.json();
+
+                    const nomes = online.map(id => mapaNomes[id]).filter(n => !!n);
+
+                    atualizarListaOnline(nomes);
+                } catch (e) {
+                    console.error("❌ Erro ao atualizar jogadores online:", e);
+                }
+            }, 15000);
+
+            btnEnviar.addEventListener("click", async () => {
+                const mensagem = inputMensagem.value.trim();
+                if (!mensagem) return;
+                await connection.invoke("EnviarMensagem", codigoLobby, jogadorId, mensagem);
+                inputMensagem.value = "";
+            });
+
+            inputMensagem.addEventListener("keydown", async (e) => {
+                if (e.key === "Enter") {
+                    e.preventDefault();
+                    btnEnviar.click();
+                }
+            });
+
+            btnAbrirChatAdmin.addEventListener("click", () => {
+                const chatBox = document.getElementById("chatAdminContainer");
+                chatBox.style.display = "block";
+                chatBox.classList.add("animate__slideInRight");
+                btnAbrirChatAdmin.style.display = "none";
+                chatAtivo = true;
+            });
+
+            document.addEventListener("click", function (e) {
+                if (e.target.id === "btnFecharChatAdmin") {
+                    const chatBox = document.getElementById("chatAdminContainer");
+                    chatBox.classList.remove("animate__slideInRight");
+                    chatBox.style.display = "none";
+                    chatAtivo = false;
+
+                    setTimeout(() => {
+                        btnAbrirChatAdmin.style.display = "inline-block";
+                    }, 300);
+                }
+            });
+        }
+
+
+
+
 
     }
 
@@ -1186,15 +1428,15 @@
         const btnSair = document.getElementById("btnSairLobby");
         if (btnSair) {
             btnSair.addEventListener("click", async () => {
-                const res = await fetch(`/ Lobby / Sair ? codigo = ${codigoLobby}& jogadorId=${jogadorAtualId} `, { method: "DELETE" });
+                const url = `/Lobby/Sair?codigo=${encodeURIComponent(codigoLobby)}&jogadorId=${encodeURIComponent(jogadorAtualId)}`;
+                const res = await fetch(url, { method: "DELETE" });
                 if (res.ok) {
-                    document.cookie = `JogadorLobbyId_${codigoLobby}=; expires = Thu, 01 Jan 1970 00:00:00 UTC; path = /;`;
+                    document.cookie = `JogadorLobbyId_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                     document.cookie = `JogadorLobbyNome_${codigoLobby}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
                     window.location.reload();
                 }
             });
         }
-
         const connection = new signalR.HubConnectionBuilder()
             .withUrl(`/hubs/lobbychat?codigoSala=${codigoLobby}&jogadorId=${jogadorAtualId}&nome=${jogadorAtualNome}`)
             .withAutomaticReconnect()
@@ -1532,6 +1774,202 @@
             icone.classList.toggle("fa-eye", !mostrar);
             icone.classList.toggle("fa-eye-slash", mostrar);
         });
+    }
+
+    // ======= ESQUECI SENHA PAGE =======
+    const esqueciSenhaPage = document.getElementById('esqueciSenhaPage');
+
+    if (esqueciSenhaPage) {
+        const form = document.getElementById('formEsqueciSenha');
+        const emailInput = document.getElementById('emailRecuperacao');
+        const btn = document.getElementById('btnEnviarEmail');
+        const btnIcon = document.getElementById('btnIconEsqueci');
+        const btnText = document.getElementById('btnTextEsqueci');
+        const btnSpinner = document.getElementById('btnSpinnerEsqueci');
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = emailInput.value.trim();
+            if (!email) {
+                mostrarToast("Informe seu e-mail.", "warning");
+                return;
+            }
+
+            // Loading
+            btn.disabled = true;
+            btnIcon.classList.add("d-none");
+            btnText.textContent = "Enviando...";
+            btnSpinner.classList.remove("d-none");
+
+            try {
+                const response = await fetch('/Login/RedefinirSenha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(email)
+                });
+
+                const result = await response.json();
+                mostrarToast(result.mensagem, result.sucesso ? "success" : "danger");
+
+                if (result.sucesso) {
+                    setTimeout(() => window.location.href = "/Login?sucesso=senha", 2500);
+                }
+            } catch (err) {
+                mostrarToast("Erro ao enviar instruções. Tente novamente.", "danger");
+            } finally {
+                btn.disabled = false;
+                btnIcon.classList.remove("d-none");
+                btnText.textContent = "Enviar instruções";
+                btnSpinner.classList.add("d-none");
+            }
+        });
+    }
+
+    // ======= NOVA SENHA PAGE =======
+    const novaSenhaPage = document.getElementById('novaSenhaPage');
+
+    if (novaSenhaPage) {
+        const form = document.getElementById('formNovaSenha');
+        const senhaInput = document.getElementById('novaSenha');
+        const toggleBtn = document.getElementById('toggleNovaSenha');
+        const iconeOlho = document.getElementById('iconeOlhoNovaSenha');
+        const token = document.getElementById('token').value;
+
+        toggleBtn.addEventListener('click', () => {
+            const mostrar = senhaInput.type === 'password';
+            senhaInput.type = mostrar ? 'text' : 'password';
+            iconeOlho.classList.toggle('fa-eye', !mostrar);
+            iconeOlho.classList.toggle('fa-eye-slash', mostrar);
+        });
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const senha = senhaInput.value.trim();
+            if (!senha || senha.length < 6) {
+                mostrarToast("A senha deve ter no mínimo 6 caracteres.", "warning");
+                return;
+            }
+
+            const btn = document.getElementById('btnNovaSenha');
+            const btnIcon = document.getElementById('btnIconNovaSenha');
+            const btnText = document.getElementById('btnTextNovaSenha');
+            const btnSpinner = document.getElementById('btnSpinnerNovaSenha');
+
+            // loading state
+            btn.disabled = true;
+            btnIcon.classList.add('d-none');
+            btnText.textContent = 'Aguarde...';
+            btnSpinner.classList.remove('d-none');
+
+            try {
+                const response = await fetch('/Login/SalvarNovaSenha', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ token, novaSenha: senha })
+                });
+
+                const result = await response.json();
+
+                if (result.sucesso) {
+                    mostrarToast(result.mensagem, 'success');
+                    setTimeout(() => window.location.href = "/Login?sucesso=senha", 1500);
+                } else {
+                    mostrarToast(result.mensagem, 'danger');
+                }
+            } catch (err) {
+                mostrarToast("Erro ao redefinir senha.", "danger");
+            } finally {
+                btn.disabled = false;
+                btnIcon.classList.remove('d-none');
+                btnText.textContent = 'Redefinir Senha';
+                btnSpinner.classList.add('d-none');
+            }
+        });
+    }
+
+    // ======= LOGIN PAGE – Mensagem de sucesso após redefinir senha =======
+    function getUrlParameter(name) {
+        name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+        const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+        const results = regex.exec(location.search);
+        return results === null ? null : decodeURIComponent(results[1].replace(/\+/g, ' '));
+    }
+
+    var meusDadosPage = document.getElementById('meusDadosPage');
+    if (meusDadosPage) {
+
+        const btnSalvar = document.querySelector('#formSalvarTudo button');
+        const icon = btnSalvar?.querySelector('i');
+        const text = btnSalvar?.querySelector('span');
+
+        document.getElementById('formSalvarTudo').addEventListener('submit', async function (e) {
+            e.preventDefault();
+
+            // Animação: loading
+            btnSalvar.disabled = true;
+            if (icon && text) {
+                icon.classList.remove('fa-save');
+                icon.classList.add('spinner-border', 'spinner-border-sm');
+                text.textContent = "Salvando...";
+            }
+
+            const nome = document.getElementById('nome').value;
+            const email = document.getElementById('email').value;
+            const senhaAtual = document.getElementById('senhaAtual').value;
+            const novaSenha = document.getElementById('novaSenha').value;
+
+            try {
+                const res = await fetch('/Usuario/SalvarAlteracoes', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ nome, email, senhaAtual, novaSenha })
+                });
+
+                const resultados = await res.json();
+
+                // Garante array de mensagens
+                const mensagens = Array.isArray(resultados) ? resultados : [resultados];
+
+                mensagens.forEach(m => mostrarToast(m.mensagem, m.sucesso));
+
+                const sucessoSenha = mensagens.find(m => m.sucesso && m.mensagem.toLowerCase().includes('senha'));
+                if (sucessoSenha) {
+                    document.getElementById('senhaAtual').value = '';
+                    document.getElementById('novaSenha').value = '';
+                }
+
+            } catch {
+                mostrarToast("Erro ao salvar alterações. Tente novamente.", false);
+            }
+
+            // Reset animação do botão
+            btnSalvar.disabled = false;
+            if (icon && text) {
+                icon.classList.remove('spinner-border', 'spinner-border-sm');
+                icon.classList.add('fa-save');
+                text.textContent = "Salvar Alterações";
+            }
+        });
+
+        // Toggle de visibilidade de senha
+        document.querySelectorAll('.toggle-visibility').forEach(button => {
+            button.addEventListener('click', function () {
+                const inputId = this.getAttribute('data-target');
+                const input = document.getElementById(inputId);
+                const icon = this.querySelector('i');
+
+                if (input?.type === 'password') {
+                    input.type = 'text';
+                    icon?.classList.replace('fa-eye', 'fa-eye-slash');
+                } else {
+                    input.type = 'password';
+                    icon?.classList.replace('fa-eye-slash', 'fa-eye');
+                }
+            });
+        });
+
     }
 
 

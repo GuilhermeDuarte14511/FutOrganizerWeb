@@ -1,9 +1,10 @@
 ﻿<div id="loginPage" class="d-flex justify-content-center align-items-center min-vh-100 bg-dark text-light px-3" data-aos="fade-in">
     <div class="card p-4 shadow-lg border-0 w-100" style="max-width: 400px; background-color: #1e1e2f;">
-        <div class="text-center mb-4">
-            <i class="fas fa-futbol fa-3x text-primary mb-3"></i>
-            <h2 class="fw-bold">FutOrganizer</h2>
-            <p class="text-light">Bem-vindo de volta!</p>
+        <div class="text-center mt-4 mb-4">
+            <img src="/Images/LogoFutOrganizer2.png" alt="Logo FutOrganizer"
+                 class="mb-3 animate__animated animate__zoomIn"
+                 style="max-width: 180px;" />
+            <p class="text-light mt-2">Bem-vindo de volta!</p>
         </div>
 
         <form id="formLogin">
@@ -11,7 +12,9 @@
             <div class="mb-3 position-relative">
                 <label for="email" class="form-label text-light">E-mail</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-transparent border-secondary text-light"><i class="fas fa-envelope"></i></span>
+                    <span class="input-group-text bg-transparent border-secondary text-light">
+                        <i class="fas fa-envelope"></i>
+                    </span>
                     <input type="email" class="form-control bg-dark text-light border-secondary" id="email" placeholder="nome@exemplo.com" required />
                 </div>
             </div>
@@ -20,7 +23,9 @@
             <div class="mb-3 position-relative">
                 <label for="senha" class="form-label text-light">Senha</label>
                 <div class="input-group">
-                    <span class="input-group-text bg-transparent border-secondary text-light"><i class="fas fa-lock"></i></span>
+                    <span class="input-group-text bg-transparent border-secondary text-light">
+                        <i class="fas fa-lock"></i>
+                    </span>
                     <input type="password" class="form-control bg-dark text-light border-secondary" id="senha" placeholder="Senha" required />
                     <button type="button" id="toggleSenha" class="btn btn-outline-secondary text-light border-secondary" tabindex="-1">
                         <i id="iconeOlho" class="fas fa-eye"></i>
@@ -36,7 +41,7 @@
         </form>
 
         <div class="text-center mt-3">
-            <a href="/Login/EsqueciSenha" class="text-secondary small d-block">Esqueceu sua senha?</a>
+            <a href="/Login/EsqueciSenha" class="text-info small d-block">Esqueceu sua senha?</a>
             <a href="/Login/CadastrarUsuario" class="text-info small d-block mt-1">Cadastrar novo usuário</a>
         </div>
     </div>

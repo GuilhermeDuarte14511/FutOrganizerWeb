@@ -228,6 +228,291 @@ html, body {
     outline: none;
 }
 
+#esqueciSenhaPage {
+    background-color: var(--dark-bg) !important;
+    min-height: 100vh;
+    width: 100%;
+    padding: 1rem;
+}
+
+    #esqueciSenhaPage .card {
+        background-color: var(--card-bg);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--card-shadow);
+        animation: fadeInUp 0.8s ease;
+    }
+
+    #esqueciSenhaPage h2 {
+        color: #fff !important;
+        font-weight: 700;
+    }
+
+    #esqueciSenhaPage p {
+        color: #aaa;
+    }
+
+    #esqueciSenhaPage .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-light);
+        border: 1px solid var(--border-color);
+        border-left: 0;
+        transition: all 0.3s ease;
+    }
+
+        #esqueciSenhaPage .form-control::placeholder {
+            color: #aaa;
+            opacity: 0.7;
+        }
+
+        #esqueciSenhaPage .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(61, 127, 255, 0.25);
+            z-index: 2;
+        }
+
+    #esqueciSenhaPage label {
+        color: #bbb;
+    }
+
+    #esqueciSenhaPage .btn-primary {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: #fff;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        #esqueciSenhaPage .btn-primary:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: scale(1.02);
+        }
+
+    #esqueciSenhaPage a {
+        color: var(--accent-color);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        #esqueciSenhaPage a:hover {
+            color: #6faaff;
+            text-decoration: underline;
+        }
+
+    #esqueciSenhaPage .input-group-text {
+        background-color: var(--input-bg);
+        color: var(--text-light);
+        border-right: 0;
+        border: 1px solid var(--border-color);
+        border-right: none;
+    }
+
+    #esqueciSenhaPage .input-group > .form-control,
+    #esqueciSenhaPage .input-group > .input-group-text,
+    #esqueciSenhaPage .input-group > .btn {
+        border-color: var(--border-color);
+    }
+
+    #esqueciSenhaPage .form-control,
+    #esqueciSenhaPage .btn,
+    #esqueciSenhaPage a {
+        transition: all 0.3s ease;
+    }
+
+@media (max-width: 576px) {
+    #esqueciSenhaPage h2 {
+        font-size: 1.5rem;
+    }
+
+    #esqueciSenhaPage .card {
+        padding: 1.5rem 1rem;
+    }
+
+    #esqueciSenhaPage .input-group-text,
+    #esqueciSenhaPage .form-control,
+    #esqueciSenhaPage .btn {
+        font-size: 0.9rem;
+    }
+}
+
+/* ============ NOVA SENHA PAGE ============ */
+#novaSenhaPage {
+    background-color: var(--dark-bg) !important;
+    min-height: 100vh;
+    width: 100%;
+    padding: 1rem;
+}
+
+    #novaSenhaPage .card {
+        background-color: var(--card-bg);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--card-shadow);
+        animation: fadeInUp 0.8s ease;
+    }
+
+    #novaSenhaPage h2 {
+        color: #fff !important;
+        font-weight: 700;
+    }
+
+    #novaSenhaPage p {
+        color: #aaa;
+    }
+
+    #novaSenhaPage .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-light);
+        border: 1px solid var(--border-color);
+        border-left: 0;
+        transition: all 0.3s ease;
+    }
+
+        #novaSenhaPage .form-control::placeholder {
+            color: #aaa;
+            opacity: 0.7;
+        }
+
+        #novaSenhaPage .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(61, 127, 255, 0.25);
+            z-index: 2;
+        }
+
+    #novaSenhaPage label {
+        color: #bbb;
+    }
+
+    #novaSenhaPage .btn-success {
+        background-color: #28a745;
+        border-color: #28a745;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        #novaSenhaPage .btn-success:hover {
+            background-color: #218838;
+            border-color: #1e7e34;
+            transform: scale(1.02);
+        }
+
+    #novaSenhaPage a {
+        color: var(--accent-color);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        #novaSenhaPage a:hover {
+            color: #6faaff;
+            text-decoration: underline;
+        }
+
+    #novaSenhaPage .input-group-text {
+        background-color: var(--input-bg);
+        color: var(--text-light);
+        border-right: 0;
+        border: 1px solid var(--border-color);
+        border-right: none;
+    }
+
+    #novaSenhaPage .input-group > .form-control,
+    #novaSenhaPage .input-group > .input-group-text,
+    #novaSenhaPage .input-group > .btn {
+        border-color: var(--border-color);
+    }
+
+    #novaSenhaPage .form-control,
+    #novaSenhaPage .btn,
+    #novaSenhaPage a {
+        transition: all 0.3s ease;
+    }
+
+@media (max-width: 576px) {
+    #novaSenhaPage h2 {
+        font-size: 1.5rem;
+    }
+
+    #novaSenhaPage .card {
+        padding: 1.5rem 1rem;
+    }
+
+    #novaSenhaPage .input-group-text,
+    #novaSenhaPage .form-control,
+    #novaSenhaPage .btn {
+        font-size: 0.9rem;
+    }
+}
+
+
+/* ============ LINK EXPIRADO PAGE ============ */
+#linkExpiradoPage {
+    background-color: var(--dark-bg) !important;
+    min-height: 100vh;
+    width: 100%;
+    padding: 1rem;
+}
+
+    #linkExpiradoPage .card {
+        background-color: var(--card-bg);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--card-shadow);
+        animation: fadeInUp 0.8s ease;
+        text-align: center;
+    }
+
+    #linkExpiradoPage h2 {
+        color: #fff !important;
+        font-weight: 700;
+    }
+
+    #linkExpiradoPage p {
+        color: #aaa;
+        font-size: 15px;
+    }
+
+    #linkExpiradoPage .btn-primary {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: #fff;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+        #linkExpiradoPage .btn-primary:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: scale(1.02);
+        }
+
+
+    #linkExpiradoPage a {
+        color: var(--accent-color);
+        text-decoration: none;
+        transition: color 0.2s ease;
+    }
+
+        #linkExpiradoPage a:hover {
+            color: #6faaff;
+            text-decoration: underline;
+        }
+
+@media (max-width: 576px) {
+    #linkExpiradoPage h2 {
+        font-size: 1.5rem;
+    }
+
+    #linkExpiradoPage .card {
+        padding: 1.5rem 1rem;
+    }
+
+    #linkExpiradoPage .btn {
+        font-size: 0.9rem;
+    }
+}
+
+
 
 /* ============ HOME PAGE ============ */
 
@@ -780,6 +1065,75 @@ input:checked + .slider {
         transform: translateY(-50%) rotate(360deg);
     }
 }
+
+#meusDadosPage {
+    background-color: var(--dark-bg) !important;
+    min-height: 100vh;
+    width: 100%;
+    padding: 1rem;
+}
+
+    #meusDadosPage .card {
+        background-color: var(--card-bg);
+        border-radius: 1rem;
+        border: 1px solid var(--border-color);
+        box-shadow: var(--card-shadow);
+        animation: fadeInUp 0.8s ease;
+    }
+
+    #meusDadosPage h2 {
+        color: #fff !important;
+        font-weight: 700;
+    }
+
+    #meusDadosPage p {
+        color: #aaa;
+    }
+
+    #meusDadosPage .form-control {
+        background-color: var(--input-bg);
+        color: var(--text-light);
+        border: 1px solid var(--border-color);
+        border-left: 0;
+    }
+
+        #meusDadosPage .form-control::placeholder {
+            color: #aaa;
+            opacity: 0.7;
+        }
+
+        #meusDadosPage .form-control:focus {
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 0.2rem rgba(61, 127, 255, 0.25);
+            z-index: 2;
+        }
+
+    #meusDadosPage .btn-success {
+        background-color: var(--accent-color);
+        border-color: var(--accent-color);
+        color: #fff;
+        font-weight: 600;
+    }
+
+        #meusDadosPage .btn-success:hover {
+            background-color: var(--accent-hover);
+            border-color: var(--accent-hover);
+            transform: scale(1.02);
+        }
+
+    #meusDadosPage .input-group-text {
+        background-color: var(--input-bg);
+        color: var(--text-light);
+        border: 1px solid var(--border-color);
+        border-right: none;
+    }
+
+    #meusDadosPage .form-control,
+    #meusDadosPage .btn,
+    #meusDadosPage a {
+        transition: all 0.3s ease;
+    }
+
 
 /* Responsividade */
 @media (max-width: 576px) {
