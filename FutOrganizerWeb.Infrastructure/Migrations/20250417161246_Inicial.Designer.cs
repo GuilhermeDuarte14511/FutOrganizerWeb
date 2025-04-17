@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace FutOrganizerWeb.Infrastructure.Migrations
 {
     [DbContext(typeof(FutOrganizerDbContext))]
-    [Migration("20250415012132_Inicial")]
+    [Migration("20250417161246_Inicial")]
     partial class Inicial
     {
         /// <inheritdoc />
@@ -37,21 +37,54 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Property<int>("Defesas")
                         .HasColumnType("int");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<Guid>("EventoId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("Gols")
                         .HasColumnType("int");
 
+                    b.Property<Guid?>("JogadorLobbyId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("NomeJogador")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("UsuarioAutenticadoId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
                     b.HasIndex("EventoId");
 
                     b.ToTable("Estatisticas");
+                });
+
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Assistencia", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ConfrontoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("JogadorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Minuto")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConfrontoId");
+
+                    b.HasIndex("JogadorId");
+
+                    b.ToTable("Assistencias");
                 });
 
             modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.ConfiguracaoPelada", b =>
@@ -65,6 +98,72 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.ToTable("ConfiguracoesPelada");
                 });
 
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Confronto", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("GolsTimeA")
+                        .HasColumnType("int");
+
+                    b.Property<int>("GolsTimeB")
+                        .HasColumnType("int");
+
+                    b.Property<Guid>("SorteioId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TimeAId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TimeBId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SorteioId");
+
+                    b.HasIndex("TimeAId");
+
+                    b.HasIndex("TimeBId");
+
+                    b.ToTable("Confrontos");
+                });
+
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.EmailTemplate", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("Ativo")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CriadoEm")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Descricao")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("EmailHtml")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("SendGridTemplateId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("EmailTemplates");
+                });
+
             modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Evento", b =>
                 {
                     b.Property<Guid>("Id")
@@ -74,6 +173,15 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Property<DateTime>("Data")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DataFim")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DataInicio")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Descricao")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -81,11 +189,38 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Property<Guid?>("UsuarioCriadorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<decimal?>("Valor")
+                        .HasColumnType("decimal(18,2)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("UsuarioCriadorId");
 
                     b.ToTable("Eventos");
+                });
+
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Gol", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("ConfrontoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("JogadorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("Minuto")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ConfrontoId");
+
+                    b.HasIndex("JogadorId");
+
+                    b.ToTable("Gols");
                 });
 
             modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Goleiro", b =>
@@ -109,11 +244,23 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("Email")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid?>("JogadorLobbyId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<Guid?>("TimeId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("UltimaAtividade")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UsuarioAutenticadoId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
@@ -242,6 +389,12 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("TokenExpiracao")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TokenRecuperacaoSenha")
+                        .HasColumnType("nvarchar(max)");
+
                     b.HasKey("Id");
 
                     b.ToTable("Usuarios");
@@ -341,6 +494,52 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Navigation("Evento");
                 });
 
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Assistencia", b =>
+                {
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Confronto", "Confronto")
+                        .WithMany("Assistencias")
+                        .HasForeignKey("ConfrontoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Jogador", "Jogador")
+                        .WithMany()
+                        .HasForeignKey("JogadorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Confronto");
+
+                    b.Navigation("Jogador");
+                });
+
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Confronto", b =>
+                {
+                    b.HasOne("Sorteio", "Sorteio")
+                        .WithMany("Confrontos")
+                        .HasForeignKey("SorteioId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Time", "TimeA")
+                        .WithMany()
+                        .HasForeignKey("TimeAId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Time", "TimeB")
+                        .WithMany()
+                        .HasForeignKey("TimeBId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Sorteio");
+
+                    b.Navigation("TimeA");
+
+                    b.Navigation("TimeB");
+                });
+
             modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Evento", b =>
                 {
                     b.HasOne("FutOrganizerWeb.Domain.Entities.Usuario", "UsuarioCriador")
@@ -349,6 +548,25 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("UsuarioCriador");
+                });
+
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Gol", b =>
+                {
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Confronto", "Confronto")
+                        .WithMany("Gols")
+                        .HasForeignKey("ConfrontoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("FutOrganizerWeb.Domain.Entities.Jogador", "Jogador")
+                        .WithMany()
+                        .HasForeignKey("JogadorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Confronto");
+
+                    b.Navigation("Jogador");
                 });
 
             modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Jogador", b =>
@@ -436,6 +654,13 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
                     b.Navigation("Partida");
                 });
 
+            modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Confronto", b =>
+                {
+                    b.Navigation("Assistencias");
+
+                    b.Navigation("Gols");
+                });
+
             modelBuilder.Entity("FutOrganizerWeb.Domain.Entities.Evento", b =>
                 {
                     b.Navigation("Estatisticas");
@@ -473,6 +698,8 @@ namespace FutOrganizerWeb.Infrastructure.Migrations
 
             modelBuilder.Entity("Sorteio", b =>
                 {
+                    b.Navigation("Confrontos");
+
                     b.Navigation("Times");
                 });
 #pragma warning restore 612, 618

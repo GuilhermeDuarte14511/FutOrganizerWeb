@@ -1,0 +1,71 @@
+﻿@model List<FutOrganizerWeb.Application.DTOs.EventoDTO>
+
+@{
+    ViewData["Title"] = "Meus Eventos";
+}
+
+<div id="eventosPage" class="container py-5 text-light">
+    <!-- Botão de voltar -->
+    <div class="mb-4">
+        <a href="/Home" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-2"></i> Voltar
+        </a>
+    </div>
+
+    <!-- Cabeçalho -->
+    <div class="text-center mb-5">
+        <h2 class="fw-bold animate__animated animate__fadeInDown">
+            <i class="fas fa-trophy me-2 text-warning"></i>Meus Eventos
+        </h2>
+        <p class="text-light">Gerencie seus campeonatos ou peladas organizadas</p>
+        <hr class="border-light opacity-25" style="width: 200px; margin: auto;">
+    </div>
+
+    <!-- Botão Criar Evento -->
+    <div class="text-center mb-4">
+        <a href="/Evento/Criar" class="btn btn-home shadow-sm">
+            <i class="fas fa-plus me-2"></i> Criar Novo Evento
+        </a>
+    </div>
+
+    <!-- Lista de Eventos -->
+    <div class="rounded-4 p-4" style="background-color: #111; border: 2px solid rgba(255, 255, 255, 0.1); box-shadow: 0 0 25px rgba(255, 255, 255, 0.05); transition: all 0.3s ease;">
+        @if (Model == null || !Model.Any())
+        {
+            <div class="text-center animate__animated animate__fadeIn">
+                <i class="fas fa-calendar-times fa-3x mb-3 text-light"></i>
+                <h5 class="text-light">Nenhum evento criado ainda 😕</h5>
+                <p class="text-light">Clique no botão acima para criar seu primeiro evento.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 animate__animated animate__fadeInUp">
+                @foreach (var evento in Model)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-lg bg-dark border border-light rounded-4">
+                            <div class="card-body d-flex flex-column justify-content-between">
+                                <div>
+                                    <h5 class="card-title text-white">
+                                        <i class="fas fa-trophy text-warning me-2"></i>@evento.Nome
+                                    </h5>
+                                    <p class="card-text text-light small mb-2">
+                                        <i class="fas fa-calendar-alt me-1 text-light"></i>
+                                        Criado em: @evento.Data.ToLocalTime().ToString("dd/MM/yyyy HH:mm")
+                                    </p>
+                                </div>
+
+                                <div class="mt-3 d-grid">
+                                    <a href="/Evento/Detalhes/@evento.Id" class="btn btn-outline-light">
+                                        <i class="fas fa-eye me-1"></i> Ver Detalhes
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+    </div>
+</div>

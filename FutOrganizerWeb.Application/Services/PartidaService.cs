@@ -25,7 +25,7 @@ namespace FutOrganizerWeb.Application.Services
             return await _repository.ObterPartidasPaginadasPorUsuarioAsync(usuarioId, page, pageSize);
         }
 
-      
+
 
         public async Task<DetalhesPartidaDTO> ObterDetalhesDaPartidaAsync(Guid partidaId)
         {
@@ -39,6 +39,7 @@ namespace FutOrganizerWeb.Application.Services
             return new DetalhesPartidaDTO
             {
                 PartidaId = partida.Id,
+                CodigoLobby = partida.CodigoLobby,
                 DataHora = partida.DataHora,
                 Local = partida.Local,
                 Latitude = partida.Latitude ?? 0,
@@ -59,6 +60,7 @@ namespace FutOrganizerWeb.Application.Services
                     }).ToList() ?? new()
             };
         }
+
 
         public async Task<Partida?> ObterPorCodigoAsync(string codigo)
         {

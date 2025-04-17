@@ -10,5 +10,6 @@ namespace FutOrganizerWeb.Application.DTOs
         public string NomeDoJogador { get; set; } = string.Empty;
         public Guid JogadorId { get; set; } // agora é Guid
         public Guid? UsuarioAutenticadoId { get; set; } // novo campo para saber se é autenticado
+        public Guid? EventoId { get; set; } // novo campo para o evento
     }
 }

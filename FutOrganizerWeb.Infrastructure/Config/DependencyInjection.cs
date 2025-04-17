@@ -20,6 +20,9 @@ namespace FutOrganizerWeb.Infrastructure.Config
             services.AddScoped<IPartidaService, PartidaService>();
             services.AddScoped<IChatService, ChatService>();
             services.AddScoped<IEmailService, EmailService>();
+            services.AddScoped<IConfrontoService, ConfrontoService>();
+            services.AddScoped<IEventoService, EventoService>();
+
 
             // Repositories
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
@@ -27,6 +30,8 @@ namespace FutOrganizerWeb.Infrastructure.Config
             services.AddScoped<IPartidaRepository, PartidaRepository>();
             services.AddScoped<IChatRepository, ChatRepository>();
             services.AddScoped<IEmailTemplateRepository, EmailTemplateRepository>();
+            services.AddScoped<IConfrontoRepository, ConfrontoRepository>();
+            services.AddScoped<IEventoRepository, EventoRepository>();
 
             return services;
         }

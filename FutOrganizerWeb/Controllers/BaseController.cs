@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Http;
 using System;
 
 namespace FutOrganizerWeb.Controllers
@@ -15,6 +16,16 @@ namespace FutOrganizerWeb.Controllers
             return usuarioId;
         }
 
+        protected IActionResult? Autenticado()
+        {
+            var usuarioId = ObterUsuarioLogado();
+            if (usuarioId == Guid.Empty)
+            {
+                return RedirectToAction("Login", "Login");
+            }
+
+            return null; // significa que está autenticado
+        }
 
         public IActionResult Index()
         {

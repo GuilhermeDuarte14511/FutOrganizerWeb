@@ -259,6 +259,12 @@
             renderTeams();
             document.getElementById("btnResortear").style.display = "block";
             mostrarToast('Times gerados automaticamente!', 'success');
+            const btnConfronto = document.getElementById("btnConfronto");
+            if (btnConfronto) {
+                const codigo = new URLSearchParams(window.location.search).get("codigo");
+                btnConfronto.href = `/Confronto?codigo=${codigo}`;
+                btnConfronto.classList.remove("d-none");
+            }
         }
 
         function renderTeams() {
@@ -582,6 +588,9 @@
         }
 
         const btnAbrirChatAdmin = document.getElementById("btnAbrirChatAdmin");
+        if (btnAbrirChatAdmin) {
+            btnAbrirChatAdmin.style.display = "inline-flex";
+        }
         const chatMensagens = document.createElement("div");
         const chatInputContainer = document.createElement("div");
         const listaOnline = document.createElement("ul");
@@ -1972,7 +1981,383 @@
 
     }
 
+    var confrontoPage = document.getElementById('confrontoPage');
+    if (confrontoPage) {
+        const sorteioId = document.querySelector("#confrontoPage").getAttribute("data-sorteioid");
+        const times = JSON.parse(document.getElementById("timesJson")?.textContent || "[]");
 
+        const timesOrdenados = [...times].sort((a, b) => {
+            const numA = parseInt(a.Nome.match(/\d+/)?.[0] ?? 0);
+            const numB = parseInt(b.Nome.match(/\d+/)?.[0] ?? 0);
+            return numA - numB;
+        });
+
+        window.abrirFormularioConfronto = function () {
+            document.getElementById('formularioCriarConfronto').classList.remove('d-none');
+            preencherSelects();
+        };
+
+        function preencherSelects(timeASelecionado = "", timeBSelecionado = "") {
+            const selectA = document.getElementById('selectTimeA');
+            const selectB = document.getElementById('selectTimeB');
+
+            selectA.innerHTML = '<option value="">Selecione um time</option>';
+            selectB.innerHTML = '<option value="">Selecione um time</option>';
+
+            timesOrdenados.forEach(t => {
+                if (t.Id !== timeBSelecionado) {
+                    selectA.innerHTML += `<option value="${t.Id}" ${t.Id === timeASelecionado ? 'selected' : ''}>${t.Nome}</option>`;
+                }
+                if (t.Id !== timeASelecionado) {
+                    selectB.innerHTML += `<option value="${t.Id}" ${t.Id === timeBSelecionado ? 'selected' : ''}>${t.Nome}</option>`;
+                }
+            });
+        }
+
+        window.mostrarJogadores = function (letra) {
+            const select = document.getElementById(`selectTime${letra}`);
+            const list = document.getElementById(`jogadoresTime${letra}`);
+            const outroTime = letra === "A" ? document.getElementById("selectTimeB").value : document.getElementById("selectTimeA").value;
+
+            preencherSelects(
+                letra === "A" ? select.value : outroTime,
+                letra === "B" ? select.value : outroTime
+            );
+
+            const time = times.find(t => t.Id === select.value);
+            list.innerHTML = '';
+            if (time) {
+                time.Jogadores.forEach(j => {
+                    list.innerHTML += `<li class="list-group-item">${j.Nome}</li>`;
+                });
+            }
+        };
+
+        window.salvarConfronto = async function () {
+            const timeAId = document.getElementById("selectTimeA").value;
+            const timeBId = document.getElementById("selectTimeB").value;
+
+            if (!timeAId || !timeBId || timeAId === timeBId) {
+                mostrarToast("Selecione dois times diferentes.", false);
+                return;
+            }
+
+            const res = await fetch(`/Confronto/Criar?sorteioId=${sorteioId}&timeAId=${timeAId}&timeBId=${timeBId}`, { method: 'POST' });
+            const data = await res.json();
+            mostrarToast(data.mensagem);
+            await carregarConfrontos(sorteioId);
+        };
+
+        async function carregarConfrontos(sorteioId) {
+            const res = await fetch(`/Confronto/ListaPorSorteio?sorteioId=${sorteioId}`);
+            const confrontos = await res.json();
+
+            const container = document.getElementById('confrontosContainer');
+            container.innerHTML = '';
+
+            confrontos.forEach(c => {
+                container.innerHTML += `
+<div class="col-md-6 animate__animated animate__fadeInUp">
+    <div class="card shadow-sm">
+        <div class="card-header fw-bold bg-dark text-white">
+            ${c.timeA} 
+            <span class="badge bg-success placar" data-value="${c.golsA}">0</span>
+            x 
+            <span class="badge bg-primary placar" data-value="${c.golsB}">0</span> 
+            ${c.timeB}
+        </div>
+        <div class="card-body">
+            <h6>${c.timeA}</h6>
+            <ul class="list-group mb-2">
+                ${c.jogadoresTimeA.map(j => `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            ${c.jogadorDestaqueId === j.id ? '<i class="fas fa-star text-warning me-1"></i>' : ''}
+                            ${j.nome}
+                            ${j.gols > 0 ? `<span class="badge bg-success ms-1">G(${j.gols})</span>` : ''}
+                            ${j.assistencias > 0 ? `<span class="badge bg-info text-dark ms-1">ASS(${j.assistencias})</span>` : ''}
+                        </span>
+                        <div>
+                            <button class="btn btn-sm btn-success me-1" onclick="registrarGol('${c.id}', '${j.id}')">Gol</button>
+                            <button class="btn btn-sm btn-info" onclick="registrarAssistencia('${c.id}', '${j.id}')">Assistência</button>
+                        </div>
+                    </li>`).join('')}
+            </ul>
+            <h6>${c.timeB}</h6>
+            <ul class="list-group mb-2">
+                ${c.jogadoresTimeB.map(j => `
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <span>
+                            ${c.jogadorDestaqueId === j.id ? '<i class="fas fa-star text-warning me-1"></i>' : ''}
+                            ${j.nome}
+                            ${j.gols > 0 ? `<span class="badge bg-success ms-1">G(${j.gols})</span>` : ''}
+                            ${j.assistencias > 0 ? `<span class="badge bg-info text-dark ms-1">ASS(${j.assistencias})</span>` : ''}
+                        </span>
+                        <div>
+                            <button class="btn btn-sm btn-success me-1" onclick="registrarGol('${c.id}', '${j.id}')">Gol</button>
+                            <button class="btn btn-sm btn-info" onclick="registrarAssistencia('${c.id}', '${j.id}')">Assistência</button>
+                        </div>
+                    </li>`).join('')}
+            </ul>
+            <div class="text-center">
+                <button class="btn btn-warning btn-sm" onclick="atualizarPlacarPrompt('${c.id}')">Atualizar Placar</button>
+            </div>
+        </div>
+    </div>
+</div>`;
+            });
+
+            document.querySelectorAll(".placar").forEach(el => {
+                const final = parseInt(el.dataset.value);
+                let current = 0;
+                el.classList.add("animate__animated", "animate__tada");
+                const interval = setInterval(() => {
+                    if (current >= final) {
+                        el.innerText = final;
+                        clearInterval(interval);
+                    } else {
+                        current++;
+                        el.innerText = current;
+                    }
+                }, 20);
+            });
+        }
+
+        window.registrarGol = async function (confrontoId, jogadorId) {
+            const res = await fetch(`/Confronto/AdicionarGol?confrontoId=${confrontoId}&jogadorId=${jogadorId}`, { method: "POST" });
+            const data = await res.json();
+            mostrarToast(data.mensagem);
+
+            // 🎉 Confetes de 3 posições (centro e laterais inferiores)
+            confetti({
+                particleCount: 50,
+                angle: 90,
+                spread: 60,
+                origin: { x: 0.5, y: 1 }
+            });
+
+            confetti({
+                particleCount: 30,
+                angle: 70,
+                spread: 55,
+                origin: { x: 0, y: 1 }
+            });
+
+            confetti({
+                particleCount: 30,
+                angle: 110,
+                spread: 55,
+                origin: { x: 1, y: 1 }
+            });
+
+            // 🔊 Som da torcida com fade-out suave
+            const audio = document.getElementById("audioTorcida");
+            if (audio) {
+                audio.currentTime = 0;
+                audio.volume = 1;
+                audio.play();
+
+                const fadeDuration = 3000;
+                const fadeSteps = 30;
+                const fadeInterval = fadeDuration / fadeSteps;
+                let currentStep = 0;
+
+                const fadeOut = setInterval(() => {
+                    if (currentStep >= fadeSteps) {
+                        clearInterval(fadeOut);
+                        audio.pause();
+                        audio.volume = 1;
+                    } else {
+                        audio.volume = 1 - currentStep / fadeSteps;
+                        currentStep++;
+                    }
+                }, fadeInterval);
+            }
+
+            // ⚽ Bola voando (se estiver ativada)
+            const bola = document.getElementById("bolaGolAnimada");
+            if (bola) {
+                bola.classList.remove("animar");
+                void bola.offsetWidth;
+                bola.classList.add("animar");
+                setTimeout(() => bola.classList.remove("animar"), 1200);
+            }
+
+            // 💥 Animação no placar
+            const placares = document.querySelectorAll(".placar");
+            placares.forEach(p => {
+                p.classList.add("animate__animated", "animate__heartBeat");
+                setTimeout(() => {
+                    p.classList.remove("animate__animated", "animate__heartBeat");
+                }, 1000);
+            });
+
+            await carregarConfrontos(sorteioId);
+        };
+
+        window.registrarAssistencia = async function (confrontoId, jogadorId) {
+            const res = await fetch(`/Confronto/AdicionarAssistencia?confrontoId=${confrontoId}&jogadorId=${jogadorId}`, { method: "POST" });
+            const data = await res.json();
+            mostrarToast(data.mensagem);
+            await carregarConfrontos(sorteioId);
+        };
+
+        window.atualizarPlacarPrompt = async function (confrontoId) {
+            const golsA = prompt("Novo placar do Time A:");
+            const golsB = prompt("Novo placar do Time B:");
+            if (golsA && golsB) {
+                await fetch(`/Confronto/AtualizarPlacar?confrontoId=${confrontoId}&golsA=${golsA}&golsB=${golsB}`, { method: "POST" });
+                mostrarToast("Placar atualizado com sucesso!");
+                await carregarConfrontos(sorteioId);
+            }
+        };
+
+        carregarConfrontos(sorteioId);
+    }
+
+
+
+    var criarEventoPage = document.getElementById('criarEventoPage');
+    if (criarEventoPage) {
+        const form = document.getElementById("formCriarEvento");
+        const valorInput = document.getElementById("valorEvento");
+        const botaoSalvar = form.querySelector("button[type='submit']");
+        const botaoOriginal = botaoSalvar.innerHTML;
+
+        // Máscara moeda brasileira com R$
+        if (valorInput) {
+            valorInput.addEventListener("input", function (e) {
+                let value = e.target.value.replace(/\D/g, "");
+                value = (parseInt(value || "0", 10) / 100).toFixed(2);
+                value = value.replace(".", ",").replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+                e.target.value = `R$ ${value}`;
+            });
+
+            valorInput.value = "R$ 0,00";
+        }
+
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const nome = document.getElementById("nomeEvento").value.trim();
+            const tipo = parseInt(document.getElementById("tipoEvento").value);
+            const data = document.getElementById("dataEvento").value;
+            const valor = valorInput.value.replace("R$", "").trim().replace(/\./g, "").replace(",", ".");
+            const obs = document.getElementById("obsEvento").value.trim();
+
+            if (!nome || !data || isNaN(tipo)) {
+                mostrarToast("Preencha todos os campos obrigatórios.", false);
+                return;
+            }
+
+            const dto = {
+                nome,
+                data,
+                tipo,
+                valorInscricao: parseFloat(valor),
+                observacoes: obs
+            };
+
+            // Ativar loading
+            botaoSalvar.disabled = true;
+            botaoSalvar.innerHTML = `<i class="fas fa-spinner fa-spin me-2"></i>Salvando...`;
+
+            try {
+                const res = await fetch("/Evento/Criar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(dto)
+                });
+
+                const json = await res.json();
+                if (res.ok) {
+                    mostrarToast(json.mensagem, true);
+                    setTimeout(() => window.location.href = "/Evento", 1500);
+                } else {
+                    mostrarToast(json.mensagem || "Erro ao criar evento.", false);
+                    botaoSalvar.disabled = false;
+                    botaoSalvar.innerHTML = botaoOriginal;
+                }
+            } catch (error) {
+                mostrarToast("Erro ao se comunicar com o servidor.", false);
+                console.error(error);
+                botaoSalvar.disabled = false;
+                botaoSalvar.innerHTML = botaoOriginal;
+            }
+        });
+    }
+
+    var detalhesEventoPage = document.getElementById('detalhesEventoPage');
+
+    if (detalhesEventoPage) {
+        // Busca especificamente o botão de "Gerar Sorteio"
+        const botao = detalhesEventoPage.querySelector('a.btn-primary[href*="eventoId="]');
+
+        if (botao) {
+            const eventoId = botao.href.split("eventoId=")[1];
+
+            botao.addEventListener('click', async function (e) {
+                e.preventDefault();
+
+                // Desativa botão e mostra loading
+                botao.disabled = true;
+                const originalContent = botao.innerHTML;
+                botao.innerHTML = `<span class="spinner-border spinner-border-sm me-2"></span>Carregando...`;
+
+                const dataHora = new Date().toISOString();
+                const local = "Local não informado";
+
+                // 🧭 Tenta obter a localização do usuário
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        async (pos) => {
+                            await criarSala(pos.coords.latitude, pos.coords.longitude);
+                        },
+                        async (err) => {
+                            console.warn("Erro ao obter localização:", err);
+                            mostrarToast("Não foi possível obter sua localização. Usando coordenadas padrão.", false);
+                            await criarSala(0, 0);
+                        },
+                        { timeout: 7000 }
+                    );
+                } else {
+                    mostrarToast("Geolocalização não suportada neste navegador.", false);
+                    await criarSala(0, 0);
+                }
+
+                async function criarSala(latitude, longitude) {
+                    try {
+                        const response = await fetch("/Sorteio/CriarSala", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                            body: new URLSearchParams({
+                                dataHora: dataHora,
+                                local: local,
+                                latitude: latitude.toString(),
+                                longitude: longitude.toString(),
+                                eventoId: eventoId
+                            })
+                        });
+
+                        const json = await response.json();
+
+                        if (response.ok && json.redirectUrl) {
+                            window.location.href = json.redirectUrl;
+                        } else {
+                            mostrarToast(json.mensagem || "Erro ao criar sala para o sorteio.", false);
+                            botao.disabled = false;
+                            botao.innerHTML = originalContent;
+                        }
+                    } catch (err) {
+                        console.error(err);
+                        mostrarToast("Erro ao se comunicar com o servidor.", false);
+                        botao.disabled = false;
+                        botao.innerHTML = originalContent;
+                    }
+                }
+            });
+        }
+    }
 
 
 });

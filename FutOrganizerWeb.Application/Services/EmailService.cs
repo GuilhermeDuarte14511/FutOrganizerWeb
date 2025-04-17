@@ -28,7 +28,7 @@ namespace FutOrganizerWeb.Application.Services
                 var from = new EmailAddress("naoresponda_futorganizer14511@outlook.com");
                 var to = new EmailAddress(destinatarioEmail, destinatarioNome);
                 var template = await _templateRepository.ObterPorTipoAsync("BoasVindas");
-                if (template == null || string.IsNullOrWhiteSpace(template.EmailHtml))
+                if (template == null)
                     throw new Exception("Template de boas-vindas não encontrado ou HTML vazio.");
 
                 var dynamicTemplateData = new

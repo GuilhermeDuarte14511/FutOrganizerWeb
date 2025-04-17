@@ -1,4 +1,13 @@
-﻿<!DOCTYPE html>
+﻿@using Microsoft.AspNetCore.Http
+@inject IHttpContextAccessor HttpContextAccessor
+
+@{
+    var usuarioId = HttpContextAccessor.HttpContext.Session.GetString("UsuarioId");
+    var usuarioNome = HttpContextAccessor.HttpContext.Session.GetString("UsuarioNome");
+    var primeiroNome = (usuarioNome ?? "Jogador").Split(" ")[0];
+}
+
+<!DOCTYPE html>
 <html lang="pt-br">
 <head>
     <meta charset="utf-8" />
@@ -12,12 +21,12 @@
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
 
     <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
     <!-- Animate.css -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" />
 
-    <!-- AOS Scroll Animations (versão estável) -->
+    <!-- AOS Scroll Animations -->
     <link rel="stylesheet" href="https://unpkg.com/aos@3.0.0-beta.6/dist/aos.css" />
 
     <!-- Estilos personalizados -->
@@ -25,33 +34,53 @@
     <link rel="stylesheet" href="~/FutOrganizerWeb.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <header>
-        <!-- Seu cabeçalho aqui -->
-    </header>
+    <div class="d-flex flex-column min-vh-100">
+        <header>
+            @if (!string.IsNullOrEmpty(usuarioId))
+            {
+                <nav class="navbar navbar-dark bg-dark shadow-sm px-3 justify-content-between">
+                    <a class="navbar-brand fw-bold text-light d-flex align-items-center" href="/Home">
+                        <i class="fas fa-futbol me-2 text-accent"></i> FutOrganizer
+                    </a>
 
-    <!-- Toast Container -->
-    <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+                    <div class="dropdown ms-auto">
+                        <a class="nav-link dropdown-toggle text-light d-flex align-items-center" href="#" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            <i class="fas fa-user-circle fa-lg me-2"></i>
+                            <span class="fw-semibold">Olá, @primeiroNome</span>
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end shadow">
+                            <li><a class="dropdown-item" href="/Evento"><i class="fas fa-calendar-check me-2"></i>Meus Eventos</a></li>
+                            <li><a class="dropdown-item" href="/Sorteio/Criar"><i class="fas fa-random me-2"></i>Sorteio Rápido</a></li>
+                            <li><a class="dropdown-item" href="/Sorteio/Historico"><i class="fas fa-clock me-2"></i>Histórico</a></li>
+                            <li><a class="dropdown-item" href="/Cronometro"><i class="fas fa-stopwatch me-2"></i>Cronômetro</a></li>
+                            <li><a class="dropdown-item" href="/Usuario/MeusDados"><i class="fas fa-user-cog me-2"></i>Meus Dados</a></li>
+                            <li><hr class="dropdown-divider" /></li>
+                            <li><a class="dropdown-item text-danger fw-semibold" href="/Login/Logout"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                        </ul>
+                    </div>
+                </nav>
+            }
+        </header>
 
-    <div class="container">
-        <main role="main" class="pb-3">
+        <!-- Toast Container -->
+        <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
+
+        <main class="flex-grow-1 pb-3">
             @RenderBody()
         </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            <!-- Rodapé opcional -->
-        </div>
-    </footer>
+    </div>
 
     <!-- Scripts principais -->
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/7.0.5/signalr.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.5.1/dist/confetti.browser.min.js"></script>
 
     <script src="~/js/site.js" asp-append-version="true"></script>
 
-    <!-- AOS Scroll Animations (versão estável) -->
+    <!-- AOS Scroll Animations -->
     <script src="https://unpkg.com/aos@3.0.0-beta.6/dist/aos.js"></script>
     <script>
         AOS.init({

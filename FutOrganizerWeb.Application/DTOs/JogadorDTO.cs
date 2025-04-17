@@ -9,5 +9,7 @@
         public Guid? UsuarioId { get; set; }
 
         public DateTime UltimaAtividade { get; set; }
+        public int Gols { get; set; }
+        public int Assistencias { get; set; }
     }
 }

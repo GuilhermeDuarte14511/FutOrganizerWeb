@@ -124,13 +124,25 @@
 <!-- Toast Container -->
 <div id="toastContainer" class="position-fixed top-0 end-0 p-3" style="z-index: 1100;"></div>
 
-<!-- ✅ Botão flutuante do Chat -->
 @if (isLobby)
 {
-    <button id="btnAbrirChatAdmin"
-            class="btn btn-primary rounded-circle shadow-lg position-fixed"
-            style="bottom: 20px; right: 20px; width: 56px; height: 56px; z-index: 9999;"
-            title="Abrir Chat da Sala">
-        <i class="fas fa-comments"></i>
-    </button>
+    <div class="floating-buttons-group-horizontal">
+        <button id="btnAbrirChatAdmin" class="floating-button btn btn-primary" title="Chat da Sala">
+            <i class="fas fa-comments"></i>
+            <span class="btn-label">Chat da Sala</span>
+        </button>
+
+        <a id="btnConfronto" class="floating-button btn btn-danger d-none" title="Gerenciar Confrontos">
+            <i class="fas fa-comments-dollar"></i>
+            <span class="btn-label">Confrontos</span>
+        </a>
+
+        <a href="/Evento/Detalhes/@Model.EventoId"
+           class="floating-button btn btn-secondary"
+           title="Voltar para Detalhes do Evento">
+            <i class="fas fa-comment-dots"></i>
+            <span class="btn-label">Detalhes do Evento</span>
+        </a>
+    </div>
+
 }

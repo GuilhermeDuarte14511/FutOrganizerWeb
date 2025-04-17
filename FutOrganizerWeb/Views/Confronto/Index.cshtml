@@ -1,0 +1,78 @@
+﻿@using FutOrganizerWeb.Application.DTOs
+@model Guid
+
+@{
+    ViewData["Title"] = "Gerenciar Confrontos";
+    var sorteioId = Model;
+    var times = ViewBag.Times as List<TimeConfrontoDTO>;
+}
+
+<div class="container mt-4" id="confrontoPage" data-sorteioid="@sorteioId">
+    <h2 class="text-white mb-4">Times Sorteados</h2>
+
+    <!-- Cards dos times -->
+    <div class="row row-cols-1 row-cols-md-3 g-3 mb-5">
+        @foreach (var time in times ?? new List<TimeConfrontoDTO>())
+        {
+            <div class="col">
+                <div class="card shadow" style="border: 2px solid @time.Cor;">
+                    <div class="card-header fw-bold text-white" style="background-color: @time.Cor;">
+                        @time.Nome
+                    </div>
+                    <ul class="list-group list-group-flush">
+                        @foreach (var jogador in time.Jogadores ?? new List<JogadorDTO>())
+                        {
+                            <li class="list-group-item">@jogador.Nome</li>
+                        }
+                    </ul>
+                </div>
+            </div>
+        }
+    </div>
+
+    <!-- Botão Novo Confronto -->
+    <div class="text-center mb-4">
+        <button class="btn btn-success btn-lg shadow" onclick="abrirFormularioConfronto()">
+            <i class="fas fa-plus"></i> Adicionar Novo Confronto
+        </button>
+    </div>
+
+    <!-- Formulário Confronto -->
+    <div id="formularioCriarConfronto" class="card mb-5 d-none animate__animated animate__fadeInUp">
+        <div class="card-header bg-dark text-white">Novo Confronto</div>
+        <div class="card-body">
+            <div class="row mb-3">
+                <div class="col-md-6">
+                    <label class="form-label">Time A</label>
+                    <select id="selectTimeA" class="form-select" onchange="mostrarJogadores('A')"></select>
+                    <ul id="jogadoresTimeA" class="list-group mt-2"></ul>
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label">Time B</label>
+                    <select id="selectTimeB" class="form-select" onchange="mostrarJogadores('B')"></select>
+                    <ul id="jogadoresTimeB" class="list-group mt-2"></ul>
+                </div>
+            </div>
+            <button class="btn btn-primary w-100" onclick="salvarConfronto('@sorteioId')">
+                <i class="fas fa-save"></i> Salvar Confronto
+            </button>
+        </div>
+    </div>
+
+    <!-- Canvas para confetes -->
+    <canvas id="confettiCanvas" style="position: fixed; top: 0; left: 0; pointer-events: none; z-index: 9999;"></canvas>
+
+    <!-- Animação da bola de futebol -->
+    <img id="bolaGolAnimada" src="/Images/bola_futebol.jpg" alt="Bola" style="position: fixed; width: 80px; display: none; z-index: 10000;" />
+
+    <!-- Confrontos já criados -->
+    <h3 class="text-white mb-3">Confrontos Criados</h3>
+    <div id="confrontosContainer" class="row g-3 animate__animated animate__fadeIn"></div>
+
+    <!-- Dados para uso no JS -->
+    <script type="application/json" id="timesJson">
+        @Html.Raw(System.Text.Json.JsonSerializer.Serialize(times ?? new List<TimeConfrontoDTO>()))
+    </script>
+</div>
+<audio id="audioTorcida" src="/sounds/somtorcida.mp3" preload="auto"></audio>
+

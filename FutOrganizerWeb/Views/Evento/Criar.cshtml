@@ -1,0 +1,75 @@
+﻿@model FutOrganizerWeb.Application.DTOs.EventoDTO
+
+@{
+    ViewData["Title"] = "Criar Evento";
+    var tiposEvento = Enum.GetValues(typeof(FutOrganizerWeb.Domain.Enums.TipoEvento))
+                          .Cast<FutOrganizerWeb.Domain.Enums.TipoEvento>()
+                          .Select(e => new SelectListItem
+                          {
+                              Text = e.ToString(),
+                              Value = ((int)e).ToString()
+                          }).ToList();
+}
+
+<div class="container py-5 text-light" id="criarEventoPage">
+    <!-- Voltar -->
+    <div class="mb-4">
+        <a href="/Evento" class="btn btn-outline-light">
+            <i class="fas fa-arrow-left me-2"></i> Voltar para Meus Eventos
+        </a>
+    </div>
+
+    <!-- Título -->
+    <div class="text-center mb-5">
+        <h2 class="fw-bold animate__animated animate__fadeInDown">
+            <i class="fas fa-trophy me-2 text-warning"></i>Criar Novo Evento
+        </h2>
+        <p class="text-light">Organize campeonatos e partidas com facilidade</p>
+        <hr class="border-light opacity-25" style="width: 200px; margin: auto;">
+    </div>
+
+    <!-- Formulário -->
+    <div class="card shadow-lg rounded-4 mx-auto animate__animated animate__fadeInUp"
+         style="max-width: 600px; background-color: var(--card-bg); border: 1px solid var(--border-color);">
+        <div class="card-body">
+            <form id="formCriarEvento">
+                <div class="mb-3">
+                    <label for="nomeEvento" class="form-label text-white">Nome do Evento</label>
+                    <input type="text" class="form-control" id="nomeEvento" name="nome" placeholder="Ex: Copa dos Amigos" required autocomplete="off">
+                </div>
+
+                <div class="mb-3">
+                    <label for="tipoEvento" class="form-label text-white">Tipo do Evento</label>
+                    <select class="form-select" id="tipoEvento" name="tipo" required>
+                        <option value="" disabled selected>Selecione o tipo</option>
+                        @foreach (var tipo in tiposEvento)
+                        {
+                            <option value="@tipo.Value">@tipo.Text</option>
+                        }
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label for="dataEvento" class="form-label text-white">Data do Evento</label>
+                    <input type="date" class="form-control" id="dataEvento" name="data" required autocomplete="off">
+                </div>
+
+                <div class="mb-3">
+                    <label for="valorEvento" class="form-label text-white">Valor da Inscrição (opcional)</label>
+                    <input type="text" class="form-control" id="valorEvento" name="valor" placeholder="Ex: 20.00" autocomplete="off">
+                </div>
+
+                <div class="mb-3">
+                    <label for="obsEvento" class="form-label text-white">Observações (opcional)</label>
+                    <textarea class="form-control" id="obsEvento" name="obs" rows="3" placeholder="Regras, horário, premiação..." autocomplete="off"></textarea>
+                </div>
+
+                <div class="text-center">
+                    <button type="submit" class="btn btn-primary px-4">
+                        <i class="fas fa-check me-2"></i>Salvar Evento
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

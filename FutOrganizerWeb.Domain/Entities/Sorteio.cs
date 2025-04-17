@@ -12,4 +12,6 @@ public class Sorteio
     public List<Time> Times { get; set; } = new();
 
     public DateTime DataAtualizacao { get; set; } = DateTime.UtcNow;
+    public List<Confronto> Confrontos { get; set; } = new();
+
 }

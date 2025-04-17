@@ -19,6 +19,7 @@ builder.Services.AddDbContext<FutOrganizerDbContext>(options =>
 
 // Injeção de dependência dos serviços do projeto
 builder.Services.AddProjectServices();
+builder.Services.AddHttpContextAccessor();
 
 // Serviços MVC e sessão
 builder.Services.AddControllersWithViews();
@@ -39,10 +40,21 @@ if (!app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseStaticFiles();
 
+
+
 app.UseRouting();
 app.UseSession();
 app.UseAuthorization();
+app.Use(async (context, next) =>
+{
+    if (context.Request.Path == "/" && context.Session.GetString("UsuarioId") != null)
+    {
+        context.Response.Redirect("/Home/Index");
+        return;
+    }
 
+    await next();
+});
 app.MapHub<LobbyChatHub>("/hubs/lobbychat");
 
 app.MapControllerRoute(

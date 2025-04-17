@@ -26,7 +26,7 @@ namespace FutOrganizerWeb.Controllers
 
         [HttpGet]
         [Route("Sorteio")]
-        public async Task<IActionResult> Index(string? codigo = null)
+        public async Task<IActionResult> Index(string? codigo = null, Guid? eventoId = null)
         {
             if (string.IsNullOrEmpty(codigo))
                 return View(); // fluxo normal (sem lobby)
@@ -44,11 +44,13 @@ namespace FutOrganizerWeb.Controllers
                 Codigo = codigo,
                 Jogadores = jogadores,
                 UsuarioAutenticadoId = usuarioId,
-                NomeDoJogador = usuario?.Nome ?? "Admin"
+                NomeDoJogador = usuario?.Nome ?? "Admin",
+                EventoId = eventoId // novo campo na ViewModel
             };
 
             return View(viewModel);
         }
+
 
         [HttpPost]
         public async Task<IActionResult> Criar([FromBody] SorteioRequest request)
@@ -104,7 +106,7 @@ namespace FutOrganizerWeb.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> CriarSala(DateTime DataHora, string Local, string Latitude, string Longitude)
+        public async Task<IActionResult> CriarSala(DateTime DataHora, string Local, string Latitude, string Longitude, Guid? eventoId = null)
         {
             var usuarioIdStr = HttpContext.Session.GetString("UsuarioId");
             if (string.IsNullOrEmpty(usuarioIdStr) || !Guid.TryParse(usuarioIdStr, out Guid usuarioId))
@@ -112,28 +114,41 @@ namespace FutOrganizerWeb.Controllers
 
             var codigoLobby = Guid.NewGuid().ToString("N")[..6].ToUpper();
 
-            // Força a leitura usando cultura que aceita ponto
             var latitudeParsed = double.TryParse(Latitude, NumberStyles.Any, CultureInfo.InvariantCulture, out double lat) ? lat : (double?)null;
             var longitudeParsed = double.TryParse(Longitude, NumberStyles.Any, CultureInfo.InvariantCulture, out double lng) ? lng : (double?)null;
 
             var novaPartida = new Partida
             {
-                DataHora = DateTime.UtcNow.AddHours(-3),
+                DataHora = DataHora,
                 Local = Local,
                 Latitude = latitudeParsed,
                 Longitude = longitudeParsed,
                 CodigoLobby = codigoLobby,
-                UsuarioCriadorId = usuarioId
+                UsuarioCriadorId = usuarioId,
+                EventoId = eventoId
             };
 
             await _partidaService.CriarPartidaAsync(novaPartida);
 
-            // ✅ Insere o criador como jogador no lobby
             var nomeAdmin = HttpContext.Session.GetString("UsuarioNome") ?? "Administrador";
             await _partidaService.AdicionarJogadorAoLobbyAsync(codigoLobby, nomeAdmin, null, usuarioId);
 
+            // ✅ Se tiver eventoId → retorna URL completa para redirecionamento
+            if (eventoId.HasValue && eventoId != Guid.Empty)
+            {
+                var url = Url.Action("Index", "Sorteio", new { codigo = codigoLobby, eventoId }, Request.Scheme);
+                return Json(new
+                {
+                    sucesso = true,
+                    redirectUrl = url
+                });
+            }
+
             return Redirect($"/Sorteio?codigo={codigoLobby}");
         }
+
+
+
 
 
         [HttpGet]

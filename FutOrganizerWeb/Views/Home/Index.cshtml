@@ -13,12 +13,17 @@
          style="max-width: 360px; width: 100%; background-color: #222230;">
         <div class="button-group d-grid gap-3 w-100">
 
-            <!-- Criar nova sala com link compartilhável -->
-            <form id="formCriarSala" method="post" action="/Sorteio/CriarSala">
-                <button type="submit" class="btn btn-home shadow-sm" title="Crie uma sala com link para convidados">
+            <!-- ✅ Criar nova sala com link compartilhável (agora no topo e 100% de largura) -->
+            <form id="formCriarSala" method="post" action="/Sorteio/CriarSala" class="w-100">
+                <button type="submit" class="btn btn-home shadow-sm w-100" title="Crie uma sala com link para convidados">
                     <i class="fas fa-plus me-2"></i> Criar Sala
                 </button>
             </form>
+
+            <!-- ✅ Botão Criar Evento -->
+            <a href="/Evento/Index" class="btn btn-home shadow-sm" title="Crie um novo campeonato ou evento">
+                <i class="fas fa-trophy me-2"></i> Criar Evento
+            </a>
 
             <!-- Ver todas as salas já criadas -->
             <a href="/Sorteio/MinhasSalas" class="btn btn-home shadow-sm" title="Visualize todas as salas criadas por você">

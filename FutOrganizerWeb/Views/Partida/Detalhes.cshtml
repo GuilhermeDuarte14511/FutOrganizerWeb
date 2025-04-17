@@ -34,6 +34,15 @@
     </div>
 
     <h4 class="text-white mb-3">Times</h4>
+
+    <!-- Botão para ver os confrontos -->
+    <div class="mb-4">
+        <a href="/Confronto/Partida/@Model.CodigoLobby" class="btn btn-primary btn-lg shadow">
+            <i class="fas fa-futbol"></i> Ver Confrontos da Partida
+        </a>
+
+    </div>
+
     <div class="row row-cols-1 row-cols-md-2 g-4">
         @foreach (var time in Model.Times)
         {
