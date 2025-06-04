@@ -24,7 +24,9 @@ namespace FutOrganizerWeb.Controllers
                 return RedirectToAction("Login", "Login");
             }
 
-            return null; // significa que está autenticado
+            // Returning null means the user is authenticated;
+            // otherwise the method returns a redirect to the login action.
+            return null;
         }
 
         public IActionResult Index()
