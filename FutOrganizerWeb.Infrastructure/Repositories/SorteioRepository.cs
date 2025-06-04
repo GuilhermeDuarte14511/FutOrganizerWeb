@@ -64,7 +64,7 @@ namespace FutOrganizerWeb.Infrastructure.Repositories
             _context.Entry(sorteioExistente).State = EntityState.Detached;
 
             // Adicionar novamente os novos dados
-            sorteio.Id = sorteio.Id; // manter o ID original
+            sorteio.Id = sorteioExistente.Id; // manter o ID original
             _context.Sorteios.Update(sorteio);
 
             await _context.SaveChangesAsync();
